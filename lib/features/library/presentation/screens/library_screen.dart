@@ -1,36 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-class LibraryScreen extends ConsumerStatefulWidget {
+import '../../../lesson/presentation/providers/lesson_provider.dart';
+
+class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
-  @override
-  ConsumerState<LibraryScreen> createState() => _LibraryScreenState();
-}
-
-class _LibraryScreenState extends ConsumerState<LibraryScreen> {
-  String _selectedCategory = 'すべて';
-  int _selectedDifficulty = 0; // 0 = all
-
-  static const _categories = ['すべて', 'ニュース', 'ビジネス', '日常会話', 'TEDスタイル'];
-
-  // Sample data
-  static const _sampleLessons = [
-    {'title': 'Morning News Report', 'category': 'ニュース', 'difficulty': 1, 'duration': '2:30', 'words': 85},
-    {'title': 'Business Meeting Basics', 'category': 'ビジネス', 'difficulty': 2, 'duration': '3:00', 'words': 110},
-    {'title': 'Daily Conversation', 'category': '日常会話', 'difficulty': 1, 'duration': '1:45', 'words': 60},
-    {'title': 'TED: The Power of Habit', 'category': 'TEDスタイル', 'difficulty': 3, 'duration': '4:00', 'words': 150},
+  static const _categories = [
+    'すべて',
+    'ニュース',
+    'ビジネス',
+    '日常会話',
+    'TEDスタイル',
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final selectedDifficulty = ref.watch(selectedDifficultyProvider);
+    final filteredLessons = ref.watch(filteredLessonsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('ライブラリ', style: theme.textTheme.titleLarge),
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => showSearch(
+              context: context,
+              delegate: _LessonSearchDelegate(ref),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -38,17 +40,19 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
           // Category filter
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
               children: _categories.map((cat) {
-                final selected = cat == _selectedCategory;
+                final selected = cat == selectedCategory;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
                     label: Text(cat),
                     selected: selected,
-                    onSelected: (_) =>
-                        setState(() => _selectedCategory = cat),
+                    onSelected: (_) => ref
+                        .read(selectedCategoryProvider.notifier)
+                        .state = cat,
                   ),
                 );
               }).toList(),
@@ -65,86 +69,125 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen> {
                 ButtonSegment(value: 2, label: Text('中級')),
                 ButtonSegment(value: 3, label: Text('上級')),
               ],
-              selected: {_selectedDifficulty},
-              onSelectionChanged: (v) =>
-                  setState(() => _selectedDifficulty = v.first),
+              selected: {selectedDifficulty},
+              onSelectionChanged: (v) => ref
+                  .read(selectedDifficultyProvider.notifier)
+                  .state = v.first,
             ),
           ),
           const SizedBox(height: 8),
 
           // Lesson list
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _sampleLessons.length,
-              itemBuilder: (context, index) {
-                final lesson = _sampleLessons[index];
-                return Card(
-                  elevation: 1,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () {},
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              Icons.headphones,
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+            child: filteredLessons.isEmpty
+                ? Center(
+                    child: Text(
+                      '該当するレッスンがありません',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: filteredLessons.length,
+                    itemBuilder: (context, index) {
+                      final lesson = filteredLessons[index];
+                      return Card(
+                        elevation: 1,
+                        margin: const EdgeInsets.only(bottom: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: () =>
+                              context.go('/lesson/${lesson.id}'),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
                               children: [
-                                Text(
-                                  lesson['title'] as String,
-                                  style: theme.textTheme.titleSmall,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${lesson['duration']} • ${lesson['words']}語',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color:
-                                        theme.colorScheme.onSurfaceVariant,
+                                Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary
+                                        .withValues(alpha: 0.1),
+                                    borderRadius:
+                                        BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    Icons.headphones,
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                _DifficultyDots(
-                                  level: lesson['difficulty'] as int,
-                                  theme: theme,
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        lesson.title,
+                                        style:
+                                            theme.textTheme.titleSmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${_formatDuration(lesson.durationSeconds)} • ${lesson.wordCount}語',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: theme.colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          _DifficultyDots(
+                                            level: lesson.difficulty,
+                                            theme: theme,
+                                          ),
+                                          const Spacer(),
+                                          if (lesson.isCompleted)
+                                            Icon(
+                                              Icons.check_circle,
+                                              size: 16,
+                                              color: theme
+                                                  .colorScheme.tertiary,
+                                            ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    lesson.isBookmarked
+                                        ? Icons.bookmark
+                                        : Icons.bookmark_border,
+                                  ),
+                                  onPressed: () => ref
+                                      .read(lessonsProvider.notifier)
+                                      .toggleBookmark(lesson.id),
                                 ),
                               ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.bookmark_border),
-                            onPressed: () {},
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
   }
 }
 
@@ -171,6 +214,57 @@ class _DifficultyDots extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+}
+
+class _LessonSearchDelegate extends SearchDelegate<String> {
+  _LessonSearchDelegate(this._ref);
+
+  final WidgetRef _ref;
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear),
+        onPressed: () => query = '',
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () => close(context, ''),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) => _buildList(context);
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _buildList(context);
+
+  Widget _buildList(BuildContext context) {
+    _ref.read(searchQueryProvider.notifier).state = query;
+    final lessons = _ref.read(filteredLessonsProvider);
+
+    return ListView.builder(
+      itemCount: lessons.length,
+      itemBuilder: (context, index) {
+        final lesson = lessons[index];
+        return ListTile(
+          leading: const Icon(Icons.headphones),
+          title: Text(lesson.title),
+          subtitle: Text(lesson.category),
+          onTap: () {
+            close(context, lesson.id);
+            context.go('/lesson/${lesson.id}');
+          },
+        );
+      },
     );
   }
 }

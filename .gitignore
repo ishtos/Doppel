@@ -62,3 +62,6 @@ app.*.map.json
 # Environment
 .env
 .env.*
+
+# Test artifacts
+test_hive/
