@@ -93,7 +93,9 @@ class LibraryScreen extends ConsumerWidget {
                     itemCount: filteredLessons.length,
                     itemBuilder: (context, index) {
                       final lesson = filteredLessons[index];
-                      return Card(
+                      return Hero(
+                        tag: 'lesson-${lesson.id}',
+                        child: Card(
                         elevation: 1,
                         margin: const EdgeInsets.only(bottom: 8),
                         shape: RoundedRectangleBorder(
@@ -175,6 +177,7 @@ class LibraryScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
+                      ),
                       );
                     },
                   ),

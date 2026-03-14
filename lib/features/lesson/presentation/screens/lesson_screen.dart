@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -264,7 +266,13 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         if (mounted) {
           setState(() => _isAnalyzing = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('分析エラー: $e')),
+            SnackBar(
+              content: const Text('分析中にエラーが発生しました。もう一度お試しください。'),
+              action: SnackBarAction(
+                label: '閉じる',
+                onPressed: () {},
+              ),
+            ),
           );
         }
       }
@@ -274,27 +282,58 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 }
 
-class _WaveformPlaceholder extends StatelessWidget {
+class _WaveformPlaceholder extends StatefulWidget {
   const _WaveformPlaceholder({required this.color});
 
   final Color color;
 
   @override
+  State<_WaveformPlaceholder> createState() => _WaveformPlaceholderState();
+}
+
+class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(20, (i) {
-        final height = 8.0 + (i % 5) * 6.0;
-        return Container(
-          width: 3,
-          height: height,
-          margin: const EdgeInsets.symmetric(horizontal: 1),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(24, (i) {
+            final phase = (i / 24) * 2 * pi;
+            final sinValue = sin(_controller.value * 2 * pi + phase);
+            final height = 8.0 + sinValue * 20.0;
+            return Container(
+              width: 3,
+              height: height.clamp(4.0, 36.0),
+              margin: const EdgeInsets.symmetric(horizontal: 1),
+              decoration: BoxDecoration(
+                color: widget.color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
+
 }

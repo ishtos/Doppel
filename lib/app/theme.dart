@@ -83,17 +83,67 @@ class AppTheme {
       error: _error,
     );
 
+    final darkBase = ThemeData(brightness: Brightness.dark).textTheme;
+    final notoSansDark = GoogleFonts.notoSansJpTextTheme(darkBase);
+
     return ThemeData(
       colorScheme: colorScheme,
       useMaterial3: true,
-      textTheme: GoogleFonts.notoSansJpTextTheme(
-        ThemeData(brightness: Brightness.dark).textTheme,
+      textTheme: notoSansDark.copyWith(
+        displayLarge: GoogleFonts.notoSansJp(
+          fontSize: 36,
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        displayMedium: GoogleFonts.notoSansJp(
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        titleLarge: GoogleFonts.notoSansJp(
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        titleMedium: GoogleFonts.notoSansJp(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        titleSmall: GoogleFonts.notoSansJp(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        bodyLarge: GoogleFonts.notoSansJp(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurface,
+        ),
+        bodyMedium: GoogleFonts.notoSansJp(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurface,
+        ),
+        bodySmall: GoogleFonts.notoSansJp(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurfaceVariant,
+        ),
+        labelLarge: GoogleFonts.ibmPlexMono(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: colorScheme.onSurface,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        indicatorColor: colorScheme.primary.withValues(alpha: 0.12),
       ),
     );
   }

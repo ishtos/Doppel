@@ -36,12 +36,23 @@ class ProgressRepository {
   Future<void> recordPractice({required int durationMinutes}) async {
     final current = getProgress();
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final lastDate = current.lastPracticeDate;
+    final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
 
-    final isConsecutiveDay = now.difference(lastDate).inDays == 1 ||
-        (now.day != lastDate.day && now.difference(lastDate).inHours < 48);
+    final daysDiff = today.difference(lastDay).inDays;
 
-    final newStreak = isConsecutiveDay ? current.currentStreak + 1 : 1;
+    // Same day: keep streak, just update minutes/count
+    // Next day: increment streak
+    // Gap > 1 day: reset streak to 1
+    final int newStreak;
+    if (daysDiff == 0) {
+      newStreak = current.currentStreak == 0 ? 1 : current.currentStreak;
+    } else if (daysDiff == 1) {
+      newStreak = current.currentStreak + 1;
+    } else {
+      newStreak = 1;
+    }
 
     final updated = current.copyWith(
       currentStreak: newStreak,

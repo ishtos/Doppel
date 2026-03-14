@@ -53,58 +53,60 @@ class HomeScreen extends ConsumerWidget {
 
               // Today's Lesson Card
               if (todayLesson != null)
-                Card(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () =>
-                        context.go('/lesson/${todayLesson.id}'),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '今日のレッスン',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+                Hero(
+                  tag: 'lesson-${todayLesson.id}',
+                  child: Card(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () =>
+                          context.go('/lesson/${todayLesson.id}'),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '今日のレッスン',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      todayLesson.title,
-                                      style: theme.textTheme.titleMedium,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Chip(
-                                      label: Text(_difficultyLabel(
-                                          todayLesson.difficulty)),
-                                      backgroundColor: theme
-                                          .colorScheme.primary
-                                          .withValues(alpha: 0.1),
-                                      labelStyle: TextStyle(
-                                        color: theme.colorScheme.primary,
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        todayLesson.title,
+                                        style: theme.textTheme.titleMedium,
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(height: 4),
+                                      Chip(
+                                        label: Text(_difficultyLabel(
+                                            todayLesson.difficulty)),
+                                        backgroundColor: theme
+                                            .colorScheme.primary
+                                            .withValues(alpha: 0.1),
+                                        labelStyle: TextStyle(
+                                          color: theme.colorScheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              CircleAvatar(
-                                radius: 28,
-                                backgroundColor: theme.colorScheme.primary,
-                                child: Icon(
-                                  Icons.play_arrow,
-                                  color: theme.colorScheme.onPrimary,
+                                CircleAvatar(
+                                  radius: 28,
+                                  backgroundColor: theme.colorScheme.primary,
+                                  child: Icon(
+                                    Icons.play_arrow,
+                                    color: theme.colorScheme.onPrimary,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           const SizedBox(height: 12),
                           LinearProgressIndicator(
                             value: weeklyStats.practiceCount / 5,
@@ -112,7 +114,8 @@ class HomeScreen extends ConsumerWidget {
                             backgroundColor: theme.colorScheme.primary
                                 .withValues(alpha: 0.1),
                           ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

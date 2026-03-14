@@ -43,8 +43,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: '/lesson/:lessonId',
-        builder: (context, state) => LessonScreen(
-          lessonId: state.pathParameters['lessonId']!,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: LessonScreen(
+            lessonId: state.pathParameters['lessonId']!,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
         ),
       ),
       GoRoute(
