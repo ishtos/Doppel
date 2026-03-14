@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/progress_provider.dart';
+
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
 
@@ -15,6 +17,17 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final progress = ref.watch(userProgressProvider);
+    final days = _isWeekly ? 7 : 30;
+    final scoreHistory = ref.watch(scoreHistoryProvider(days));
+    final weakPatterns = ref.watch(weakPatternsProvider);
+
+    // Build chart spots
+    final spots = scoreHistory.isEmpty
+        ? List.generate(days, (i) => FlSpot(i.toDouble(), 0))
+        : scoreHistory.asMap().entries.map((e) {
+            return FlSpot(e.key.toDouble(), e.value.overallScore.toDouble());
+          }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -24,7 +37,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             isSelected: [_isWeekly, !_isWeekly],
             onPressed: (i) => setState(() => _isWeekly = i == 0),
             borderRadius: BorderRadius.circular(8),
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 32),
+            constraints:
+                const BoxConstraints(minWidth: 48, minHeight: 32),
             children: const [Text('週'), Text('月')],
           ),
           const SizedBox(width: 8),
@@ -51,24 +65,18 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                           titlesData: const FlTitlesData(show: false),
                           borderData: FlBorderData(show: false),
                           minX: 0,
-                          maxX: 6,
+                          maxX: (spots.length - 1).toDouble().clamp(1, double.infinity),
                           minY: 0,
                           maxY: 100,
                           lineBarsData: [
                             LineChartBarData(
-                              spots: const [
-                                FlSpot(0, 0),
-                                FlSpot(1, 0),
-                                FlSpot(2, 0),
-                                FlSpot(3, 0),
-                                FlSpot(4, 0),
-                                FlSpot(5, 0),
-                                FlSpot(6, 0),
-                              ],
+                              spots: spots,
                               isCurved: true,
                               color: theme.colorScheme.primary,
                               barWidth: 3,
-                              dotData: const FlDotData(show: false),
+                              dotData: FlDotData(
+                                show: scoreHistory.isNotEmpty,
+                              ),
                               belowBarData: BarAreaData(
                                 show: true,
                                 color: theme.colorScheme.primary
@@ -76,6 +84,21 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                               ),
                             ),
                           ],
+                          lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                              getTooltipItems: (spots) {
+                                return spots.map((spot) {
+                                  return LineTooltipItem(
+                                    '${spot.y.round()}点',
+                                    TextStyle(
+                                      color: theme.colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                }).toList();
+                              },
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -98,14 +121,53 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   children: [
                     Text('苦手パターン', style: theme.textTheme.titleSmall),
                     const SizedBox(height: 12),
-                    Center(
-                      child: Text(
-                        'データがまだありません',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                    if (weakPatterns.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'データがまだありません',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      )
+                    else
+                      ...weakPatterns.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 80,
+                                child: Text(
+                                  entry.key,
+                                  style: theme.textTheme.bodyMedium,
+                                ),
+                              ),
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: LinearProgressIndicator(
+                                    value: entry.value,
+                                    color: theme.colorScheme.error,
+                                    backgroundColor: theme
+                                        .colorScheme.error
+                                        .withValues(alpha: 0.1),
+                                    minHeight: 8,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${(entry.value * 100).round()}%',
+                                style: theme.textTheme.labelLarge,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),
@@ -118,7 +180,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 Expanded(
                   child: _StatCard(
                     label: '累計練習',
-                    value: '0時間',
+                    value: '${(progress.totalPracticeMinutes / 60).toStringAsFixed(1)}時間',
                     icon: Icons.timer,
                     theme: theme,
                   ),
@@ -127,7 +189,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 Expanded(
                   child: _StatCard(
                     label: '完了レッスン',
-                    value: '0回',
+                    value: '${progress.completedLessons}回',
                     icon: Icons.check_circle,
                     theme: theme,
                   ),
@@ -136,7 +198,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 Expanded(
                   child: _StatCard(
                     label: '最長連続',
-                    value: '0日',
+                    value: '${progress.longestStreak}日',
                     icon: Icons.local_fire_department,
                     theme: theme,
                   ),
@@ -147,7 +209,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
             // Weekly review
             Card(
-              color: theme.colorScheme.primary.withValues(alpha: 0.05),
+              color:
+                  theme.colorScheme.primary.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -178,7 +241,9 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'レッスンを始めると、AIコーチが毎週あなたの進捗をレビューします。',
+                            progress.completedLessons == 0
+                                ? 'レッスンを始めると、AIコーチが毎週あなたの進捗をレビューします。'
+                                : '今週は${scoreHistory.length}回練習しました。${progress.currentStreak}日連続で頑張っています！',
                             style: theme.textTheme.bodyMedium,
                           ),
                         ],
@@ -212,7 +277,8 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
