@@ -240,44 +240,56 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     if (recorderState.isRecording) {
       // Stop recording and analyze
       final path = await recorder.stopRecording();
-      setState(() => _isAnalyzing = true);
-
-      try {
-        final analysis = ref.read(speechAnalysisServiceProvider);
-        final feedback = await analysis.analyze(
-          lessonId: lessonId,
-          modelTranscript: transcript,
-          userAudioPath: path,
-        );
-
-        // Save feedback
-        final feedbackRepo = ref.read(feedbackRepositoryProvider);
-        await feedbackRepo.save(feedback);
-
-        // Record practice in progress
-        final progressRepo = ref.read(progressRepositoryProvider);
-        await progressRepo.recordPractice(durationMinutes: 3);
-
-        if (mounted) {
-          setState(() => _isAnalyzing = false);
-          context.go('/feedback/${feedback.id}');
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() => _isAnalyzing = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('分析中にエラーが発生しました。もう一度お試しください。'),
-              action: SnackBarAction(
-                label: '閉じる',
-                onPressed: () {},
-              ),
-            ),
-          );
-        }
-      }
+      await _analyzeAndNavigate(lessonId, transcript, path);
     } else {
-      await recorder.startRecording();
+      // Try to start recording; if it fails (e.g. simulator), skip to analysis
+      final started = await recorder.tryStartRecording();
+      if (!started) {
+        await _analyzeAndNavigate(lessonId, transcript, null);
+      }
+    }
+  }
+
+  Future<void> _analyzeAndNavigate(
+    String lessonId,
+    String transcript,
+    String? audioPath,
+  ) async {
+    setState(() => _isAnalyzing = true);
+
+    try {
+      final analysis = ref.read(speechAnalysisServiceProvider);
+      final feedback = await analysis.analyze(
+        lessonId: lessonId,
+        modelTranscript: transcript,
+        userAudioPath: audioPath,
+      );
+
+      // Save feedback
+      final feedbackRepo = ref.read(feedbackRepositoryProvider);
+      await feedbackRepo.save(feedback);
+
+      // Record practice in progress
+      final progressRepo = ref.read(progressRepositoryProvider);
+      await progressRepo.recordPractice(durationMinutes: 3);
+
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+        context.go('/feedback/${feedback.id}');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('分析中にエラーが発生しました。もう一度お試しください。'),
+            action: SnackBarAction(
+              label: '閉じる',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
     }
   }
 }

@@ -183,6 +183,28 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
     state = state.copyWith(isRecording: true, recordingPath: path);
   }
 
+  /// Try to start recording. Returns false if recording is unavailable
+  /// (e.g. on simulator with no microphone).
+  Future<bool> tryStartRecording() async {
+    try {
+      final hasPerms = await _recorder.hasPermission();
+      if (!hasPerms) return false;
+
+      final dir = await getApplicationDocumentsDirectory();
+      final path = '${dir.path}/recording_${const Uuid().v4()}.m4a';
+
+      await _recorder.start(
+        const RecordConfig(encoder: AudioEncoder.aacLc),
+        path: path,
+      );
+
+      state = state.copyWith(isRecording: true, recordingPath: path);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<String?> stopRecording() async {
     final path = await _recorder.stop();
     state = state.copyWith(isRecording: false);
