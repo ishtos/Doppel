@@ -7,9 +7,24 @@ class FeedbackRepository {
 
   final Box<Map> _box;
 
+  /// Recursively cast Hive's Map<dynamic, dynamic> to Map<String, dynamic>.
+  static Map<String, dynamic> deepCast(Map raw) {
+    return raw.map((key, value) {
+      if (value is Map) {
+        return MapEntry(key.toString(), deepCast(value));
+      } else if (value is List) {
+        return MapEntry(
+          key.toString(),
+          value.map((e) => e is Map ? deepCast(e) : e).toList(),
+        );
+      }
+      return MapEntry(key.toString(), value);
+    });
+  }
+
   List<FeedbackModel> findAll() {
     return _box.values
-        .map((e) => FeedbackModel.fromJson(Map<String, dynamic>.from(e)))
+        .map((e) => FeedbackModel.fromJson(deepCast(e)))
         .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
@@ -17,7 +32,7 @@ class FeedbackRepository {
   FeedbackModel? findById(String id) {
     final raw = _box.get(id);
     if (raw == null) return null;
-    return FeedbackModel.fromJson(Map<String, dynamic>.from(raw));
+    return FeedbackModel.fromJson(deepCast(raw));
   }
 
   List<FeedbackModel> findByLessonId(String lessonId) {

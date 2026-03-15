@@ -1,6 +1,7 @@
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../../../feedback/data/models/feedback_model.dart';
+import '../../../feedback/data/repositories/feedback_repository.dart';
 import '../models/user_progress_model.dart';
 
 class ProgressRepository {
@@ -71,7 +72,7 @@ class ProgressRepository {
   List<FeedbackModel> getScoreHistory({int days = 7}) {
     final cutoff = DateTime.now().subtract(Duration(days: days));
     return feedbackBox.values
-        .map((e) => FeedbackModel.fromJson(Map<String, dynamic>.from(e)))
+        .map((e) => FeedbackModel.fromJson(FeedbackRepository.deepCast(e)))
         .where((f) => f.createdAt.isAfter(cutoff))
         .toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
@@ -80,7 +81,7 @@ class ProgressRepository {
   /// Analyze weak pronunciation patterns from recent feedback.
   Map<String, double> getWeakPatterns() {
     final feedbacks = feedbackBox.values
-        .map((e) => FeedbackModel.fromJson(Map<String, dynamic>.from(e)))
+        .map((e) => FeedbackModel.fromJson(FeedbackRepository.deepCast(e)))
         .toList();
 
     final patternCounts = <String, List<double>>{};

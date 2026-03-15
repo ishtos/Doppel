@@ -9,7 +9,7 @@ final ttsServiceProvider =
 class TtsState {
   const TtsState({
     this.isSpeaking = false,
-    this.speed = 0.45,
+    this.speed = 0.5,
   });
 
   final bool isSpeaking;

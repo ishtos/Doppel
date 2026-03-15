@@ -82,7 +82,7 @@ class AiCoachService {
         'Authorization': 'Bearer $_apiKey',
       },
       body: jsonEncode({
-        'model': 'gpt-4o-mini',
+        'model': 'gpt-5-mini',
         'max_tokens': 256,
         'messages': [
           {

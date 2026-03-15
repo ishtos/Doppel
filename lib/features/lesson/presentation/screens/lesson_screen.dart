@@ -23,6 +23,7 @@ class LessonScreen extends ConsumerStatefulWidget {
 
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   bool _isAnalyzing = false;
+  bool _hideTextOnRecord = false;
 
   @override
   Widget build(BuildContext context) {
@@ -121,14 +122,67 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                 // Transcript area
                 Expanded(
                   flex: 2,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Text(
-                      lesson.transcriptText,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        height: 1.8,
+                  child: Stack(
+                    children: [
+                      SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        child: Text(
+                          lesson.transcriptText,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            height: 1.8,
+                          ),
+                        ),
                       ),
-                    ),
+                      // Hide overlay when recording with toggle on
+                      if (_hideTextOnRecord && recorderState.isRecording)
+                        Positioned.fill(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.95),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.visibility_off,
+                                    size: 32,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'テキスト非表示中',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      // Toggle button
+                      Positioned(
+                        top: 0,
+                        right: 8,
+                        child: IconButton(
+                          icon: Icon(
+                            _hideTextOnRecord
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            size: 20,
+                          ),
+                          tooltip: _hideTextOnRecord
+                              ? '録音中テキスト非表示 ON'
+                              : '録音中テキスト非表示 OFF',
+                          onPressed: () =>
+                              setState(() => _hideTextOnRecord = !_hideTextOnRecord),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
