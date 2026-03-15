@@ -15,6 +15,8 @@ class LibraryScreen extends ConsumerWidget {
     'ビジネス',
     '日常会話',
     'TEDスタイル',
+    'スポーツ',
+    '時事ネタ',
   ];
 
   @override
