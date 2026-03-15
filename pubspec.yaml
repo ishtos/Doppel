@@ -29,6 +29,7 @@ dependencies:
   # Audio
   just_audio: ^0.9.40
   record: ^6.2.0
+  flutter_tts: ^4.2.0
 
   # AI / Speech
   http: ^1.2.2

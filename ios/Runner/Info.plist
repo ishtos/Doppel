@@ -47,6 +47,10 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>シャドーイング練習の録音に使用します</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>発音分析に使用します</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

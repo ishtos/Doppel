@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/services/speech_analysis_service.dart';
+import '../../../../shared/services/tts_service.dart';
 import '../providers/lesson_provider.dart';
 
 class LessonScreen extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final lesson = ref.watch(lessonByIdProvider(widget.lessonId));
-    final playerState = ref.watch(audioPlayerProvider);
+    final ttsState = ref.watch(ttsServiceProvider);
     final recorderState = ref.watch(audioRecorderProvider);
 
     if (lesson == null) {
@@ -40,7 +41,11 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         title: Text(lesson.title, style: theme.textTheme.titleMedium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () {
+            // Stop TTS when leaving
+            ref.read(ttsServiceProvider.notifier).stop();
+            context.go('/home');
+          },
         ),
       ),
       body: _isAnalyzing
@@ -100,7 +105,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Center(
-                              child: playerState.isPlaying
+                              child: ttsState.isSpeaking
                                   ? _WaveformPlaceholder(
                                       color: theme.colorScheme.primary
                                           .withValues(alpha: 0.6),
@@ -150,42 +155,47 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   ),
                 ),
 
-                // Playback controls
+                // Playback controls (TTS)
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 8),
                   child: Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.replay_5),
-                        onPressed: () =>
-                            ref.read(audioPlayerProvider.notifier).rewind5s(),
-                      ),
-                      IconButton(
+                      // Play/Stop model audio via TTS
+                      IconButton.filled(
                         icon: Icon(
-                          playerState.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
+                          ttsState.isSpeaking
+                              ? Icons.stop
+                              : Icons.volume_up,
                         ),
                         onPressed: () => ref
-                            .read(audioPlayerProvider.notifier)
-                            .togglePlay(),
+                            .read(ttsServiceProvider.notifier)
+                            .speak(lesson.transcriptText),
+                        tooltip: ttsState.isSpeaking ? '停止' : 'お手本を再生',
                       ),
-                      Expanded(
+                      const SizedBox(width: 8),
+                      Text(
+                        ttsState.isSpeaking ? '再生中...' : 'お手本を聴く',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const Spacer(),
+                      // Speed control
+                      Text(
+                        '${ttsState.speed.toStringAsFixed(1)}x',
+                        style: theme.textTheme.labelLarge,
+                      ),
+                      SizedBox(
+                        width: 140,
                         child: Slider(
-                          value: playerState.speed,
-                          min: 0.5,
-                          max: 1.5,
-                          divisions: 4,
-                          label: '${playerState.speed}x',
+                          value: ttsState.speed,
+                          min: 0.3,
+                          max: 1.0,
+                          divisions: 7,
+                          label: '${ttsState.speed.toStringAsFixed(1)}x',
                           onChanged: (v) => ref
-                              .read(audioPlayerProvider.notifier)
+                              .read(ttsServiceProvider.notifier)
                               .setSpeed(v),
                         ),
-                      ),
-                      Text(
-                        '${playerState.speed}x',
-                        style: theme.textTheme.labelLarge,
                       ),
                     ],
                   ),
@@ -234,6 +244,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   Future<void> _handleRecordTap(String lessonId, String transcript) async {
+    // Stop TTS if playing
+    ref.read(ttsServiceProvider.notifier).stop();
+
     final recorder = ref.read(audioRecorderProvider.notifier);
     final recorderState = ref.read(audioRecorderProvider);
 
@@ -347,5 +360,4 @@ class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
       },
     );
   }
-
 }
