@@ -159,43 +159,72 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 8),
-                  child: Row(
+                  child: Column(
                     children: [
-                      // Play/Stop model audio via TTS
-                      IconButton.filled(
-                        icon: Icon(
-                          ttsState.isSpeaking
-                              ? Icons.stop
-                              : Icons.volume_up,
-                        ),
-                        onPressed: () => ref
-                            .read(ttsServiceProvider.notifier)
-                            .speak(lesson.transcriptText),
-                        tooltip: ttsState.isSpeaking ? '停止' : 'お手本を再生',
+                      Row(
+                        children: [
+                          // Play/Stop model audio via TTS
+                          IconButton.filled(
+                            icon: Icon(
+                              ttsState.isSpeaking
+                                  ? Icons.stop
+                                  : Icons.volume_up,
+                            ),
+                            onPressed: () => ref
+                                .read(ttsServiceProvider.notifier)
+                                .speak(lesson.transcriptText),
+                            tooltip: ttsState.isSpeaking ? '停止' : 'お手本を再生',
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            ttsState.isSpeaking ? '再生中...' : 'お手本を聴く',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                          const Spacer(),
+                          // WPM badge
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.tertiary
+                                  .withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${_estimateWpm(lesson.wordCount, lesson.durationSeconds, ttsState.speed)} WPM',
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.tertiary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        ttsState.isSpeaking ? '再生中...' : 'お手本を聴く',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      const Spacer(),
-                      // Speed control
-                      Text(
-                        '${ttsState.speed.toStringAsFixed(1)}x',
-                        style: theme.textTheme.labelLarge,
-                      ),
-                      SizedBox(
-                        width: 140,
-                        child: Slider(
-                          value: ttsState.speed,
-                          min: 0.3,
-                          max: 1.0,
-                          divisions: 7,
-                          label: '${ttsState.speed.toStringAsFixed(1)}x',
-                          onChanged: (v) => ref
-                              .read(ttsServiceProvider.notifier)
-                              .setSpeed(v),
-                        ),
+                      const SizedBox(height: 4),
+                      // Speed slider row
+                      Row(
+                        children: [
+                          const Icon(Icons.speed, size: 18),
+                          Expanded(
+                            child: Slider(
+                              value: ttsState.speed,
+                              min: 0.3,
+                              max: 1.0,
+                              divisions: 7,
+                              label: '${ttsState.speed.toStringAsFixed(1)}x',
+                              onChanged: (v) => ref
+                                  .read(ttsServiceProvider.notifier)
+                                  .setSpeed(v),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 36,
+                            child: Text(
+                              '${ttsState.speed.toStringAsFixed(1)}x',
+                              style: theme.textTheme.labelLarge,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -241,6 +270,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
               ],
             ),
     );
+  }
+
+  /// Estimate words-per-minute based on lesson metadata and TTS speed.
+  int _estimateWpm(int wordCount, int durationSeconds, double speed) {
+    if (durationSeconds <= 0) return 0;
+    // Native WPM from lesson data, scaled by TTS speed
+    final nativeWpm = (wordCount / durationSeconds * 60).round();
+    return (nativeWpm * speed).round();
   }
 
   Future<void> _handleRecordTap(String lessonId, String transcript) async {
