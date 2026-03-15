@@ -2,34 +2,18 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 final aiCoachServiceProvider = Provider<AiCoachService>((ref) {
   return AiCoachService();
 });
 
 class AiCoachService {
-  static const _apiKeyPref = 'claude_api_key';
-  static const _baseUrl = 'https://api.anthropic.com/v1/messages';
+  static const _baseUrl = 'https://api.openai.com/v1/chat/completions';
+  static const _apiKey = String.fromEnvironment('OPENAI_API_KEY');
 
-  String? _apiKey;
+  bool get hasApiKey => _apiKey.isNotEmpty;
 
-  Future<void> setApiKey(String key) async {
-    _apiKey = key;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_apiKeyPref, key);
-  }
-
-  Future<String?> _getApiKey() async {
-    if (_apiKey != null) return _apiKey;
-    final prefs = await SharedPreferences.getInstance();
-    _apiKey = prefs.getString(_apiKeyPref);
-    return _apiKey;
-  }
-
-  bool get hasApiKey => _apiKey != null;
-
-  /// Generate feedback message using Claude API.
+  /// Generate feedback message using OpenAI API.
   /// Falls back to local template if API key is not configured.
   Future<String> generateFeedback({
     required int pronunciationScore,
@@ -37,8 +21,7 @@ class AiCoachService {
     required int intonationScore,
     required List<String> problemWords,
   }) async {
-    final apiKey = await _getApiKey();
-    if (apiKey == null) {
+    if (!hasApiKey) {
       return _localFeedback(
         pronunciationScore: pronunciationScore,
         rhythmScore: rhythmScore,
@@ -48,15 +31,11 @@ class AiCoachService {
     }
 
     try {
-      return await _callClaude(
-        'あなたは英語シャドーイングのAIコーチです。'
-        'ユーザーの練習結果を分析し、具体的で励みになるフィードバックを日本語で提供してください。'
-        '2-3文で簡潔に。\n\n'
+      return await _callOpenAI(
         '発音スコア: $pronunciationScore/100\n'
         'リズムスコア: $rhythmScore/100\n'
         'イントネーションスコア: $intonationScore/100\n'
         '問題のある単語: ${problemWords.join(", ")}\n',
-        apiKey: apiKey,
       );
     } catch (_) {
       return _localFeedback(
@@ -74,8 +53,7 @@ class AiCoachService {
     required int practiceCount,
     required List<String> weakPatterns,
   }) async {
-    final apiKey = await _getApiKey();
-    if (apiKey == null) {
+    if (!hasApiKey) {
       return _localWeeklyReview(
         averageScore: averageScore,
         practiceCount: practiceCount,
@@ -83,14 +61,10 @@ class AiCoachService {
     }
 
     try {
-      return await _callClaude(
-        'あなたは英語シャドーイングのAIコーチです。'
-        'ユーザーの週間成績をレビューし、モチベーションを高めるコメントを日本語で提供してください。'
-        '2-3文で簡潔に。\n\n'
+      return await _callOpenAI(
         '今週の練習回数: $practiceCount回\n'
         '平均スコア: $averageScore/100\n'
         '苦手パターン: ${weakPatterns.join(", ")}\n',
-        apiKey: apiKey,
       );
     } catch (_) {
       return _localWeeklyReview(
@@ -100,18 +74,23 @@ class AiCoachService {
     }
   }
 
-  Future<String> _callClaude(String prompt, {required String apiKey}) async {
+  Future<String> _callOpenAI(String prompt) async {
     final response = await http.post(
       Uri.parse(_baseUrl),
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+        'Authorization': 'Bearer $_apiKey',
       },
       body: jsonEncode({
-        'model': 'claude-haiku-4-5-20251001',
+        'model': 'gpt-4o-mini',
         'max_tokens': 256,
         'messages': [
+          {
+            'role': 'system',
+            'content': 'あなたは英語シャドーイングのAIコーチです。'
+                '具体的で励みになるフィードバックを日本語で提供してください。'
+                '2-3文で簡潔に。',
+          },
           {'role': 'user', 'content': prompt},
         ],
       }),
@@ -119,11 +98,12 @@ class AiCoachService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
-      final content = data['content'] as List;
-      return content.first['text'] as String;
+      final choices = data['choices'] as List;
+      final message = choices.first['message'] as Map<String, dynamic>;
+      return message['content'] as String;
     }
 
-    throw Exception('Claude API error: ${response.statusCode}');
+    throw Exception('OpenAI API error: ${response.statusCode}');
   }
 
   // ── Local fallback templates ──

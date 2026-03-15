@@ -17,6 +17,9 @@ class FeedbackModel with _$FeedbackModel {
     required List<ProblemWord> problemWords,
     required String coachMessage,
     required DateTime createdAt,
+    String? userTranscript,
+    String? modelTranscript,
+    String? userAudioPath,
   }) = _FeedbackModel;
 
   factory FeedbackModel.fromJson(Map<String, dynamic> json) =>

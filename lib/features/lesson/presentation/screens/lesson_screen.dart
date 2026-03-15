@@ -8,6 +8,8 @@ import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/services/speech_analysis_service.dart';
 import '../../../../shared/services/tts_service.dart';
+import '../../../../shared/utils/score_utils.dart';
+import '../../../feedback/presentation/providers/feedback_provider.dart';
 import '../providers/lesson_provider.dart';
 
 class LessonScreen extends ConsumerStatefulWidget {
@@ -28,6 +30,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     final lesson = ref.watch(lessonByIdProvider(widget.lessonId));
     final ttsState = ref.watch(ttsServiceProvider);
     final recorderState = ref.watch(audioRecorderProvider);
+    final pastFeedbacks = ref.watch(feedbacksByLessonProvider(widget.lessonId));
 
     if (lesson == null) {
       return Scaffold(
@@ -61,6 +64,60 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             )
           : Column(
               children: [
+                // Past score banner
+                if (pastFeedbacks.isNotEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    color: theme.colorScheme.primary
+                        .withValues(alpha: 0.05),
+                    child: Row(
+                      children: [
+                        Icon(Icons.history,
+                            size: 16,
+                            color: theme.colorScheme.onSurfaceVariant),
+                        const SizedBox(width: 8),
+                        Text(
+                          '前回: ${pastFeedbacks.first.overallScore}点',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: ScoreUtils.scoreColor(
+                              pastFeedbacks.first.overallScore,
+                              theme.colorScheme,
+                            ),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '最高: ${pastFeedbacks.map((f) => f.overallScore).reduce((a, b) => a > b ? a : b)}点',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Text(
+                          '${pastFeedbacks.length}回練習',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () => _showPastResults(
+                              context, theme, pastFeedbacks),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 0),
+                            tapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text('詳細'),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Transcript area
                 Expanded(
                   flex: 2,
@@ -208,19 +265,19 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                           Expanded(
                             child: Slider(
                               value: ttsState.speed,
-                              min: 0.3,
-                              max: 1.0,
+                              min: 0.25,
+                              max: 0.6,
                               divisions: 7,
-                              label: '${ttsState.speed.toStringAsFixed(1)}x',
+                              label: _speedLabel(ttsState.speed),
                               onChanged: (v) => ref
                                   .read(ttsServiceProvider.notifier)
                                   .setSpeed(v),
                             ),
                           ),
                           SizedBox(
-                            width: 36,
+                            width: 42,
                             child: Text(
-                              '${ttsState.speed.toStringAsFixed(1)}x',
+                              _speedLabel(ttsState.speed),
                               style: theme.textTheme.labelLarge,
                             ),
                           ),
@@ -272,12 +329,79 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     );
   }
 
+  void _showPastResults(BuildContext context, ThemeData theme,
+      List<dynamic> feedbacks) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('過去の成績', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 12),
+            ...feedbacks.take(10).map((f) {
+              final fb = f as dynamic;
+              return ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: ScoreUtils.scoreColor(
+                    fb.overallScore as int,
+                    theme.colorScheme,
+                  ).withValues(alpha: 0.15),
+                  child: Text(
+                    '${fb.overallScore}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: ScoreUtils.scoreColor(
+                        fb.overallScore as int,
+                        theme.colorScheme,
+                      ),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  '発音${fb.pronunciationScore} / リズム${fb.rhythmScore} / 抑揚${fb.intonationScore}',
+                  style: theme.textTheme.bodySmall,
+                ),
+                subtitle: Text(
+                  _formatDate(fb.createdAt as DateTime),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.go('/feedback/${fb.id}');
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime dt) {
+    return '${dt.month}/${dt.day} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+  }
+
+  /// Map iOS speechRate (0.25-0.6) to user-facing label (0.5x-1.2x).
+  String _speedLabel(double rate) {
+    // iOS: 0.25=very slow, 0.5=normal, 0.6=fast
+    final display = (rate / 0.5).toStringAsFixed(1);
+    return '${display}x';
+  }
+
   /// Estimate words-per-minute based on lesson metadata and TTS speed.
   int _estimateWpm(int wordCount, int durationSeconds, double speed) {
     if (durationSeconds <= 0) return 0;
-    // Native WPM from lesson data, scaled by TTS speed
+    // Native WPM from lesson data, scaled relative to normal rate (0.5)
     final nativeWpm = (wordCount / durationSeconds * 60).round();
-    return (nativeWpm * speed).round();
+    return (nativeWpm * (speed / 0.5)).round();
   }
 
   Future<void> _handleRecordTap(String lessonId, String transcript) async {

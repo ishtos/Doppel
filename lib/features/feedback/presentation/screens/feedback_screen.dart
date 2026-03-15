@@ -2,18 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../providers/feedback_provider.dart';
 
-class FeedbackScreen extends ConsumerWidget {
+class FeedbackScreen extends ConsumerStatefulWidget {
   const FeedbackScreen({super.key, required this.feedbackId});
 
   final String feedbackId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FeedbackScreen> createState() => _FeedbackScreenState();
+}
+
+class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final feedback = ref.watch(feedbackByIdProvider(feedbackId));
+    final feedback = ref.watch(feedbackByIdProvider(widget.feedbackId));
+    final playerState = ref.watch(audioPlayerProvider);
 
     if (feedback == null) {
       return Scaffold(
@@ -82,6 +89,112 @@ class FeedbackScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 20),
+
+            // Transcript comparison
+            if (feedback.userTranscript != null ||
+                feedback.modelTranscript != null)
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('テキスト比較',
+                          style: theme.textTheme.titleSmall),
+                      const SizedBox(height: 12),
+                      if (feedback.modelTranscript != null) ...[
+                        Text('お手本',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            )),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary
+                                .withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            feedback.modelTranscript!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (feedback.userTranscript != null) ...[
+                        Text('あなたの発話',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            )),
+                        const SizedBox(height: 4),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.secondary
+                                .withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            feedback.userTranscript!,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              height: 1.6,
+                            ),
+                          ),
+                        ),
+                      ] else
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '音声認識テキストなし（シミュレーターモード）',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            const SizedBox(height: 20),
+
+            // User audio playback
+            if (feedback.userAudioPath != null)
+              Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: theme.colorScheme.secondary,
+                    child: Icon(
+                      playerState.isPlaying
+                          ? Icons.stop
+                          : Icons.play_arrow,
+                      color: theme.colorScheme.onSecondary,
+                    ),
+                  ),
+                  title: Text(playerState.isPlaying ? '再生中...' : '自分の録音を聴く'),
+                  subtitle: const Text('録音した音声を再生します'),
+                  onTap: () {
+                    final player = ref.read(audioPlayerProvider.notifier);
+                    if (playerState.isPlaying) {
+                      player.stopPlayback();
+                    } else {
+                      player.playFile(feedback.userAudioPath!);
+                    }
+                  },
+                ),
+              ),
+            if (feedback.userAudioPath != null)
+              const SizedBox(height: 20),
 
             // Problem words
             if (feedback.problemWords.isNotEmpty)

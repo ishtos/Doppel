@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/providers/db_providers.dart';
+import '../../../../shared/utils/score_utils.dart';
 import '../../../lesson/presentation/providers/lesson_provider.dart';
 
 class LibraryScreen extends ConsumerWidget {
@@ -93,6 +95,9 @@ class LibraryScreen extends ConsumerWidget {
                     itemCount: filteredLessons.length,
                     itemBuilder: (context, index) {
                       final lesson = filteredLessons[index];
+                      final latestFeedback = ref
+                          .watch(feedbackRepositoryProvider)
+                          .findLatestByLessonId(lesson.id);
                       return Hero(
                         tag: 'lesson-${lesson.id}',
                         child: Card(
@@ -151,7 +156,39 @@ class LibraryScreen extends ConsumerWidget {
                                             theme: theme,
                                           ),
                                           const Spacer(),
-                                          if (lesson.isCompleted)
+                                          if (latestFeedback != null)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: ScoreUtils.scoreColor(
+                                                  latestFeedback
+                                                      .overallScore,
+                                                  theme.colorScheme,
+                                                ).withValues(alpha: 0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10),
+                                              ),
+                                              child: Text(
+                                                '${latestFeedback.overallScore}点',
+                                                style: theme
+                                                    .textTheme.labelSmall
+                                                    ?.copyWith(
+                                                  color:
+                                                      ScoreUtils.scoreColor(
+                                                    latestFeedback
+                                                        .overallScore,
+                                                    theme.colorScheme,
+                                                  ),
+                                                  fontWeight:
+                                                      FontWeight.w700,
+                                                ),
+                                              ),
+                                            )
+                                          else if (lesson.isCompleted)
                                             Icon(
                                               Icons.check_circle,
                                               size: 16,

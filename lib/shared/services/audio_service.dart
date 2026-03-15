@@ -62,6 +62,26 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
     }
   }
 
+  Future<void> playFile(String filePath) async {
+    try {
+      final duration = await _player.setFilePath(filePath);
+      state = state.copyWith(
+        duration: duration ?? Duration.zero,
+        isLoaded: true,
+        position: Duration.zero,
+      );
+      _listenToPosition();
+      await _player.play();
+    } catch (_) {
+      // File not accessible
+    }
+  }
+
+  Future<void> stopPlayback() async {
+    await _player.stop();
+    state = state.copyWith(isPlaying: false, position: Duration.zero);
+  }
+
   Future<void> loadUrl(String url) async {
     final duration = await _player.setUrl(url);
     state = state.copyWith(
