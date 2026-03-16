@@ -148,6 +148,10 @@ class HomeScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
 
+              // Improvement Points
+              _ImprovementPointsSection(theme: theme),
+              const SizedBox(height: 24),
+
               // Recent Activity
               Text('最近の練習', style: theme.textTheme.titleSmall),
               const SizedBox(height: 8),
@@ -176,15 +180,28 @@ class HomeScreen extends ConsumerWidget {
                       subtitle: Text(
                         DateFormat('M/d HH:mm').format(activity.date),
                       ),
-                      trailing: Text(
-                        '${activity.score}点',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: ScoreUtils.scoreColor(
-                            activity.score,
-                            theme.colorScheme,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${activity.score}点',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              color: ScoreUtils.scoreColor(
+                                activity.score,
+                                theme.colorScheme,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ],
                       ),
+                      onTap: () =>
+                          context.go('/feedback/${activity.feedbackId}'),
                     )),
             ],
           ),
@@ -243,6 +260,67 @@ class _StatTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _ImprovementPointsSection extends ConsumerWidget {
+  const _ImprovementPointsSection({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final points = ref.watch(recentImprovementPointsProvider);
+
+    if (points.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.lightbulb_outline,
+                size: 18, color: theme.colorScheme.tertiary),
+            const SizedBox(width: 6),
+            Text('改善ポイント', style: theme.textTheme.titleSmall),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: points.map((point) {
+                return ActionChip(
+                  avatar: point.count > 1
+                      ? CircleAvatar(
+                          radius: 10,
+                          backgroundColor: theme.colorScheme.error,
+                          child: Text(
+                            '${point.count}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: theme.colorScheme.onError,
+                            ),
+                          ),
+                        )
+                      : Icon(Icons.volume_up,
+                          size: 16, color: theme.colorScheme.error),
+                  label: Text('${point.word} ${point.phoneme}'),
+                  backgroundColor:
+                      theme.colorScheme.error.withValues(alpha: 0.08),
+                  side: BorderSide.none,
+                  onPressed: () =>
+                      context.go('/feedback/${point.feedbackId}'),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -29,11 +29,52 @@ final recentActivityProvider = Provider<List<RecentActivity>>((ref) {
   return feedbacks.map((f) {
     final lesson = lessonRepo.findById(f.lessonId);
     return RecentActivity(
+      feedbackId: f.id,
       lessonTitle: lesson?.title ?? '不明なレッスン',
       score: f.overallScore,
       date: f.createdAt,
     );
   }).toList();
+});
+
+/// Aggregated improvement points from recent feedbacks.
+final recentImprovementPointsProvider =
+    Provider<List<ImprovementPoint>>((ref) {
+  final feedbackRepo = ref.watch(feedbackRepositoryProvider);
+  final lessonRepo = ref.watch(lessonRepositoryProvider);
+  final feedbacks = feedbackRepo.findRecent(limit: 10);
+
+  // Aggregate problem words, keeping the most recent occurrence.
+  final seen = <String, ImprovementPoint>{};
+  for (final f in feedbacks) {
+    final lessonTitle =
+        lessonRepo.findById(f.lessonId)?.title ?? '不明なレッスン';
+    for (final pw in f.problemWords) {
+      final key = pw.word.toLowerCase();
+      if (!seen.containsKey(key)) {
+        seen[key] = ImprovementPoint(
+          word: pw.word,
+          phoneme: pw.phoneme,
+          errorRate: pw.errorRate,
+          lessonTitle: lessonTitle,
+          feedbackId: f.id,
+          date: f.createdAt,
+          count: 1,
+        );
+      } else {
+        seen[key] = seen[key]!.copyWith(count: seen[key]!.count + 1);
+      }
+    }
+  }
+
+  // Sort by count descending, then by errorRate descending.
+  final points = seen.values.toList()
+    ..sort((a, b) {
+      final c = b.count.compareTo(a.count);
+      return c != 0 ? c : b.errorRate.compareTo(a.errorRate);
+    });
+
+  return points.take(8).toList();
 });
 
 /// Weekly stats for home screen.
@@ -60,14 +101,48 @@ final weeklyStatsProvider = Provider<WeeklyStats>((ref) {
 
 class RecentActivity {
   const RecentActivity({
+    required this.feedbackId,
     required this.lessonTitle,
     required this.score,
     required this.date,
   });
 
+  final String feedbackId;
   final String lessonTitle;
   final int score;
   final DateTime date;
+}
+
+class ImprovementPoint {
+  const ImprovementPoint({
+    required this.word,
+    required this.phoneme,
+    required this.errorRate,
+    required this.lessonTitle,
+    required this.feedbackId,
+    required this.date,
+    required this.count,
+  });
+
+  final String word;
+  final String phoneme;
+  final double errorRate;
+  final String lessonTitle;
+  final String feedbackId;
+  final DateTime date;
+  final int count;
+
+  ImprovementPoint copyWith({int? count}) {
+    return ImprovementPoint(
+      word: word,
+      phoneme: phoneme,
+      errorRate: errorRate,
+      lessonTitle: lessonTitle,
+      feedbackId: feedbackId,
+      date: date,
+      count: count ?? this.count,
+    );
+  }
 }
 
 class WeeklyStats {
