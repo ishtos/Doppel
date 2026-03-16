@@ -143,7 +143,7 @@ class LibraryScreen extends ConsumerWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '${_formatDuration(lesson.durationSeconds)} • ${lesson.wordCount}語',
+                                        '${_formatDuration(lesson.durationSeconds)} • ${_calcWpm(lesson.wordCount, lesson.durationSeconds)} WPM',
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                           color: theme.colorScheme
@@ -224,6 +224,11 @@ class LibraryScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  int _calcWpm(int wordCount, int durationSeconds) {
+    if (durationSeconds <= 0) return 0;
+    return (wordCount / durationSeconds * 60).round();
   }
 
   String _formatDuration(int seconds) {
