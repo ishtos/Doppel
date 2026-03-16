@@ -231,6 +231,12 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
     return path;
   }
 
+  /// Cancel recording — stops without returning a path.
+  Future<void> cancelRecording() async {
+    await _recorder.stop();
+    state = state.copyWith(isRecording: false);
+  }
+
   Future<void> toggleRecording() async {
     if (state.isRecording) {
       await stopRecording();

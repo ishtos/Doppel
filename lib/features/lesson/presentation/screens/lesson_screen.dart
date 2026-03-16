@@ -121,7 +121,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
                 // Transcript area
                 Expanded(
-                  flex: 2,
                   child: Stack(
                     children: [
                       SingleChildScrollView(
@@ -186,85 +185,25 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   ),
                 ),
 
-                // Waveform comparison area
-                Expanded(
-                  flex: 3,
-                  child: Container(
+                // Waveform area (visible when TTS speaking or recording)
+                if (ttsState.isSpeaking || recorderState.isRecording)
+                  Container(
+                    height: 64,
                     margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.surface,
+                      color: recorderState.isRecording
+                          ? theme.colorScheme.error.withValues(alpha: 0.05)
+                          : theme.colorScheme.primary.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'お手本',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            margin:
-                                const EdgeInsets.symmetric(vertical: 4),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary
-                                  .withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: ttsState.isSpeaking
-                                  ? _WaveformPlaceholder(
-                                      color: theme.colorScheme.primary
-                                          .withValues(alpha: 0.6),
-                                    )
-                                  : Icon(
-                                      Icons.graphic_eq,
-                                      color: theme.colorScheme.primary
-                                          .withValues(alpha: 0.3),
-                                      size: 32,
-                                    ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'あなた',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            width: double.infinity,
-                            margin:
-                                const EdgeInsets.symmetric(vertical: 4),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.secondary
-                                  .withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: recorderState.isRecording
-                                  ? _WaveformPlaceholder(
-                                      color: theme.colorScheme.secondary,
-                                    )
-                                  : Icon(
-                                      Icons.graphic_eq,
-                                      color: theme.colorScheme.secondary
-                                          .withValues(alpha: 0.3),
-                                      size: 32,
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Center(
+                      child: _WaveformPlaceholder(
+                        color: recorderState.isRecording
+                            ? theme.colorScheme.error.withValues(alpha: 0.7)
+                            : theme.colorScheme.primary.withValues(alpha: 0.6),
+                      ),
                     ),
                   ),
-                ),
 
                 // Playback controls (TTS)
                 Padding(
@@ -341,41 +280,72 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   ),
                 ),
 
-                // Record button
+                // Record button + cancel
                 Padding(
                   padding: const EdgeInsets.only(bottom: 32),
-                  child: Center(
-                    child: GestureDetector(
-                      onTap: () => _handleRecordTap(lesson.id, lesson.transcriptText),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        width: recorderState.isRecording ? 112 : 96,
-                        height: recorderState.isRecording ? 112 : 96,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: recorderState.isRecording
-                              ? theme.colorScheme.error
-                              : theme.colorScheme.primary,
-                          boxShadow: [
-                            BoxShadow(
-                              color: (recorderState.isRecording
-                                      ? theme.colorScheme.error
-                                      : theme.colorScheme.primary)
-                                  .withValues(alpha: 0.3),
-                              blurRadius: 16,
-                              offset: const Offset(0, 4),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Cancel button (visible only while recording)
+                      AnimatedOpacity(
+                        opacity: recorderState.isRecording ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 200),
+                        child: IgnorePointer(
+                          ignoring: !recorderState.isRecording,
+                          child: GestureDetector(
+                            onTap: _handleCancelRecording,
+                            child: Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.colorScheme.surfaceContainerHighest,
+                              ),
+                              child: Icon(
+                                Icons.close,
+                                size: 24,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: Icon(
-                          recorderState.isRecording
-                              ? Icons.stop
-                              : Icons.mic,
-                          size: 32,
-                          color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
+                      SizedBox(width: recorderState.isRecording ? 24 : 0),
+                      // Record / Stop button
+                      GestureDetector(
+                        onTap: () => _handleRecordTap(lesson.id, lesson.transcriptText),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: recorderState.isRecording ? 112 : 96,
+                          height: recorderState.isRecording ? 112 : 96,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: recorderState.isRecording
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.primary,
+                            boxShadow: [
+                              BoxShadow(
+                                color: (recorderState.isRecording
+                                        ? theme.colorScheme.error
+                                        : theme.colorScheme.primary)
+                                    .withValues(alpha: 0.3),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            recorderState.isRecording
+                                ? Icons.stop
+                                : Icons.mic,
+                            size: 32,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      // Spacer to balance the cancel button
+                      SizedBox(width: recorderState.isRecording ? 72 : 0),
+                    ],
                   ),
                 ),
               ],
@@ -456,6 +426,18 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
     // Native WPM from lesson data, scaled relative to normal rate (0.5)
     final nativeWpm = (wordCount / durationSeconds * 60).round();
     return (nativeWpm * (speed / 0.5)).round();
+  }
+
+  Future<void> _handleCancelRecording() async {
+    await ref.read(audioRecorderProvider.notifier).cancelRecording();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('録音をキャンセルしました'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<void> _handleRecordTap(String lessonId, String transcript) async {
