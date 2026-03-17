@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/utils/score_utils.dart';
+import '../../../../shared/utils/text_diff.dart';
 import '../providers/feedback_provider.dart';
 
 class FeedbackScreen extends ConsumerStatefulWidget {
@@ -90,81 +91,13 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Transcript comparison
+            // Transcript comparison with diff highlighting
             if (feedback.userTranscript != null ||
                 feedback.modelTranscript != null)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('テキスト比較',
-                          style: theme.textTheme.titleSmall),
-                      const SizedBox(height: 12),
-                      if (feedback.modelTranscript != null) ...[
-                        Text('お手本',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            )),
-                        const SizedBox(height: 4),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary
-                                .withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            feedback.modelTranscript!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              height: 1.6,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                      ],
-                      if (feedback.userTranscript != null) ...[
-                        Text('あなたの発話',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            )),
-                        const SizedBox(height: 4),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.secondary
-                                .withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            feedback.userTranscript!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              height: 1.6,
-                            ),
-                          ),
-                        ),
-                      ] else
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '音声認識テキストなし（シミュレーターモード）',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+              _TranscriptComparisonCard(
+                modelTranscript: feedback.modelTranscript,
+                userTranscript: feedback.userTranscript,
+                theme: theme,
               ),
             const SizedBox(height: 20),
 
@@ -407,6 +340,167 @@ class _SubScoreTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TranscriptComparisonCard extends StatelessWidget {
+  const _TranscriptComparisonCard({
+    required this.modelTranscript,
+    required this.userTranscript,
+    required this.theme,
+  });
+
+  final String? modelTranscript;
+  final String? userTranscript;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasBoth = modelTranscript != null && userTranscript != null;
+    final diff = hasBoth
+        ? computeWordDiff(modelTranscript!, userTranscript!)
+        : null;
+
+    final baseStyle = theme.textTheme.bodyMedium?.copyWith(height: 1.6);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('テキスト比較', style: theme.textTheme.titleSmall),
+            if (hasBoth) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  _LegendDot(
+                    color: theme.colorScheme.error.withValues(alpha: 0.25),
+                    label: '抜けた単語',
+                    theme: theme,
+                  ),
+                  const SizedBox(width: 12),
+                  _LegendDot(
+                    color: theme.colorScheme.tertiary.withValues(alpha: 0.25),
+                    label: '余分な単語',
+                    theme: theme,
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+
+            // Model transcript
+            if (modelTranscript != null) ...[
+              Text('お手本',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  )),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: diff != null
+                    ? RichText(
+                        text: buildDiffTextSpan(
+                          spans: diff.modelSpans,
+                          highlightType: DiffType.missing,
+                          highlightColor:
+                              theme.colorScheme.error.withValues(alpha: 0.25),
+                          baseStyle: baseStyle,
+                        ),
+                      )
+                    : Text(modelTranscript!, style: baseStyle),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // User transcript
+            if (userTranscript != null) ...[
+              Text('あなたの発話',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  )),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: diff != null
+                    ? RichText(
+                        text: buildDiffTextSpan(
+                          spans: diff.userSpans,
+                          highlightType: DiffType.extra,
+                          highlightColor:
+                              theme.colorScheme.tertiary.withValues(alpha: 0.25),
+                          baseStyle: baseStyle,
+                        ),
+                      )
+                    : Text(userTranscript!, style: baseStyle),
+              ),
+            ] else
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '音声認識テキストなし（シミュレーターモード）',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LegendDot extends StatelessWidget {
+  const _LegendDot({
+    required this.color,
+    required this.label,
+    required this.theme,
+  });
+
+  final Color color;
+  final String label;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 }
