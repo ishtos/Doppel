@@ -30,7 +30,7 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () {},
+            onPressed: () => context.go('/settings'),
           ),
         ],
       ),
