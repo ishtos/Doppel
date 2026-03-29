@@ -7,6 +7,7 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/lesson/presentation/screens/lesson_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -59,6 +60,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => FeedbackScreen(
           feedbackId: state.pathParameters['feedbackId']!,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
