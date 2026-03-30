@@ -4,6 +4,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/seed_data.dart';
 
 Future<void> main() async {
@@ -31,12 +32,14 @@ class DoppelApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(settingsProvider.select((s) => s.themeMode));
 
     return MaterialApp.router(
       title: 'Doppel',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

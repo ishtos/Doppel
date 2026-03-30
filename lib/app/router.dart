@@ -9,7 +9,7 @@ import '../features/library/presentation/screens/library_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart'; // FIXED: オンボーディング画面import追加
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
-import '../features/settings/presentation/providers/settings_provider.dart'; // FIXED: 設定プロバイダーimport追加
+import '../features/settings/presentation/providers/settings_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
