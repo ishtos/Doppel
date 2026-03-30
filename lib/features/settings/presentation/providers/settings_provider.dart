@@ -11,15 +11,23 @@ class SettingsState {
   const SettingsState({
     this.themeMode = ThemeMode.system,
     this.ttsSpeed = 0.5,
+    this.hasCompletedOnboarding = false,
   });
 
   final ThemeMode themeMode;
   final double ttsSpeed;
+  final bool hasCompletedOnboarding;
 
-  SettingsState copyWith({ThemeMode? themeMode, double? ttsSpeed}) {
+  SettingsState copyWith({
+    ThemeMode? themeMode,
+    double? ttsSpeed,
+    bool? hasCompletedOnboarding,
+  }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
       ttsSpeed: ttsSpeed ?? this.ttsSpeed,
+      hasCompletedOnboarding:
+          hasCompletedOnboarding ?? this.hasCompletedOnboarding,
     );
   }
 }
@@ -31,17 +39,21 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
 
   static const _themeModeKey = 'theme_mode';
   static const _ttsSpeedKey = 'tts_speed';
+  static const _onboardingCompletedKey = 'onboarding_completed';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final themeModeIndex = prefs.getInt(_themeModeKey);
     final ttsSpeed = prefs.getDouble(_ttsSpeedKey);
+    final onboardingCompleted =
+        prefs.getBool(_onboardingCompletedKey) ?? false;
 
     state = SettingsState(
       themeMode: themeModeIndex != null
           ? ThemeMode.values[themeModeIndex]
           : ThemeMode.system,
       ttsSpeed: ttsSpeed ?? 0.5,
+      hasCompletedOnboarding: onboardingCompleted,
     );
   }
 
@@ -55,5 +67,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(ttsSpeed: speed);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_ttsSpeedKey, speed);
+  }
+
+  Future<void> completeOnboarding() async {
+    state = state.copyWith(hasCompletedOnboarding: true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompletedKey, true);
   }
 }

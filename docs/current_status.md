@@ -22,6 +22,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase D: AI統合 & UX強化 (Whisper STT、テキスト比較、過去成績表示)
 - [x] Phase E: UX改善 (録音キャンセル、波形UI統合、レッスン拡張、WPM修正)
 - [x] Phase F: 改善ポイント & Diff (ホーム画面に改善ポイント、テキスト比較ハイライト)
+- [x] Phase G: オンボーディング画面 (初回起動時の3ページガイド)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -45,11 +46,13 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 
 | 画面 | ルート | 主な機能 |
 |------|--------|----------|
+| Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
 | Home | `/home` | 挨拶、今日のレッスン、週間統計、改善ポイント、最近の練習 |
 | Library | `/library` | カテゴリ/難易度フィルタ、検索、WPMバッジ、スコアバッジ |
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
+| Settings | `/settings` | テーマ、TTS速度、データリセット |
 
 ## 7. Lesson Content
 - **16レッスン** (各約250-320語)
@@ -57,7 +60,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
 ## 8. Handover Note for Next Run
-Phase A-F まで全て完了。主要機能は全て実装済み。
+Phase A-G まで全て完了。主要機能＋オンボーディングは全て実装済み。
 次は **リリース準備** として以下から着手:
 - App icon / Splash screen の設定
 - Android ビルド確認 (`flutter build apk`)
