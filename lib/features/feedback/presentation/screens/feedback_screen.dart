@@ -158,46 +158,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
               ),
             const SizedBox(height: 20),
 
-            // AI Coach message
-            Card(
-              color:
-                  theme.colorScheme.primary.withValues(alpha: 0.05),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    CircleAvatar(
-                      radius: 20,
-                      backgroundColor: theme.colorScheme.primary,
-                      child: Icon(
-                        Icons.psychology,
-                        color: theme.colorScheme.onPrimary,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'AIコーチ',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            feedback.coachMessage,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            // AI Coach message with retry support
+            _AiCoachCard(
+              feedbackId: feedback.id,
+              coachMessage: feedback.coachMessage,
+              theme: theme,
             ),
             const SizedBox(height: 32),
 
@@ -501,6 +466,152 @@ class _LegendDot extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// FIXED: AI Coach card extracted as separate widget with retry support
+class _AiCoachCard extends ConsumerWidget {
+  const _AiCoachCard({
+    required this.feedbackId,
+    required this.coachMessage,
+    required this.theme,
+  });
+
+  final String feedbackId;
+  final String coachMessage;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final regenerateState = ref.watch(coachRegenerateProvider(feedbackId));
+    final displayMessage =
+        regenerateState.message ?? coachMessage;
+
+    return Card(
+      color: theme.colorScheme.primary.withValues(alpha: 0.05),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: theme.colorScheme.primary,
+                  child: Icon(
+                    Icons.psychology,
+                    color: theme.colorScheme.onPrimary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AIコーチ',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      if (regenerateState.status ==
+                          CoachRegenerateStatus.loading)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('AIコーチが考え中...'),
+                            ],
+                          ),
+                        )
+                      else
+                        Text(
+                          displayMessage,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            // FIXED: Error message display
+            if (regenerateState.status == CoachRegenerateStatus.error)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.error.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 16,
+                        color: theme.colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          regenerateState.errorMessage ?? 'エラーが発生しました',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            // FIXED: Regenerate button row
+            if (regenerateState.status != CoachRegenerateStatus.loading)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(coachRegenerateProvider(feedbackId).notifier)
+                          .regenerate();
+                    },
+                    icon: Icon(
+                      regenerateState.status == CoachRegenerateStatus.error
+                          ? Icons.refresh
+                          : Icons.auto_awesome,
+                      size: 16,
+                    ),
+                    label: Text(
+                      regenerateState.status == CoachRegenerateStatus.error
+                          ? 'リトライ'
+                          : 'AIで再生成',
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
+                      textStyle: theme.textTheme.labelMedium,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
