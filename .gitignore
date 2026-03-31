@@ -66,3 +66,6 @@ app.*.map.json
 # Test artifacts
 test_hive/
 test_hive_streak/
+
+# Steering files (local planning docs)
+.steering/
