@@ -47,6 +47,32 @@ class AiCoachService {
     }
   }
 
+  /// Regenerate feedback via API. Throws on failure (no fallback).
+  /// Used by retry UI so users know if the request actually failed.
+  Future<String> regenerateFeedback({
+    required int pronunciationScore,
+    required int rhythmScore,
+    required int intonationScore,
+    required List<String> problemWords,
+  }) async {
+    if (!hasApiKey) {
+      // FIXED: No API key → still return local feedback instead of throwing
+      return _localFeedback(
+        pronunciationScore: pronunciationScore,
+        rhythmScore: rhythmScore,
+        intonationScore: intonationScore,
+        problemWords: problemWords,
+      );
+    }
+
+    return await _callOpenAI(
+      '発音スコア: $pronunciationScore/100\n'
+      'リズムスコア: $rhythmScore/100\n'
+      'イントネーションスコア: $intonationScore/100\n'
+      '問題のある単語: ${problemWords.join(", ")}\n',
+    );
+  }
+
   /// Generate weekly review message.
   Future<String> generateWeeklyReview({
     required int averageScore,
