@@ -6,16 +6,40 @@ import '../features/feedback/presentation/screens/feedback_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/lesson/presentation/screens/lesson_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
+import '../features/onboarding/presentation/screens/onboarding_screen.dart'; // FIXED: オンボーディング画面import追加
 import '../features/progress/presentation/screens/progress_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/providers/settings_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final hasCompletedOnboarding = ref.watch(
+    settingsProvider.select((s) => s.hasCompletedOnboarding),
+  ); // FIXED: オンボーディング完了状態を監視
+
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
+    redirect: (context, state) {
+      // FIXED: 初回起動時はオンボーディングへリダイレクト
+      final isOnboarding = state.uri.path == '/onboarding';
+      if (!hasCompletedOnboarding && !isOnboarding) {
+        return '/onboarding';
+      }
+      if (hasCompletedOnboarding && isOnboarding) {
+        return '/home';
+      }
+      return null;
+    },
     routes: [
+      // FIXED: オンボーディングルート追加
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) => MainShell(child: child),
@@ -59,6 +83,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => FeedbackScreen(
           feedbackId: state.pathParameters['feedbackId']!,
         ),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
