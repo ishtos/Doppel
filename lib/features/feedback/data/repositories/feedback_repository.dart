@@ -1,26 +1,12 @@
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../models/feedback_model.dart';
+import '../../../../shared/utils/hive_utils.dart'; // FIXED: deepCast を共通ユーティリティから参照
 
 class FeedbackRepository {
   FeedbackRepository(this._box);
 
   final Box<Map> _box;
-
-  /// Recursively cast Hive's Map<dynamic, dynamic> to Map<String, dynamic>.
-  static Map<String, dynamic> deepCast(Map raw) {
-    return raw.map((key, value) {
-      if (value is Map) {
-        return MapEntry(key.toString(), deepCast(value));
-      } else if (value is List) {
-        return MapEntry(
-          key.toString(),
-          value.map((e) => e is Map ? deepCast(e) : e).toList(),
-        );
-      }
-      return MapEntry(key.toString(), value);
-    });
-  }
 
   List<FeedbackModel> findAll() {
     return _box.values
