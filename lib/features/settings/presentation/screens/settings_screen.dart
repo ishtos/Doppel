@@ -60,6 +60,29 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 1, indent: 72),
 
+          // Daily goal section
+          _SectionHeader(title: '目標', theme: theme),
+          ListTile(
+            leading: const Icon(Icons.flag_outlined),
+            title: const Text('1日の練習目標'),
+            subtitle: Text('${settings.dailyGoal}回 / 日'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 72),
+            child: SegmentedButton<int>(
+              segments: const [
+                ButtonSegment(value: 1, label: Text('1回')),
+                ButtonSegment(value: 2, label: Text('2回')),
+                ButtonSegment(value: 3, label: Text('3回')),
+                ButtonSegment(value: 5, label: Text('5回')),
+              ],
+              selected: {settings.dailyGoal},
+              onSelectionChanged: (v) => notifier.setDailyGoal(v.first),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1, indent: 72),
+
           // Data section
           _SectionHeader(title: 'データ', theme: theme),
           ListTile(
