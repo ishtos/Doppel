@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../providers/settings_provider.dart';
@@ -96,12 +97,41 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const Divider(height: 1, indent: 72),
 
-          // App info
+          // App info // FIXED: About画面・ライセンスへのナビゲーション追加
           _SectionHeader(title: 'アプリ情報', theme: theme),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('バージョン'),
-            subtitle: Text('1.0.0'),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: const Text('Doppelについて'),
+            subtitle: const Text('バージョン 1.0.0'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push('/about'),
+          ),
+          const Divider(height: 1, indent: 72),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: const Text('ライセンス'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => showLicensePage(
+              context: context,
+              applicationName: 'Doppel',
+              applicationVersion: '1.0.0+1',
+              applicationIcon: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.record_voice_over,
+                    size: 24,
+                    color: theme.colorScheme.onPrimary,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
