@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,7 @@ class HomeScreen extends ConsumerWidget {
     final todayLesson = ref.watch(todayLessonProvider);
     final weeklyStats = ref.watch(weeklyStatsProvider);
     final recentActivity = ref.watch(recentActivityProvider);
+    final goalProgress = ref.watch(dailyGoalProgressProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -40,14 +43,30 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Greeting
-              Text(_greeting(), style: theme.textTheme.titleLarge),
-              const SizedBox(height: 4),
-              Text(
-                'Day ${progress.currentStreak}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.secondary,
-                ),
+              // Greeting + Daily Goal Progress
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(_greeting(), style: theme.textTheme.titleLarge),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Day ${progress.currentStreak}',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _DailyGoalIndicator(
+                    goalProgress: goalProgress,
+                    theme: theme,
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
 
@@ -108,11 +127,26 @@ class HomeScreen extends ConsumerWidget {
                               ],
                             ),
                           const SizedBox(height: 12),
-                          LinearProgressIndicator(
-                            value: weeklyStats.practiceCount / 5,
-                            color: theme.colorScheme.primary,
-                            backgroundColor: theme.colorScheme.primary
-                                .withValues(alpha: 0.1),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: LinearProgressIndicator(
+                                  value: goalProgress.progress,
+                                  color: goalProgress.isAchieved
+                                      ? theme.colorScheme.tertiary
+                                      : theme.colorScheme.primary,
+                                  backgroundColor: theme.colorScheme.primary
+                                      .withValues(alpha: 0.1),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${goalProgress.completed}/${goalProgress.goal}',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
                           ),
                           ],
                         ),
@@ -322,5 +356,100 @@ class _ImprovementPointsSection extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+class _DailyGoalIndicator extends StatelessWidget {
+  const _DailyGoalIndicator({
+    required this.goalProgress,
+    required this.theme,
+  });
+
+  final DailyGoalProgress goalProgress;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = goalProgress.isAchieved
+        ? theme.colorScheme.tertiary
+        : theme.colorScheme.primary;
+
+    return SizedBox(
+      width: 64,
+      height: 64,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: CustomPaint(
+              painter: _CircularGoalPainter(
+                progress: goalProgress.progress,
+                color: color,
+                backgroundColor: color.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+          if (goalProgress.isAchieved)
+            Icon(Icons.check, size: 22, color: color)
+          else
+            Text(
+              '${goalProgress.completed}/${goalProgress.goal}',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CircularGoalPainter extends CustomPainter {
+  _CircularGoalPainter({
+    required this.progress,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final double progress;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    const strokeWidth = 5.0;
+
+    final bgPaint = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    final fgPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius - strokeWidth / 2, bgPaint);
+
+    final sweepAngle = 2 * pi * progress;
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
+      -pi / 2,
+      sweepAngle,
+      false,
+      fgPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CircularGoalPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }

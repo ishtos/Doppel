@@ -25,6 +25,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase G: オンボーディング画面 (初回起動時の3ページガイド)
 - [x] Phase H: AI Coach リトライUI (フィードバック画面でのAIコーチメッセージ再生成)
 - [x] Phase I: Release準備 - About画面 & Settings強化
+- [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -38,7 +39,6 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 8. 追加レッスンコンテンツ拡充
 
 ## 5. Technical Debt & Issues
-- ~~`deepCast()` ユーティリティが `FeedbackRepository` にスタティックメソッドとして配置されている~~ → `shared/utils/hive_utils.dart` へ移動済み
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
 - Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足
@@ -48,12 +48,12 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | 画面 | ルート | 主な機能 |
 |------|--------|----------|
 | Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
-| Home | `/home` | 挨拶、今日のレッスン、週間統計、改善ポイント、最近の練習 |
+| Home | `/home` | 挨拶、デイリー目標進捗、今日のレッスン、週間統計、改善ポイント、最近の練習 |
 | Library | `/library` | カテゴリ/難易度フィルタ、検索、WPMバッジ、スコアバッジ |
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
-| Settings | `/settings` | テーマ、TTS速度、データリセット、About・ライセンスへのリンク |
+| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、データリセット、About・ライセンスへのリンク |
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
@@ -61,18 +61,15 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-01)
-- About画面の新規作成 (Phase I)
-  - `about_screen.dart`: アプリ情報、ライセンス一覧、プライバシーポリシー、利用規約
-  - `settings_screen.dart`: About画面・ライセンスへのナビゲーション追加
-  - `router.dart`: `/about` ルート追加
-- テクニカルデビット解消
-  - `hive_utils.dart`: `deepCast()` を `FeedbackRepository` から `shared/utils/` へ移動
-  - `feedback_repository.dart`: 共通ユーティリティからの参照に変更
-  - `progress_repository.dart`: 同上
+## 8. 本日完了したタスク (2026-04-02)
+- デイリー練習目標機能 (Phase J)
+  - `settings_provider.dart`: SettingsStateに `dailyGoal` フィールド追加、SharedPreferences永続化
+  - `settings_screen.dart`: 「目標」セクション追加（SegmentedButtonで1/2/3/5回選択）
+  - `home_provider.dart`: `todayPracticeCountProvider` & `dailyGoalProgressProvider` 追加
+  - `home_screen.dart`: 円形プログレスインジケーター表示、今日のレッスンカード内に目標進捗バー追加
 
 ## 9. Handover Note for Next Run
-Phase A-I まで全て完了。About画面（プライバシーポリシー・利用規約含む）を追加済み。
+Phase A-J まで全て完了。デイリー練習目標機能を追加済み（Settings画面で目標設定、Home画面に円形プログレス表示）。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)

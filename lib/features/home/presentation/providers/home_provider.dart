@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../../lesson/data/models/lesson_model.dart';
 import '../../../progress/data/models/user_progress_model.dart';
+import '../../../settings/presentation/providers/settings_provider.dart';
 
 /// User progress for home screen display.
 final homeProgressProvider = Provider<UserProgressModel>((ref) {
@@ -98,6 +99,32 @@ final weeklyStatsProvider = Provider<WeeklyStats>((ref) {
     totalMinutes: weeklyMinutes,
   );
 });
+
+/// Today's practice count from feedback records.
+final todayPracticeCountProvider = Provider<int>((ref) {
+  final feedbackRepo = ref.watch(feedbackRepositoryProvider);
+  final all = feedbackRepo.findAll();
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  return all.where((f) => !f.createdAt.isBefore(today)).length;
+});
+
+/// Daily goal progress data for home screen.
+final dailyGoalProgressProvider = Provider<DailyGoalProgress>((ref) {
+  final goal = ref.watch(settingsProvider).dailyGoal;
+  final count = ref.watch(todayPracticeCountProvider);
+  return DailyGoalProgress(goal: goal, completed: count);
+});
+
+class DailyGoalProgress {
+  const DailyGoalProgress({required this.goal, required this.completed});
+
+  final int goal;
+  final int completed;
+
+  double get progress => goal > 0 ? (completed / goal).clamp(0.0, 1.0) : 0.0;
+  bool get isAchieved => completed >= goal;
+}
 
 class RecentActivity {
   const RecentActivity({
