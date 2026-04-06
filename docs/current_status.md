@@ -26,6 +26,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase H: AI Coach リトライUI (フィードバック画面でのAIコーチメッセージ再生成)
 - [x] Phase I: Release準備 - About画面 & Settings強化
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
+- [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -49,7 +50,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 |------|--------|----------|
 | Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
 | Home | `/home` | 挨拶、デイリー目標進捗、今日のレッスン、週間統計、改善ポイント、最近の練習 |
-| Library | `/library` | カテゴリ/難易度フィルタ、検索、WPMバッジ、スコアバッジ |
+| Library | `/library` | カテゴリ/難易度フィルタ、**ソート(4種)、ブックマークフィルタ、練習回数バッジ**、検索、WPMバッジ、スコアバッジ |
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
@@ -61,15 +62,13 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-02)
-- デイリー練習目標機能 (Phase J)
-  - `settings_provider.dart`: SettingsStateに `dailyGoal` フィールド追加、SharedPreferences永続化
-  - `settings_screen.dart`: 「目標」セクション追加（SegmentedButtonで1/2/3/5回選択）
-  - `home_provider.dart`: `todayPracticeCountProvider` & `dailyGoalProgressProvider` 追加
-  - `home_screen.dart`: 円形プログレスインジケーター表示、今日のレッスンカード内に目標進捗バー追加
+## 8. 本日完了したタスク (2026-04-06)
+- ライブラリ画面強化 (Phase K)
+  - `lesson_provider.dart`: `LessonSortType` enum追加、`bookmarkFilterProvider` / `lessonSortProvider` / `lessonPracticeCountProvider` 追加、`filteredLessonsProvider` にソート・ブックマークフィルタロジック追加
+  - `library_screen.dart`: ソートドロップダウン追加、ブックマークフィルタチップ追加、レッスンカードに練習回数バッジ追加、ブックマークフィルタ時の空状態メッセージ改善
 
 ## 9. Handover Note for Next Run
-Phase A-J まで全て完了。デイリー練習目標機能を追加済み（Settings画面で目標設定、Home画面に円形プログレス表示）。
+Phase A-K まで全て完了。ライブラリ画面にソート機能（デフォルト/難易度順/スコア順/最近の練習）、ブックマークフィルタ、練習回数バッジを追加済み。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)
