@@ -9,8 +9,10 @@ import '../../../lesson/presentation/providers/lesson_provider.dart';
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
+  // FIXED: 「お気に入り」カテゴリを追加
   static const _categories = [
     'すべて',
+    'お気に入り',
     'ニュース',
     'ビジネス',
     '日常会話',
@@ -52,6 +54,16 @@ class LibraryScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
+                    // FIXED: お気に入りチップにブックマークアイコンを付与
+                    avatar: cat == 'お気に入り'
+                        ? Icon(
+                            Icons.bookmark,
+                            size: 16,
+                            color: selected
+                                ? Theme.of(context).colorScheme.onSecondaryContainer
+                                : Theme.of(context).colorScheme.onSurfaceVariant,
+                          )
+                        : null,
                     label: Text(cat),
                     selected: selected,
                     onSelected: (_) => ref

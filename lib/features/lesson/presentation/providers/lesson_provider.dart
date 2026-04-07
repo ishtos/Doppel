@@ -43,7 +43,10 @@ final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
   return lessons.maybeWhen(
     data: (list) {
       var filtered = list;
-      if (category != 'すべて') {
+      if (category == 'お気に入り') {
+        // FIXED: お気に入りカテゴリは isBookmarked でフィルター
+        filtered = filtered.where((l) => l.isBookmarked).toList();
+      } else if (category != 'すべて') {
         filtered = filtered.where((l) => l.category == category).toList();
       }
       if (difficulty > 0) {
