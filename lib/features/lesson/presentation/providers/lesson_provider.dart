@@ -3,6 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../data/models/lesson_model.dart';
 
+// FIXED: ソート種別を enum で明示的に定義
+enum LessonSortType {
+  defaultOrder,
+  difficultyAsc,
+  bestScore,
+  recentPractice,
+}
+
 /// All lessons list provider.
 final lessonsProvider =
     StateNotifierProvider<LessonsNotifier, AsyncValue<List<LessonModel>>>(
@@ -33,20 +41,30 @@ final lessonByIdProvider =
   return ref.watch(lessonRepositoryProvider).findById(id);
 });
 
+/// Practice count per lesson (number of feedback records).
+final lessonPracticeCountProvider =
+    Provider.family<int, String>((ref, lessonId) {
+  final feedbackRepo = ref.watch(feedbackRepositoryProvider);
+  return feedbackRepo.findByLessonId(lessonId).length;
+});
+
 /// Filtered lessons provider.
 final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
   final lessons = ref.watch(lessonsProvider);
   final category = ref.watch(selectedCategoryProvider);
   final difficulty = ref.watch(selectedDifficultyProvider);
   final query = ref.watch(searchQueryProvider);
+  // FIXED: ブックマークフィルタとソートを追加
+  final bookmarkOnly = ref.watch(bookmarkFilterProvider);
+  final sortType = ref.watch(lessonSortProvider);
 
   return lessons.maybeWhen(
     data: (list) {
       var filtered = list;
-      if (category == 'お気に入り') {
-        // FIXED: お気に入りカテゴリは isBookmarked でフィルター
+      if (bookmarkOnly) {
         filtered = filtered.where((l) => l.isBookmarked).toList();
-      } else if (category != 'すべて') {
+      }
+      if (category != 'すべて') {
         filtered = filtered.where((l) => l.category == category).toList();
       }
       if (difficulty > 0) {
@@ -61,6 +79,31 @@ final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
                 l.transcriptText.toLowerCase().contains(q))
             .toList();
       }
+
+      // FIXED: ソートロジック
+      switch (sortType) {
+        case LessonSortType.defaultOrder:
+          break;
+        case LessonSortType.difficultyAsc:
+          filtered = [...filtered]
+            ..sort((a, b) => a.difficulty.compareTo(b.difficulty));
+        case LessonSortType.bestScore:
+          final feedbackRepo = ref.read(feedbackRepositoryProvider);
+          filtered = [...filtered]..sort((a, b) {
+              final aFb = feedbackRepo.findLatestByLessonId(a.id);
+              final bFb = feedbackRepo.findLatestByLessonId(b.id);
+              final aScore = aFb?.overallScore ?? -1;
+              final bScore = bFb?.overallScore ?? -1;
+              return bScore.compareTo(aScore);
+            });
+        case LessonSortType.recentPractice:
+          filtered = [...filtered]..sort((a, b) {
+              final aTime = a.lastPracticedAt ?? DateTime(2000);
+              final bTime = b.lastPracticedAt ?? DateTime(2000);
+              return bTime.compareTo(aTime);
+            });
+      }
+
       return filtered;
     },
     orElse: () => [],
@@ -71,3 +114,6 @@ final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
 final selectedCategoryProvider = StateProvider<String>((ref) => 'すべて');
 final selectedDifficultyProvider = StateProvider<int>((ref) => 0);
 final searchQueryProvider = StateProvider<String>((ref) => '');
+final bookmarkFilterProvider = StateProvider<bool>((ref) => false);
+final lessonSortProvider =
+    StateProvider<LessonSortType>((ref) => LessonSortType.defaultOrder);

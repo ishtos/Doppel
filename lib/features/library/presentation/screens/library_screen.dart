@@ -9,10 +9,8 @@ import '../../../lesson/presentation/providers/lesson_provider.dart';
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
-  // FIXED: 「お気に入り」カテゴリを追加
   static const _categories = [
     'すべて',
-    'お気に入り',
     'ニュース',
     'ビジネス',
     '日常会話',
@@ -21,12 +19,22 @@ class LibraryScreen extends ConsumerWidget {
     '時事ネタ',
   ];
 
+  // FIXED: ソート種別のラベルマップを定義
+  static const _sortLabels = {
+    LessonSortType.defaultOrder: 'デフォルト',
+    LessonSortType.difficultyAsc: '難易度順',
+    LessonSortType.bestScore: 'スコア順',
+    LessonSortType.recentPractice: '最近の練習',
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final selectedDifficulty = ref.watch(selectedDifficultyProvider);
     final filteredLessons = ref.watch(filteredLessonsProvider);
+    final bookmarkOnly = ref.watch(bookmarkFilterProvider);
+    final sortType = ref.watch(lessonSortProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -54,16 +62,6 @@ class LibraryScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    // FIXED: お気に入りチップにブックマークアイコンを付与
-                    avatar: cat == 'お気に入り'
-                        ? Icon(
-                            Icons.bookmark,
-                            size: 16,
-                            color: selected
-                                ? Theme.of(context).colorScheme.onSecondaryContainer
-                                : Theme.of(context).colorScheme.onSurfaceVariant,
-                          )
-                        : null,
                     label: Text(cat),
                     selected: selected,
                     onSelected: (_) => ref
@@ -93,12 +91,62 @@ class LibraryScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
 
+          // FIXED: ソート & ブックマークフィルタ行を追加
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                // Bookmark toggle
+                FilterChip(
+                  avatar: Icon(
+                    bookmarkOnly ? Icons.bookmark : Icons.bookmark_border,
+                    size: 18,
+                    color: bookmarkOnly
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  label: const Text('ブックマーク'),
+                  selected: bookmarkOnly,
+                  onSelected: (_) => ref
+                      .read(bookmarkFilterProvider.notifier)
+                      .state = !bookmarkOnly,
+                ),
+                const Spacer(),
+                // Sort dropdown
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<LessonSortType>(
+                    value: sortType,
+                    icon: const Icon(Icons.sort, size: 20),
+                    isDense: true,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    items: LessonSortType.values.map((type) {
+                      return DropdownMenuItem(
+                        value: type,
+                        child: Text(_sortLabels[type]!),
+                      );
+                    }).toList(),
+                    onChanged: (v) {
+                      if (v != null) {
+                        ref.read(lessonSortProvider.notifier).state = v;
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+
           // Lesson list
           Expanded(
             child: filteredLessons.isEmpty
                 ? Center(
                     child: Text(
-                      '該当するレッスンがありません',
+                      bookmarkOnly
+                          ? 'ブックマークしたレッスンがありません'
+                          : '該当するレッスンがありません',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -112,6 +160,9 @@ class LibraryScreen extends ConsumerWidget {
                       final latestFeedback = ref
                           .watch(feedbackRepositoryProvider)
                           .findLatestByLessonId(lesson.id);
+                      // FIXED: 練習回数を取得
+                      final practiceCount = ref
+                          .watch(lessonPracticeCountProvider(lesson.id));
                       return Hero(
                         tag: 'lesson-${lesson.id}',
                         child: Card(
@@ -169,6 +220,48 @@ class LibraryScreen extends ConsumerWidget {
                                             level: lesson.difficulty,
                                             theme: theme,
                                           ),
+                                          // FIXED: 練習回数バッジを追加
+                                          if (practiceCount > 0) ...[
+                                            const SizedBox(width: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 1),
+                                              decoration: BoxDecoration(
+                                                color: theme.colorScheme
+                                                    .secondary
+                                                    .withValues(alpha: 0.12),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize:
+                                                    MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.mic,
+                                                    size: 12,
+                                                    color: theme.colorScheme
+                                                        .secondary,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    '$practiceCount回',
+                                                    style: theme
+                                                        .textTheme.labelSmall
+                                                        ?.copyWith(
+                                                      color: theme
+                                                          .colorScheme
+                                                          .secondary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
                                           const Spacer(),
                                           if (latestFeedback != null)
                                             Container(

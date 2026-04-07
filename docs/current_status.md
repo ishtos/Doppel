@@ -26,7 +26,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase H: AI Coach リトライUI (フィードバック画面でのAIコーチメッセージ再生成)
 - [x] Phase I: Release準備 - About画面 & Settings強化
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
-- [x] Phase K: お気に入りレッスン表示強化 (ブックマークフィルター & Home画面セクション)
+- [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -50,7 +50,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 |------|--------|----------|
 | Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
 | Home | `/home` | 挨拶、デイリー目標進捗、お気に入りレッスン、今日のレッスン、週間統計、改善ポイント、最近の練習 |
-| Library | `/library` | カテゴリ/難易度フィルタ、お気に入りフィルタ、検索、WPMバッジ、スコアバッジ |
+| Library | `/library` | カテゴリ/難易度フィルタ、**ソート(4種)、ブックマークフィルタ、練習回数バッジ**、検索、WPMバッジ、スコアバッジ |
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
@@ -63,14 +63,15 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
 ## 8. 本日完了したタスク (2026-04-07)
-- お気に入りレッスン表示強化 (Phase K)
-  - `lesson_provider.dart`: filteredLessonsProvider で「お気に入り」カテゴリフィルター対応
+- ライブラリ画面強化 (Phase K)
+  - `lesson_provider.dart`: `LessonSortType` enum追加、`bookmarkFilterProvider` / `lessonSortProvider` / `lessonPracticeCountProvider` 追加、`filteredLessonsProvider` にソート・ブックマークフィルタロジック追加
+  - `library_screen.dart`: ソートドロップダウン追加、ブックマークフィルタチップ追加、レッスンカードに練習回数バッジ追加、ブックマークフィルタ時の空状態メッセージ改善
+- Home画面お気に入りセクション追加
   - `home_provider.dart`: bookmarkedLessonsProvider 追加
-  - `library_screen.dart`: カテゴリフィルターに「お気に入り」チップ追加（ブックマークアイコン付き）
   - `home_screen.dart`: お気に入りレッスン横スクロールセクション追加
 
 ## 9. Handover Note for Next Run
-Phase A-K まで全て完了。お気に入りレッスン表示強化を追加済み（Library画面にブックマークフィルター、Home画面にお気に入りセクション）。
+Phase A-K まで全て完了。ライブラリ画面にソート機能（デフォルト/難易度順/スコア順/最近の練習）、ブックマークフィルタ、練習回数バッジを追加済み。Home画面にお気に入りレッスン横スクロールセクションを追加済み。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)
