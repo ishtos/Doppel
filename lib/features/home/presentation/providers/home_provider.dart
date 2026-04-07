@@ -5,6 +5,12 @@ import '../../../lesson/data/models/lesson_model.dart';
 import '../../../progress/data/models/user_progress_model.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 
+/// Bookmarked lessons for home screen display. // FIXED: お気に入りレッスンプロバイダー追加
+final bookmarkedLessonsProvider = Provider<List<LessonModel>>((ref) {
+  final repo = ref.watch(lessonRepositoryProvider);
+  return repo.findAll().where((l) => l.isBookmarked).toList();
+});
+
 /// User progress for home screen display.
 final homeProgressProvider = Provider<UserProgressModel>((ref) {
   return ref.watch(progressRepositoryProvider).getProgress();

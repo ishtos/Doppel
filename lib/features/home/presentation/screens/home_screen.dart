@@ -156,6 +156,9 @@ class HomeScreen extends ConsumerWidget {
                 ),
               const SizedBox(height: 24),
 
+              // FIXED: お気に入りレッスンセクション追加
+              _BookmarkedLessonsSection(theme: theme),
+
               // Weekly Summary
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -255,6 +258,90 @@ class HomeScreen extends ConsumerWidget {
       default:
         return '';
     }
+  }
+}
+
+// FIXED: お気に入りレッスン横スクロールセクション
+class _BookmarkedLessonsSection extends ConsumerWidget {
+  const _BookmarkedLessonsSection({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bookmarked = ref.watch(bookmarkedLessonsProvider);
+
+    if (bookmarked.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.bookmark, size: 18, color: theme.colorScheme.primary),
+            const SizedBox(width: 6),
+            Text('お気に入りレッスン', style: theme.textTheme.titleSmall),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 100,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: bookmarked.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final lesson = bookmarked[index];
+              return SizedBox(
+                width: 180,
+                child: Card(
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => context.go('/lesson/${lesson.id}'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            lesson.title,
+                            style: theme.textTheme.labelLarge,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.headphones,
+                                size: 14,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                lesson.category,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    );
   }
 }
 
