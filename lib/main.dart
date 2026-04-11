@@ -6,6 +6,7 @@ import 'app/router.dart';
 import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/seed_data.dart';
+import 'shared/services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,9 @@ Future<void> main() async {
       await lessonsBox.put(lesson.id, lesson.toJson());
     }
   }
+
+  // Initialize notification service
+  await NotificationService.instance.initialize();
 
   runApp(const ProviderScope(child: DoppelApp()));
 }

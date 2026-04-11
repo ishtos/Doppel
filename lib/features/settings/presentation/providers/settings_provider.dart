@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../shared/services/notification_service.dart';
+
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, SettingsState>(
   (ref) => SettingsNotifier(),
@@ -13,18 +15,30 @@ class SettingsState {
     this.ttsSpeed = 0.5,
     this.hasCompletedOnboarding = false,
     this.dailyGoal = 3,
+    this.isReminderEnabled = false,
+    this.reminderHour = 20,
+    this.reminderMinute = 0,
   });
 
   final ThemeMode themeMode;
   final double ttsSpeed;
   final bool hasCompletedOnboarding;
   final int dailyGoal;
+  final bool isReminderEnabled;
+  final int reminderHour;
+  final int reminderMinute;
+
+  String get reminderTimeLabel =>
+      '${reminderHour.toString().padLeft(2, '0')}:${reminderMinute.toString().padLeft(2, '0')}';
 
   SettingsState copyWith({
     ThemeMode? themeMode,
     double? ttsSpeed,
     bool? hasCompletedOnboarding,
     int? dailyGoal,
+    bool? isReminderEnabled,
+    int? reminderHour,
+    int? reminderMinute,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -32,6 +46,9 @@ class SettingsState {
       hasCompletedOnboarding:
           hasCompletedOnboarding ?? this.hasCompletedOnboarding,
       dailyGoal: dailyGoal ?? this.dailyGoal,
+      isReminderEnabled: isReminderEnabled ?? this.isReminderEnabled,
+      reminderHour: reminderHour ?? this.reminderHour,
+      reminderMinute: reminderMinute ?? this.reminderMinute,
     );
   }
 }
@@ -45,6 +62,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _ttsSpeedKey = 'tts_speed';
   static const _onboardingCompletedKey = 'onboarding_completed';
   static const _dailyGoalKey = 'daily_goal';
+  static const _reminderEnabledKey = 'reminder_enabled';
+  static const _reminderHourKey = 'reminder_hour';
+  static const _reminderMinuteKey = 'reminder_minute';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -53,6 +73,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final onboardingCompleted =
         prefs.getBool(_onboardingCompletedKey) ?? false;
     final dailyGoal = prefs.getInt(_dailyGoalKey);
+    final reminderEnabled = prefs.getBool(_reminderEnabledKey) ?? false;
+    final reminderHour = prefs.getInt(_reminderHourKey) ?? 20;
+    final reminderMinute = prefs.getInt(_reminderMinuteKey) ?? 0;
 
     state = SettingsState(
       themeMode: themeModeIndex != null
@@ -61,6 +84,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       ttsSpeed: ttsSpeed ?? 0.5,
       hasCompletedOnboarding: onboardingCompleted,
       dailyGoal: dailyGoal ?? 3,
+      isReminderEnabled: reminderEnabled,
+      reminderHour: reminderHour,
+      reminderMinute: reminderMinute,
     );
   }
 
@@ -86,5 +112,43 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(dailyGoal: goal);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_dailyGoalKey, goal);
+  }
+
+  Future<void> setReminderEnabled(bool enabled) async {
+    state = state.copyWith(isReminderEnabled: enabled);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_reminderEnabledKey, enabled);
+
+    final notificationService = NotificationService.instance;
+    if (enabled) {
+      final granted = await notificationService.requestPermission();
+      if (!granted) {
+        // Permission denied — revert the toggle
+        state = state.copyWith(isReminderEnabled: false);
+        await prefs.setBool(_reminderEnabledKey, false);
+        return;
+      }
+      await notificationService.scheduleDailyReminder(
+        hour: state.reminderHour,
+        minute: state.reminderMinute,
+      );
+    } else {
+      await notificationService.cancelAll();
+    }
+  }
+
+  Future<void> setReminderTime(int hour, int minute) async {
+    state = state.copyWith(reminderHour: hour, reminderMinute: minute);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_reminderHourKey, hour);
+    await prefs.setInt(_reminderMinuteKey, minute);
+
+    // Reschedule if reminder is currently enabled
+    if (state.isReminderEnabled) {
+      await NotificationService.instance.scheduleDailyReminder(
+        hour: hour,
+        minute: minute,
+      );
+    }
   }
 }
