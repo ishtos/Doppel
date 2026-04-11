@@ -84,6 +84,41 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 8),
           const Divider(height: 1, indent: 72),
 
+          // Notification section
+          _SectionHeader(title: '通知', theme: theme),
+          SwitchListTile(
+            secondary: const Icon(Icons.notifications_outlined),
+            title: const Text('練習リマインダー'),
+            subtitle: Text(
+              settings.isReminderEnabled
+                  ? '毎日 ${settings.reminderTimeLabel} に通知'
+                  : 'オフ',
+            ),
+            value: settings.isReminderEnabled,
+            onChanged: (v) => notifier.setReminderEnabled(v),
+          ),
+          if (settings.isReminderEnabled)
+            ListTile(
+              leading: const SizedBox(width: 24),
+              title: const Text('通知時刻'),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    settings.reminderTimeLabel,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
+              onTap: () => _showTimePicker(context, settings, notifier),
+            ),
+          const Divider(height: 1, indent: 72),
+
           // Data section
           _SectionHeader(title: 'データ', theme: theme),
           ListTile(
@@ -171,6 +206,24 @@ class SettingsScreen extends ConsumerWidget {
         }).toList(),
       ),
     );
+  }
+
+  Future<void> _showTimePicker(
+    BuildContext context,
+    SettingsState settings,
+    SettingsNotifier notifier,
+  ) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(
+        hour: settings.reminderHour,
+        minute: settings.reminderMinute,
+      ),
+      helpText: 'リマインダー時刻を選択',
+    );
+    if (picked != null) {
+      await notifier.setReminderTime(picked.hour, picked.minute);
+    }
   }
 
   Future<void> _confirmReset(BuildContext context) async {
