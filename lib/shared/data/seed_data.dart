@@ -92,6 +92,42 @@ const seedLessons = [
     wordCount: 277,
   ),
 
+  // FIXED: ニュース中級レッスンを追加（各カテゴリ4レッスンに統一）
+  LessonModel(
+    id: 'lesson-022',
+    title: 'Health and Wellness Report',
+    category: 'ニュース',
+    difficulty: 2,
+    transcriptText:
+        'In today\'s health report, we look at several important developments in wellness and medical research. '
+        'A major study published this week found a strong link between regular physical activity and mental health. '
+        'Researchers followed more than fifty thousand adults over ten years '
+        'and discovered that those who exercised at least three times per week '
+        'were forty percent less likely to experience symptoms of depression. '
+        'The type of exercise did not matter as much as consistency. '
+        'Whether participants chose running, swimming, or simply walking for thirty minutes, the benefits were similar. '
+        'In nutrition news, the government has released updated dietary guidelines for the first time in five years. '
+        'The new guidelines place greater emphasis on plant-based foods '
+        'and recommend reducing consumption of processed meats and sugary drinks. '
+        'Adults should now aim for at least five servings of fruits and vegetables per day, '
+        'up from the previous recommendation of three. '
+        'Nutritionists have welcomed the changes, though some say they do not go far enough. '
+        'Meanwhile, a breakthrough in allergy treatment is giving hope to millions of people worldwide. '
+        'A new immunotherapy approach showed promising results in clinical trials, '
+        'with over seventy percent of participants reporting significant reduction in symptoms after three months. '
+        'The therapy works by gradually exposing the immune system to tiny amounts of the allergen, '
+        'training it to stop overreacting. Doctors say it could be widely available within two years. '
+        'In technology and health news, a new wearable device can now monitor blood sugar levels without a needle. '
+        'The device uses light sensors on the wrist to estimate glucose readings in real time. '
+        'While not yet accurate enough to replace traditional testing for diabetic patients, '
+        'researchers say the technology is improving rapidly. '
+        'Finally, health officials remind everyone about the importance of regular screenings. '
+        'Early detection remains the most effective tool against serious diseases.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 131,
+    wordCount: 284,
+  ),
+
   // ── ビジネス ──
 
   LessonModel(
@@ -187,6 +223,38 @@ const seedLessons = [
     wordCount: 277,
   ),
 
+  // FIXED: ビジネス初級レッスンを追加（カテゴリ×難易度のギャップ埋め）
+  LessonModel(
+    id: 'lesson-017',
+    title: 'First Day at the Office',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Welcome aboard. You must be our new team member. It is great to have you here. '
+        'My name is Sarah, and I will show you around the office today. '
+        'This is the main entrance. You need your ID card to open the door, so keep it with you at all times. '
+        'Over here is the kitchen. Feel free to use the coffee machine and the microwave. '
+        'There is a refrigerator for your lunch. Just remember to write your name on it. '
+        'Next door is the break room where people come to relax during lunch. '
+        'Now let me show you your desk. Here it is, right by the window. '
+        'You have a computer, a phone, and some supplies to get you started. '
+        'If you need anything, just ask Lisa, our office manager. Her desk is right over there. '
+        'The meeting rooms are on the second floor. You can book them through the company calendar. '
+        'Our team meets every Monday at ten in the morning, so please add that to your schedule. '
+        'The dress code here is business casual. Jeans are fine on Fridays. '
+        'Your manager has set up some training sessions for your first week. '
+        'The schedule should already be in your email, so check that when you get to your desk. '
+        'We also have a buddy system for new employees. Your buddy is Tom from the marketing team. '
+        'He will check in with you every day this week to make sure everything goes smoothly. '
+        'Please do not worry if you feel a little lost at first. Everyone remembers what it was like to be new. '
+        'One more thing. We have a team lunch every other Friday at a restaurant nearby. '
+        'The next one is this week, so it will be a great chance for you to meet everyone. '
+        'Once again, welcome to the company. We are really glad you are here.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 162,
+    wordCount: 270,
+  ),
+
   // ── 日常会話 ──
 
   LessonModel(
@@ -243,6 +311,69 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_005.mp3',
     durationSeconds: 156,
     wordCount: 260,
+  ),
+
+  // FIXED: 日常会話の中級・上級レッスンを追加（カテゴリ×難易度のギャップ埋め）
+  LessonModel(
+    id: 'lesson-018',
+    title: 'At the Doctor\'s Office',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Good afternoon. I have an appointment at two thirty under the name Taylor. '
+        'Could you check if the doctor is running on time? About fifteen minutes behind? That is not too bad. I will wait. '
+        'Oh, before I sit down, I should mention that my insurance has changed since my last visit. Here is my new card. '
+        'Do I need to fill out any forms? Just this one page? I will get that done right away. '
+        'Hello, Doctor Chen. Thank you for seeing me today. '
+        'I have been having some trouble with my right shoulder for the past two weeks. '
+        'It started after I spent a long weekend painting my apartment. '
+        'At first I thought it was just a minor strain that would go away on its own, '
+        'but the pain has actually gotten worse, especially when I try to lift my arm above my head. '
+        'I have also noticed some stiffness in the morning that takes about twenty minutes to loosen up. '
+        'I have not taken any medication because I wanted to get your advice first. '
+        'It hurts right there when you press on it. And when I try to rotate it like this, there is a sharp pain. '
+        'A rotator cuff strain? What would you recommend for treatment? '
+        'Physical therapy twice a week sounds reasonable. How long will recovery take? '
+        'Six to eight weeks? I can work with that. Should I avoid any specific activities? '
+        'No heavy lifting and no reaching above my head. I understand. '
+        'Would it help to apply ice or heat? Ice for the first few days, then switch to heat? '
+        'That is very helpful. Thank you, Doctor Chen. '
+        'I will schedule the therapy appointments on my way out. '
+        'Could I also get a copy of the referral for my records?',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 131,
+    wordCount: 284,
+  ),
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thank you for showing me the apartment. I have several questions before making my decision. '
+        'The listing mentioned that utilities are included in the rent, but it did not specify which ones. '
+        'Could you clarify whether that covers electricity, gas, water, and internet, or only some of those? '
+        'Only water and trash collection? That is somewhat different from what the advertisement suggested. '
+        'I wonder if we could revisit the monthly rent to account for the additional costs I would be responsible for. '
+        'The natural light in the living room is wonderful, and the neighborhood has a lot of character. '
+        'However, I noticed the paint in the bedroom is peeling near the window frame, which often indicates a moisture problem. '
+        'Has the building experienced any issues with water damage or leaks in the past? '
+        'The windows also appear quite old. Have they been inspected recently for energy efficiency? '
+        'I am concerned that heating costs could be substantial during winter if the insulation is poor. '
+        'Regarding the lease terms, I noticed the standard agreement requires eighteen months with a two-month deposit. '
+        'Would you consider a twelve-month lease instead? '
+        'I understand longer commitments provide stability for the landlord, '
+        'so I would accept a modest rent increase in exchange for the shorter term. '
+        'I also wanted to ask about the policy on modifications. '
+        'I work remotely three days a week and would need to set up a small home office in the second bedroom. '
+        'Would I be permitted to install shelving and mount a whiteboard on the wall? '
+        'I would naturally restore everything to its original condition when the lease ends. '
+        'One final question. Is the building planning any major renovations soon? '
+        'Construction noise during working hours would significantly affect my productivity. '
+        'These factors are all important to my decision, so I appreciate you taking the time to address them.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 113,
+    wordCount: 282,
   ),
 
   // ── TEDスタイル ──
@@ -307,6 +438,71 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_008.mp3',
     durationSeconds: 117,
     wordCount: 292,
+  ),
+
+  // FIXED: TEDスタイルの初級・中級レッスンを追加（カテゴリ×難易度のギャップ埋め）
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Magic of Reading',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'I want to talk to you today about something simple but incredibly powerful: reading. '
+        'When was the last time you sat down and read a book just for fun? '
+        'For many of us, the honest answer is that it has been far too long. '
+        'We are so busy with work, social media, and daily tasks that we forget how wonderful it feels to get lost in a good story. '
+        'But reading does much more than entertain us. It actually changes our brains. '
+        'Scientists have found that when we read a story, our brains react as if we are living the experience ourselves. '
+        'If a character runs through a forest, the part of your brain that controls movement becomes active. '
+        'If someone in the story eats a delicious meal, your sensory areas respond. '
+        'Reading is like a workout for your mind. '
+        'And here is something that might surprise you. People who read regularly are better at understanding others. '
+        'When you read about characters dealing with difficult situations, '
+        'you practice putting yourself in someone else\'s shoes. This builds empathy, '
+        'which is one of the most important skills we can have. '
+        'Reading also helps reduce stress. One study found that just six minutes of reading '
+        'can lower your stress levels by up to sixty percent. '
+        'That is more effective than listening to music or going for a walk. '
+        'Six minutes. Less time than it takes to make a cup of coffee. '
+        'So here is my challenge to you. Tonight, instead of picking up your phone before bed, '
+        'pick up a book instead. It does not matter what kind. Fiction, history, science, anything you enjoy. '
+        'Start with just ten minutes. You might be amazed at how quickly those ten minutes turn into an hour. '
+        'Reading is a gift we can give ourselves every single day. All we have to do is open the page.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 168,
+    wordCount: 280,
+  ),
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'Most of us know we should sleep more, but few understand why sleep is so critically important. '
+        'Tonight I want to share what happens inside your brain while you sleep, '
+        'and why cutting corners on rest might be one of the most dangerous things you can do. '
+        'Let me clear up a common misconception. Sleep is not a passive state where your brain shuts down. '
+        'Certain parts of your brain are actually more active during sleep than during the day. '
+        'This is because sleep serves essential functions that cannot happen while you are awake. '
+        'The most fascinating of these is memory consolidation. '
+        'During the day, your brain collects enormous amounts of information from experiences and conversations. '
+        'But this information is stored in a temporary, fragile form. '
+        'During deep sleep, your brain transfers these memories into long-term storage, '
+        'strengthening neural connections and discarding what it considers unimportant. '
+        'This is why students who sleep well after studying consistently outperform those who stay up all night. '
+        'Sleep also plays a vital role in emotional regulation. '
+        'Research shows that sleep-deprived people are significantly more reactive to negative experiences. '
+        'The amygdala, which processes emotions, becomes hyperactive without adequate rest, '
+        'while the prefrontal cortex, responsible for rational decisions, becomes less effective. '
+        'This makes us more anxious, more irritable, and more likely to make poor choices. '
+        'Perhaps most importantly, sleep is when your brain cleans itself. '
+        'A system called the glymphatic system flushes out toxic waste products that build up during the day. '
+        'Without enough sleep, these toxins accumulate and may contribute to cognitive decline over time. '
+        'So how much sleep do you need? For most adults, seven to nine hours is the answer. '
+        'The science is clear. Sleep is not a luxury. It is a biological necessity.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 132,
+    wordCount: 286,
   ),
 
   // ── スポーツ ──
@@ -395,6 +591,39 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_011.mp3',
     durationSeconds: 116,
     wordCount: 289,
+  ),
+
+  // FIXED: スポーツ中級レッスンを追加（各カテゴリ4レッスンに統一）
+  LessonModel(
+    id: 'lesson-023',
+    title: 'Basketball Season Highlights',
+    category: 'スポーツ',
+    difficulty: 2,
+    transcriptText:
+        'What an incredible basketball season it has been. Let us look at this week\'s highlights from across the league. '
+        'In the game of the week, the defending champions faced their toughest test yet, '
+        'traveling to play the league leaders in a sold-out arena. '
+        'The home team came out strong, building an early fifteen-point lead behind outstanding three-point shooting. '
+        'Their star guard was on fire, hitting six threes in the first half alone. '
+        'But the champions showed exactly why they earned that title. '
+        'They mounted a spectacular comeback in the third quarter, outscoring their opponents thirty-eight to twenty-one. '
+        'The key was their defensive intensity, which forced eight turnovers in that period. '
+        'The momentum shift was unmistakable, and the crowd grew quieter as the lead disappeared. '
+        'The fourth quarter was a thrilling back-and-forth battle that kept fans on the edge of their seats. '
+        'With just twelve seconds remaining and the score tied, '
+        'the champions\' veteran point guard drove to the basket, drew a foul, '
+        'and calmly sank both free throws to seal the victory. '
+        'The final score was one hundred twelve to one hundred ten in a game that lived up to every expectation. '
+        'In other news around the league, this year\'s rookie class continues to impress. '
+        'The number one draft pick recorded his fifth triple-double of the season on Tuesday, '
+        'joining an exclusive list of players to reach that milestone before turning twenty-one. '
+        'His combination of speed, vision, and scoring ability has drawn comparisons to some of the all-time greats. '
+        'Coaches and analysts agree that we are watching the emergence of a generational talent. '
+        'Looking ahead to next week, all eyes will be on Friday\'s matchup '
+        'between the top two teams in the eastern conference. It promises to be another classic.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 130,
+    wordCount: 281,
   ),
 
   // ── 時事ネタ ──
@@ -486,5 +715,41 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_014.mp3',
     durationSeconds: 108,
     wordCount: 270,
+  ),
+  // FIXED: 時事ネタ中級レッスンを追加（各カテゴリ4レッスンに統一）
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Renewable Energy Revolution',
+    category: '時事ネタ',
+    difficulty: 2,
+    transcriptText:
+        'The global shift toward renewable energy is accelerating faster than anyone predicted a decade ago. '
+        'New data released this week shows that solar and wind power now account for thirty percent of electricity worldwide, '
+        'a milestone that experts had not expected to reach until twenty thirty-five. '
+        'This rapid growth has been driven by dramatic cost reductions in renewable technology. '
+        'Solar panel prices have fallen by nearly ninety percent over the past fifteen years, '
+        'making them competitive with or cheaper than fossil fuels in most regions. '
+        'Several countries are leading the way. '
+        'Norway generates almost all of its electricity from renewable sources, primarily hydropower. '
+        'Denmark gets more than half its energy from wind turbines. '
+        'On particularly windy days, the country produces more electricity than it can use. '
+        'Developing nations are also making impressive progress. '
+        'India has installed more solar capacity in the past three years than any other country, '
+        'driven by ambitious government targets and falling costs. '
+        'Morocco has built one of the world\'s largest solar farms in the Sahara Desert, '
+        'providing clean energy to over two million households. '
+        'However, significant challenges remain. '
+        'The intermittent nature of solar and wind means that energy storage is essential for a reliable supply. '
+        'Battery technology is improving, but large-scale storage remains expensive to build. '
+        'Grid infrastructure in many countries needs major upgrades to handle variable output from renewables. '
+        'The transition also raises questions about jobs in traditional energy sectors. '
+        'While renewable industries are creating millions of new positions, '
+        'workers in coal and oil communities need retraining programs to make the switch. '
+        'Despite these challenges, momentum behind clean energy appears unstoppable. '
+        'Investment reached a record four hundred billion dollars last year. '
+        'The question is no longer whether the world will go renewable, but how quickly.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 129,
+    wordCount: 278,
   ),
 ];
