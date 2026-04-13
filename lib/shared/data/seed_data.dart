@@ -92,6 +92,38 @@ const seedLessons = [
     wordCount: 277,
   ),
 
+  LessonModel(
+    id: 'lesson-021',
+    title: 'Education Reform Update',
+    category: 'ニュース',
+    difficulty: 2,
+    transcriptText:
+        'In education news today, the government has unveiled a comprehensive reform plan '
+        'that aims to transform how children learn in schools across the country. '
+        'The new policy introduces coding and digital literacy as mandatory subjects starting from elementary school. '
+        'Education minister Claire Johnson told reporters that these changes are essential '
+        'for preparing the next generation for an increasingly digital world. '
+        'Under the new plan, schools will receive additional funding to upgrade their technology infrastructure and hire specialized teachers. '
+        'The government has allocated five billion dollars over the next three years to support the transition. '
+        'Teachers unions have expressed mixed reactions to the announcement. '
+        'While they support the idea of modernizing education, they worry about the timeline and the burden it places on already overworked educators. '
+        'A spokesperson for the National Teachers Association said that proper training must come before implementation. '
+        'The reform also includes changes to how students are assessed. '
+        'Traditional written exams will be supplemented with project-based evaluations that test critical thinking and collaboration skills. '
+        'Parents groups have largely welcomed the shift, saying it better reflects the skills children will need in the real world. '
+        'However, some education experts caution that the transition needs to be handled carefully. '
+        'Moving too quickly could create inequality between schools that are well-resourced and those that are not. '
+        'Rural schools in particular may struggle to recruit qualified technology teachers. '
+        'The ministry has acknowledged this concern and announced a remote teaching initiative '
+        'that will connect students in rural areas with instructors in major cities through video conferencing. '
+        'Pilot programs are expected to begin in September, with full rollout planned for the following academic year. '
+        'International observers have praised the ambition of the plan, '
+        'noting that few countries have attempted reforms of this scale and scope.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 128,
+    wordCount: 277,
+  ),
+
   // ── ビジネス ──
 
   LessonModel(
@@ -187,6 +219,38 @@ const seedLessons = [
     wordCount: 277,
   ),
 
+  LessonModel(
+    id: 'lesson-022',
+    title: 'Customer Service Training',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Welcome to today\'s customer service training session. '
+        'Whether you are new to the team or have been with us for years, these skills are important for everyone. '
+        'Good customer service is the foundation of our business. It is what keeps customers coming back. '
+        'Let me start with the most important principle. Always listen carefully to what the customer is saying. '
+        'Many problems can be solved simply by giving the customer your full attention and showing that you understand their concern. '
+        'When a customer contacts us with a problem, the first thing you should do is greet them warmly and ask how you can help. '
+        'Use their name if you know it. This small gesture makes people feel valued and respected. '
+        'Next, let the customer explain their issue completely before you respond. '
+        'Do not interrupt, even if you think you already know the answer. '
+        'People want to feel heard, and giving them space to talk builds trust. '
+        'Once you understand the problem, repeat it back to the customer in your own words. '
+        'This shows that you were listening and helps avoid any misunderstandings. '
+        'Then, explain what you can do to help. Be honest about what is possible and what is not. '
+        'Customers appreciate honesty far more than empty promises. '
+        'If you cannot solve the problem right away, tell the customer exactly what steps you will take and when they can expect a resolution. '
+        'Always follow up. If you promised to call back by three o\'clock, call back by three o\'clock. '
+        'Keeping your word is one of the easiest ways to build customer loyalty. '
+        'Finally, end every interaction on a positive note. '
+        'Thank the customer for their patience and ask if there is anything else you can help with. '
+        'A friendly closing leaves a lasting impression. '
+        'Remember, every customer interaction is an opportunity to strengthen our reputation.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 168,
+    wordCount: 280,
+  ),
+
   // ── 日常会話 ──
 
   LessonModel(
@@ -243,6 +307,70 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_005.mp3',
     durationSeconds: 156,
     wordCount: 260,
+  ),
+
+  LessonModel(
+    id: 'lesson-017',
+    title: 'At the Doctor\'s Office',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Good afternoon. I have an appointment with Doctor Williams at two thirty. '
+        'My name is Sarah Thompson. I called yesterday about a persistent cough. '
+        'Thank you, I\'ll take a seat in the waiting area. '
+        'Oh, the doctor is ready to see me now? That was quick. '
+        'Hello Doctor Williams. I\'ve been having this cough for about two weeks now. '
+        'It started as a mild tickle in my throat, but it has gotten worse over the past few days. '
+        'I also feel quite tired during the day, even though I am sleeping well at night. '
+        'No, I do not have a fever. I have been checking my temperature regularly. '
+        'But I do sometimes feel a bit of pressure in my chest when I cough. '
+        'I have not been taking any medication. I wanted to get your advice first. '
+        'I did try some herbal tea with honey, and it helped a little bit, but only temporarily. '
+        'My work has been quite stressful lately, and I have been spending long hours in an air-conditioned office. '
+        'Could that be related? I see, dry air can irritate the throat. That makes sense. '
+        'Should I be worried about anything more serious? I appreciate you being thorough. '
+        'A chest X-ray? Yes, I think that would give me peace of mind. '
+        'Is there a laboratory here in the building, or do I need to go somewhere else? '
+        'The pharmacy next door has everything I need? That is very convenient. '
+        'How often should I take the medicine? Twice a day after meals? Got it. '
+        'And should I come back for a follow-up appointment? '
+        'Next week at the same time works perfectly for me. '
+        'Thank you so much, Doctor Williams. I feel much better just knowing what is going on.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 131,
+    wordCount: 284,
+  ),
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'I\'m looking for a one-bedroom apartment, preferably in the downtown area near public transportation. '
+        'My budget is around fifteen hundred dollars a month, including utilities if possible. '
+        'Could you show me what\'s available? This first place looks interesting on the listing. '
+        'The kitchen seems a bit small though. Is there any storage space? '
+        'A walk-in closet would be great. And what floor is this unit on? '
+        'The fifth floor with an elevator? Perfect. I\'ve had bad experiences with walk-up apartments before. '
+        'What about laundry facilities? In-unit washer and dryer? That\'s a huge plus. '
+        'I\'ve been living in a place where I had to go to the basement every time I needed to do laundry. '
+        'Let me ask about the neighborhood. Are there grocery stores within walking distance? '
+        'A supermarket just two blocks away? And what about restaurants and cafes? '
+        'That sounds wonderful. I really value being able to walk to get my daily essentials. '
+        'Now, regarding the lease terms, is it a twelve-month lease or is there flexibility? '
+        'I might need to relocate for work in about eight months, so a shorter lease would be ideal. '
+        'A ten-month option with a slight increase in rent? Let me think about that. '
+        'What about pets? I have a small cat. She\'s very well-behaved and stays indoors. '
+        'There\'s a pet deposit of three hundred dollars? That\'s reasonable. '
+        'One more thing, how\'s the noise level? I work from home two days a week, '
+        'so I need a quiet environment during business hours. '
+        'The building has thick walls and double-glazed windows? That\'s exactly what I need. '
+        'Could I take some photos to show my partner? We\'ll need to discuss it tonight. '
+        'I\'m very interested though. When is the earliest move-in date? '
+        'The first of next month? That lines up perfectly with my current lease ending.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 116,
+    wordCount: 290,
   ),
 
   // ── TEDスタイル ──
@@ -307,6 +435,69 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_008.mp3',
     durationSeconds: 117,
     wordCount: 292,
+  ),
+
+  LessonModel(
+    id: 'lesson-019',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'Today I want to talk about something we all do but rarely think about. Sleep. '
+        'We spend roughly one third of our lives sleeping, yet most of us know very little about why we need it. '
+        'The truth is, sleep is one of the most powerful tools we have for improving our health, our mood, and our ability to think clearly. '
+        'When you sleep, your brain is not simply resting. It is actually incredibly active. '
+        'During the night, your brain processes the information you gathered during the day. '
+        'It sorts through your memories, deciding which ones to keep and which ones to discard. '
+        'This is why a good night of sleep can help you remember things you studied the day before. '
+        'But that is not all. While you sleep, your body repairs itself. '
+        'Your muscles grow, your tissues heal, and your immune system gets stronger. '
+        'People who regularly get enough sleep are less likely to get sick compared to those who do not. '
+        'So how much sleep do we actually need? For most adults, the answer is between seven and nine hours per night. '
+        'However, studies show that more than a third of adults are not getting enough sleep on a regular basis. '
+        'The consequences of sleep deprivation are serious. '
+        'Lack of sleep affects your concentration, your reaction time, and your emotional stability. '
+        'It can also increase your risk of heart disease, obesity, and depression over the long term. '
+        'The good news is that improving your sleep does not require expensive equipment or complicated routines. '
+        'Simple changes like keeping a consistent bedtime, avoiding screens before bed, '
+        'and making your room dark and cool can make a big difference. '
+        'Start tonight. Your brain and your body will thank you for it.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 162,
+    wordCount: 270,
+  ),
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: Digital Minimalism',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'How many times have you picked up your phone today without thinking about it? '
+        'If you are like the average person, the answer is somewhere between eighty and one hundred times. '
+        'That number might shock you, but it reveals something important about the relationship we have with our devices. '
+        'We have become so dependent on technology that we rarely question whether it is actually making our lives better. '
+        'I am not suggesting that technology is bad. Far from it. '
+        'The internet has given us access to more information and connection than any generation before us. '
+        'But there is a difference between using technology intentionally and letting technology use us. '
+        'This is where the concept of digital minimalism comes in. '
+        'Digital minimalism is not about giving up your phone or deleting all your apps. '
+        'It is about being deliberate with how you spend your attention. '
+        'Because attention, not time, is our most valuable resource. '
+        'Every notification that pulls your focus away from a meaningful conversation costs you something real. '
+        'Every hour spent mindlessly scrolling through content you will not remember tomorrow is an hour you cannot get back. '
+        'The pioneers of digital minimalism suggest a simple exercise. '
+        'Take thirty days and strip your digital life down to the essentials. '
+        'Keep only the tools and apps that directly support something you deeply value. '
+        'After thirty days, slowly add things back one at a time, and notice how each addition makes you feel. '
+        'Most people who try this experiment report something surprising. '
+        'They discover that they do not miss most of the things they removed. '
+        'Instead, they feel calmer, more focused, and more present in their daily lives. '
+        'The goal is not perfection. The goal is awareness. '
+        'Once you see how your digital habits affect your wellbeing, '
+        'you can make informed choices about what deserves your attention and what does not.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 132,
+    wordCount: 285,
   ),
 
   // ── スポーツ ──
@@ -395,6 +586,38 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_011.mp3',
     durationSeconds: 116,
     wordCount: 289,
+  ),
+
+  LessonModel(
+    id: 'lesson-023',
+    title: 'Marathon Running Guide',
+    category: 'スポーツ',
+    difficulty: 2,
+    transcriptText:
+        'Training for a marathon is one of the most challenging and rewarding experiences a person can undertake. '
+        'Whether you are a beginner or an experienced runner, proper preparation is the key to crossing that finish line. '
+        'The most important rule of marathon training is to increase your distance gradually. '
+        'Many new runners make the mistake of doing too much too soon, which almost always leads to injury. '
+        'A good training plan typically spans sixteen to twenty weeks, with mileage increasing by no more than ten percent each week. '
+        'Your weekly schedule should include a mix of different types of runs. '
+        'Easy runs at a comfortable pace should make up the majority of your training. '
+        'These build your aerobic base without putting too much stress on your body. '
+        'Once a week, include a longer run that gradually builds up to around thirty-two kilometers. '
+        'These long runs teach your body to use fuel efficiently and prepare your mind for the mental challenge of race day. '
+        'Interval training is another important component. '
+        'Short bursts of faster running followed by recovery periods help improve your speed and cardiovascular fitness. '
+        'However, do not overdo these sessions. One or two interval workouts per week is enough for most runners. '
+        'Nutrition plays an equally important role in marathon training. '
+        'You need to fuel your body with the right foods before, during, and after each run. '
+        'Complex carbohydrates like whole grains and pasta provide sustained energy, '
+        'while protein helps repair your muscles after hard efforts. '
+        'Staying hydrated is also critical, especially during those longer weekend runs. '
+        'Rest days are not optional. Your body needs time to recover and rebuild. '
+        'Skipping rest days might seem productive, but it actually slows your progress and increases the risk of overuse injuries. '
+        'Trust the process, stay consistent, and on race day, you will be ready to achieve something extraordinary.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 131,
+    wordCount: 284,
   ),
 
   // ── 時事ネタ ──
@@ -486,5 +709,37 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_014.mp3',
     durationSeconds: 108,
     wordCount: 270,
+  ),
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Healthy Eating Trends',
+    category: '時事ネタ',
+    difficulty: 1,
+    transcriptText:
+        'The way people think about food is changing in a big way. '
+        'More and more people around the world are paying attention to what they eat and how it affects their health. '
+        'This growing interest in healthy eating is creating new trends in the food industry. '
+        'One of the biggest changes in recent years is the rise of plant-based diets. '
+        'Many people are choosing to eat less meat and more vegetables, fruits, and grains. '
+        'Some do this for health reasons, while others are motivated by concerns about the environment. '
+        'Plant-based alternatives to meat and dairy products have improved dramatically in both taste and availability. '
+        'You can now find plant-based burgers, milk, cheese, and even ice cream in most supermarkets. '
+        'Another important trend is the focus on whole foods and natural ingredients. '
+        'Consumers are reading labels more carefully and looking for products with simple, recognizable ingredients. '
+        'They want to know where their food comes from and how it was produced. '
+        'This has led to an increase in demand for organic and locally grown produce. '
+        'Farmers markets have become more popular in many communities as people seek out fresh, seasonal food. '
+        'Meal preparation, often called meal prep, has also become a widespread practice. '
+        'People cook large batches of food on weekends and store them for the week ahead. '
+        'This saves time, reduces waste, and makes it easier to eat healthy meals during busy weekdays. '
+        'Many websites and social media channels now share simple meal prep ideas for people who are just getting started. '
+        'Health experts agree that these trends are moving in a positive direction. '
+        'Eating a balanced diet rich in vegetables, fruits, whole grains, and lean proteins '
+        'can reduce the risk of many common diseases. '
+        'Small changes in daily eating habits can lead to big improvements in overall health over time. '
+        'The key is to find an approach that is enjoyable and sustainable for the long term.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 171,
+    wordCount: 285,
   ),
 ];

@@ -13,6 +13,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **Audio:** flutter_tts (TTS再生) + record (録音) + just_audio (音声再生)
 - **Charts:** fl_chart
 - **Data Models:** Freezed + json_serializable
+- **Notifications:** flutter_local_notifications + timezone
 - **API Key 管理:** `--dart-define=OPENAI_API_KEY=xxx` (ビルド時注入)
 
 ## 3. Current Milestones
@@ -27,6 +28,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase I: Release準備 - About画面 & Settings強化
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
+- [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase M: レッスンコンテンツ拡充 (16→24レッスン、全カテゴリ均等4レッスン化、難易度分布改善)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -36,8 +39,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 4. App Store / Google Play メタデータ準備
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
-7. ローカル通知によるリマインダー機能
-8. 追加レッスンコンテンツ拡充
+7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
+8. ~~追加レッスンコンテンツ拡充~~ → Phase M で実装済み (24レッスン)
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -54,24 +57,30 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
-| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、データリセット、About・ライセンスへのリンク |
+| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、**練習リマインダー通知**、データリセット、About・ライセンスへのリンク |
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
-- **16レッスン** (各約250-320語)
-- **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
+- **24レッスン** (各約250-320語)
+- **カテゴリ:** ニュース(4)、ビジネス(4)、日常会話(4)、TEDスタイル(4)、スポーツ(4)、時事ネタ(4)
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-07)
-- ライブラリ画面強化 (Phase K)
-  - `lesson_provider.dart`: `LessonSortType` enum追加、`bookmarkFilterProvider` / `lessonSortProvider` / `lessonPracticeCountProvider` 追加、`filteredLessonsProvider` にソート・ブックマークフィルタロジック追加
-  - `library_screen.dart`: ソートドロップダウン追加、ブックマークフィルタチップ追加、レッスンカードに練習回数バッジ追加、ブックマークフィルタ時の空状態メッセージ改善
-- Home画面お気に入りセクション追加
-  - `home_provider.dart`: bookmarkedLessonsProvider 追加
-  - `home_screen.dart`: お気に入りレッスン横スクロールセクション追加
+## 8. 本日完了したタスク (2026-04-13)
+- レッスンコンテンツ拡充 (Phase M)
+  - 8レッスン追加 (lesson-017 ~ lesson-024)
+  - lesson-017: 日常会話 中級 "At the Doctor's Office" (284語)
+  - lesson-018: 日常会話 上級 "Apartment Hunting" (290語)
+  - lesson-019: TEDスタイル 初級 "The Science of Sleep" (270語)
+  - lesson-020: TEDスタイル 中級 "Digital Minimalism" (285語)
+  - lesson-021: ニュース 中級 "Education Reform Update" (277語)
+  - lesson-022: ビジネス 初級 "Customer Service Training" (280語)
+  - lesson-023: スポーツ 中級 "Marathon Running Guide" (284語)
+  - lesson-024: 時事ネタ 初級 "Healthy Eating Trends" (285語)
+  - 全カテゴリが4レッスンずつ均等に（16→24レッスン）
+  - 日常会話に中級・上級、TEDスタイルに初級・中級、ビジネスに初級を補完
 
 ## 9. Handover Note for Next Run
-Phase A-K まで全て完了。ライブラリ画面にソート機能（デフォルト/難易度順/スコア順/最近の練習）、ブックマークフィルタ、練習回数バッジを追加済み。Home画面にお気に入りレッスン横スクロールセクションを追加済み。
+Phase A-M まで全て完了。レッスンコンテンツを24レッスンに拡充済み（全6カテゴリ×4レッスン）。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)
