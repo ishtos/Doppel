@@ -186,6 +186,35 @@ const seedLessons = [
     durationSeconds: 111,
     wordCount: 277,
   ),
+  LessonModel(
+    id: 'lesson-017',
+    title: 'Self-Introduction at Work',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Good morning everyone. My name is Sarah, and I am the new marketing assistant. '
+        'I am very happy to be here today. Let me tell you a little bit about myself. '
+        'I studied business at university for four years. During my time there, I learned about marketing, finance, and management. '
+        'I also joined an international exchange program for one semester, which was a wonderful experience. '
+        'After graduating, I worked at a small advertising company for two years. '
+        'I helped create social media campaigns for local businesses. '
+        'It was a great place to start my career because I got to try many different things. '
+        'I learned how to write press releases, design simple graphics, and communicate with clients. '
+        'I decided to join this company because I want to grow my skills in digital marketing. '
+        'I have always admired the work this team does, and I am excited to contribute to future projects. '
+        'In my free time, I enjoy reading business books and listening to marketing podcasts. '
+        'I also like running in the park and cooking new recipes at home. '
+        'On weekends, I often visit new restaurants with my friends. We love trying food from different countries. '
+        'I believe that good teamwork is very important in any workplace. '
+        'I always try to be a reliable team member and finish my tasks on time. '
+        'If you ever need any help with anything, please do not hesitate to ask me. '
+        'I am still learning many things, so I also hope to receive your guidance and support along the way. '
+        'I am really looking forward to working with all of you and learning from this experienced team. '
+        'Thank you very much for listening to my introduction today.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 159,
+    wordCount: 265,
+  ),
 
   // ── 日常会話 ──
 
@@ -243,6 +272,60 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_005.mp3',
     durationSeconds: 156,
     wordCount: 260,
+  ),
+
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Planning a Weekend Trip',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hey, are you free this weekend? I was thinking we could take a short trip somewhere nice. '
+        'I have been working so hard lately and I really need a break. How about you? '
+        'I was looking at a few options online last night. There is a beautiful lake town about two hours from here by train. '
+        'The reviews say the scenery is amazing, especially in spring. They have hiking trails, a local market, and some great seafood restaurants. '
+        'Or we could go to that mountain resort my colleague told me about. It is a bit further away, maybe three hours by car, '
+        'but they have hot springs and the views from the top are supposed to be incredible. '
+        'What do you think? Do you have a preference? '
+        'If we go to the lake town, we should probably book a hotel soon because it gets busy on weekends. '
+        'I found a nice place with good ratings for about eighty dollars a night. It includes breakfast and is within walking distance of the lake. '
+        'We would need to catch the nine o\'clock train on Saturday morning to get there before lunch. '
+        'That way we would have the whole afternoon to explore the town and maybe take a boat ride. '
+        'On Sunday, we could wake up early, do a short hike, grab lunch at the local market, and then head back in the evening. '
+        'I think we should pack light. Just bring comfortable shoes, a jacket, and maybe a camera. '
+        'The weather forecast says it will be sunny but a little cool in the morning. '
+        'Oh, and we should definitely try the famous fish soup they make in that area. '
+        'Everyone says it is the best thing on the menu. So what do you say? Are you in?',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 127,
+    wordCount: 275,
+  ),
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Cultural Exchange Discussion',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'I have been living abroad for about three years now, and the experience has completely changed the way I see the world. '
+        'When I first arrived, everything felt unfamiliar and sometimes overwhelming. '
+        'The language barrier was the hardest part. Even simple tasks like grocery shopping or asking for directions felt like huge challenges. '
+        'But gradually, as I picked up the language and made local friends, I started to understand the culture on a much deeper level. '
+        'One thing that really surprised me was how differently people communicate in this country compared to where I grew up. '
+        'Back home, we tend to be very direct in our conversations. If we disagree with someone, we say so openly and expect others to do the same. '
+        'But here, communication is much more indirect. People often hint at what they mean rather than stating it outright, '
+        'and you have to read between the lines to understand the true message. '
+        'At first, I found this frustrating because I would often misread situations and accidentally offend people without realizing it. '
+        'Over time, though, I have come to appreciate this style of communication. '
+        'There is a certain elegance to it, and it reflects a deep respect for maintaining harmony in relationships. '
+        'Another fascinating difference is the concept of personal space and privacy. '
+        'In my home country, it is perfectly normal to ask someone about their salary or age, but here those topics are considered quite personal. '
+        'On the other hand, people here are incredibly generous with their time and hospitality. '
+        'Neighbors bring food when you move in, and colleagues always make sure you feel included at social events. '
+        'Living in another culture has taught me that there is rarely one right way to do things. '
+        'Most of our habits and values are shaped by the environment we grow up in, not by some universal truth.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 114,
+    wordCount: 285,
   ),
 
   // ── TEDスタイル ──
@@ -307,6 +390,63 @@ const seedLessons = [
     audioAssetPath: 'assets/audio/lesson_008.mp3',
     durationSeconds: 117,
     wordCount: 292,
+  ),
+
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: Small Steps, Big Change',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'Today I want to talk about something very simple but very powerful. Small steps. '
+        'We all have big dreams. Maybe you want to learn a new language, start a business, or get healthier. '
+        'These goals can feel very far away. Sometimes they feel so big that we do not even try to start. '
+        'But here is the secret. You do not need to change everything at once. You just need to take one small step today. '
+        'Let me share a story with you. A few years ago, I wanted to start running. '
+        'I had never been a runner before. The idea of running five kilometers seemed impossible to me. '
+        'So instead of trying to run five kilometers on day one, I started with just five minutes. '
+        'Every morning, I put on my running shoes and walked out the door. Some days I ran. Some days I just walked. '
+        'But every single day, I showed up. After one month, I could run for fifteen minutes without stopping. '
+        'After three months, I finished my first five kilometer race. '
+        'The key was not willpower or talent. The key was making the first step so small that I could not say no. '
+        'Scientists call this idea the power of tiny habits. When you make a change very small, your brain does not resist it. '
+        'You do not feel scared or tired. You just do it. And over time, these tiny actions add up to amazing results. '
+        'So here is my challenge to you today. Think of one goal that matters to you. '
+        'Now think of the smallest possible step you can take toward that goal. Maybe it is reading one page of a book. '
+        'Maybe it is drinking one glass of water in the morning. Whatever it is, start there. '
+        'Because the journey of a thousand miles truly does begin with a single step.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 162,
+    wordCount: 270,
+  ),
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'How many of you got a full eight hours of sleep last night? '
+        'If your hand is not raised, you are not alone. Studies show that nearly one third of adults worldwide are chronically sleep deprived. '
+        'And the consequences are far more serious than just feeling tired the next day. '
+        'Sleep is not a luxury. It is a biological necessity that affects every single system in your body. '
+        'During sleep, your brain performs a remarkable cleaning process. '
+        'A system called the glymphatic system flushes out toxic waste products that accumulate during your waking hours. '
+        'When you do not get enough sleep, this waste builds up, and over time, it increases the risk of neurological disorders. '
+        'But the effects go beyond your brain. Sleep deprivation weakens your immune system, '
+        'making you more vulnerable to infections and chronic diseases. '
+        'It disrupts the hormones that regulate hunger, which is why you crave sugary and fatty foods when you are tired. '
+        'It impairs your judgment, slows your reaction time, and reduces your ability to concentrate. '
+        'In fact, driving after being awake for twenty hours is comparable to driving with a blood alcohol level above the legal limit. '
+        'So what can we do about it? The good news is that sleep science gives us clear, practical solutions. '
+        'First, try to maintain a consistent sleep schedule, even on weekends. Your body\'s internal clock thrives on routine. '
+        'Second, limit your exposure to screens at least one hour before bed. '
+        'The blue light emitted by phones and laptops suppresses melatonin, the hormone that signals your body it is time to sleep. '
+        'Third, keep your bedroom cool, dark, and quiet. The ideal sleeping temperature is around eighteen degrees Celsius. '
+        'These may sound like small changes, but research shows they can dramatically improve both the quality and duration of your sleep. '
+        'Remember, investing in your sleep is investing in every aspect of your health and performance.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 129,
+    wordCount: 280,
   ),
 
   // ── スポーツ ──
