@@ -13,6 +13,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **Audio:** flutter_tts (TTS再生) + record (録音) + just_audio (音声再生)
 - **Charts:** fl_chart
 - **Data Models:** Freezed + json_serializable
+- **Notifications:** flutter_local_notifications + timezone
+- **Release Tools:** flutter_launcher_icons + flutter_native_splash
 - **API Key 管理:** `--dart-define=OPENAI_API_KEY=xxx` (ビルド時注入)
 
 ## 3. Current Milestones
@@ -27,17 +29,18 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase I: Release準備 - About画面 & Settings強化
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
-- [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
+- [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase M: Release準備 - App Icon & Splash Screen & Android署名設定
+- [ ] Release最終準備 (アイコン/スプラッシュ生成実行、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
-1. App icon (1024x1024 PNG) & Splash screen 設定
-2. Android ビルド確認 & リリース署名設定
-3. ~~Privacy policy URL 作成~~ → About画面内にプライバシーポリシー表示を実装済み
+1. ~~App icon (1024x1024 PNG) & Splash screen 設定~~ → Phase M で設定済み
+2. `dart run flutter_launcher_icons` & `dart run flutter_native_splash:create` 実行（Flutter環境で）
+3. Android ビルド確認 (`flutter build apk`) & リリース署名設定（key.properties 実ファイル作成）
 4. App Store / Google Play メタデータ準備
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
-7. ローカル通知によるリマインダー機能
-8. 追加レッスンコンテンツ拡充
+7. 追加レッスンコンテンツ拡充
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -54,7 +57,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
-| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、データリセット、About・ライセンスへのリンク |
+| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、**練習リマインダー通知**、データリセット、About・ライセンスへのリンク |
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
@@ -62,18 +65,24 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-07)
-- ライブラリ画面強化 (Phase K)
-  - `lesson_provider.dart`: `LessonSortType` enum追加、`bookmarkFilterProvider` / `lessonSortProvider` / `lessonPracticeCountProvider` 追加、`filteredLessonsProvider` にソート・ブックマークフィルタロジック追加
-  - `library_screen.dart`: ソートドロップダウン追加、ブックマークフィルタチップ追加、レッスンカードに練習回数バッジ追加、ブックマークフィルタ時の空状態メッセージ改善
-- Home画面お気に入りセクション追加
-  - `home_provider.dart`: bookmarkedLessonsProvider 追加
-  - `home_screen.dart`: お気に入りレッスン横スクロールセクション追加
+## 8. 本日完了したタスク (2026-04-15)
+- Release準備 - App Icon & Splash Screen & Android署名設定 (Phase M)
+  - `assets/icon/app_icon.png`: 1024x1024 アプリアイコン生成（ディープインディゴ背景 + 白い波形デザイン + アンバーアクセント）
+  - `assets/icon/app_icon_foreground.png`: Android Adaptive Icon 前景画像（透過背景）
+  - `flutter_launcher_icons.yaml`: iOS/Android/Web 全プラットフォーム向けアイコン生成設定
+  - `flutter_native_splash.yaml`: ライト/ダークモード対応スプラッシュ画面設定（Android 12+ 対応含む）
+  - `pubspec.yaml`: flutter_launcher_icons ^0.14.3, flutter_native_splash ^2.4.5 追加
+  - `android/app/build.gradle.kts`: release signingConfig 追加（key.properties 読み込み、未設定時debug署名フォールバック）
+  - `android/key.properties.example`: 署名設定テンプレート
 
 ## 9. Handover Note for Next Run
-Phase A-K まで全て完了。ライブラリ画面にソート機能（デフォルト/難易度順/スコア順/最近の練習）、ブックマークフィルタ、練習回数バッジを追加済み。Home画面にお気に入りレッスン横スクロールセクションを追加済み。
-次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
-- Splash screen の設定 (flutter_native_splash)
-- Android ビルド確認 (`flutter build apk`) & リリース署名設定
+Phase A-M まで全て完了。アプリアイコン・スプラッシュ画面の設定ファイルと Android リリース署名設定を追加済み。
+次回は Flutter 環境で以下のコマンドを実行して実際のアセットを生成する:
+```bash
+dart run flutter_launcher_icons     # アイコン生成
+dart run flutter_native_splash:create  # スプラッシュ画面生成
+```
+その後:
+- `android/key.properties` に実際の署名情報を設定
+- `flutter build apk --release` でリリースビルド確認
 - App Store / Google Play メタデータ準備

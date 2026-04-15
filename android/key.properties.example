@@ -1,0 +1,8 @@
+## Android release signing configuration
+## Copy this file to key.properties and fill in your values.
+## NEVER commit key.properties to version control.
+
+storePassword=your-store-password
+keyPassword=your-key-password
+keyAlias=doppel-release
+storeFile=/path/to/your/keystore.jks

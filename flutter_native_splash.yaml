@@ -1,0 +1,24 @@
+flutter_native_splash:
+  # Light mode
+  color: "#F5F5F7"
+  image: "assets/icon/app_icon.png"
+  image_width: 200
+
+  # Dark mode
+  color_dark: "#121212"
+  image_dark: "assets/icon/app_icon.png"
+
+  # --- Android 12+ ---
+  android_12:
+    color: "#F5F5F7"
+    icon_background_color: "#F5F5F7"
+    image: "assets/icon/app_icon.png"
+    image_dark: "assets/icon/app_icon.png"
+    color_dark: "#121212"
+    icon_background_color_dark: "#121212"
+
+  # --- iOS ---
+  ios: true
+
+  # --- Web ---
+  web: true
