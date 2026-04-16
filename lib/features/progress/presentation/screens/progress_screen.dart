@@ -21,6 +21,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final days = _isWeekly ? 7 : 30;
     final scoreHistory = ref.watch(scoreHistoryProvider(days));
     final weakPatterns = ref.watch(weakPatternsProvider);
+    final categoryPerformance = ref.watch(categoryPerformanceProvider); // FIXED: カテゴリ別パフォーマンス追加
 
     // Build chart spots
     final spots = scoreHistory.isEmpty
@@ -105,6 +106,13 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+
+            // FIXED: カテゴリ別パフォーマンスセクション追加
+            _CategoryPerformanceSection(
+              categoryPerformance: categoryPerformance,
+              theme: theme,
             ),
             const SizedBox(height: 20),
 
@@ -297,5 +305,224 @@ class _StatCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// FIXED: カテゴリ別パフォーマンス分析ウィジェット
+class _CategoryPerformanceSection extends StatelessWidget {
+  const _CategoryPerformanceSection({
+    required this.categoryPerformance,
+    required this.theme,
+  });
+
+  final List<CategoryPerformance> categoryPerformance;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.category,
+                    size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text('カテゴリ別スコア', style: theme.textTheme.titleSmall),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (categoryPerformance.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    '練習データがまだありません',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
+            else ...[
+              SizedBox(
+                height: 200, // FIXED: 縦棒グラフなので固定高さに修正
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    maxY: 100,
+                    barTouchData: BarTouchData(
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final perf = categoryPerformance[group.x];
+                          return BarTooltipItem(
+                            '${perf.category}\n${perf.averageScore.round()}点 (${perf.practiceCount}回)',
+                            TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 36,
+                          getTitlesWidget: (value, meta) {
+                            final idx = value.toInt();
+                            if (idx < 0 || idx >= categoryPerformance.length) {
+                              return const SizedBox.shrink();
+                            }
+                            return SideTitleWidget(
+                              meta: meta,
+                              child: Text(
+                                _shortenCategory(
+                                    categoryPerformance[idx].category),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 28,
+                          interval: 50,
+                          getTitlesWidget: (value, meta) {
+                            if (value == 0 || value == 50 || value == 100) {
+                              return Text(
+                                '${value.toInt()}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 10,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
+                      ),
+                      topTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      rightTitles: const AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: 50,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: theme.colorScheme.outlineVariant
+                              .withValues(alpha: 0.3),
+                          strokeWidth: 1,
+                        );
+                      },
+                    ),
+                    borderData: FlBorderData(show: false),
+                    barGroups: categoryPerformance
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                      final idx = entry.key;
+                      final perf = entry.value;
+                      return BarChartGroupData(
+                        x: idx,
+                        barRods: [
+                          BarChartRodData(
+                            toY: perf.averageScore,
+                            color: _barColor(idx, categoryPerformance.length),
+                            width: 20,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(4),
+                              topRight: Radius.circular(4),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Practice count chips
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: categoryPerformance.map((perf) {
+                  return Chip(
+                    avatar: CircleAvatar(
+                      radius: 10,
+                      backgroundColor: theme.colorScheme.primary
+                          .withValues(alpha: 0.15),
+                      child: Text(
+                        '${perf.practiceCount}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    label: Text(
+                      '${perf.category} ${perf.averageScore.round()}点',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    backgroundColor: theme.colorScheme.surface,
+                    side: BorderSide(
+                      color: theme.colorScheme.outlineVariant
+                          .withValues(alpha: 0.5),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _shortenCategory(String category) {
+    switch (category) {
+      case 'ニュース':
+        return 'ニュース';
+      case 'ビジネス':
+        return 'ビジネス';
+      case '日常会話':
+        return '日常';
+      case 'TEDスタイル':
+        return 'TED';
+      case 'スポーツ':
+        return 'スポーツ';
+      case '時事ネタ':
+        return '時事';
+      default:
+        return category;
+    }
+  }
+
+  Color _barColor(int index, int total) {
+    if (total <= 1) return theme.colorScheme.primary;
+    if (index == 0) return theme.colorScheme.tertiary; // Best category
+    if (index == total - 1) return theme.colorScheme.error; // Weakest category
+    return theme.colorScheme.primary;
   }
 }
