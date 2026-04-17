@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../progress/presentation/providers/achievement_provider.dart';
 import '../providers/home_provider.dart';
 import '../../../../shared/utils/score_utils.dart';
 
@@ -183,6 +184,10 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+              const SizedBox(height: 24),
+
+              // Achievement Summary
+              _AchievementBanner(theme: theme),
               const SizedBox(height: 24),
 
               // Improvement Points
@@ -442,6 +447,72 @@ class _ImprovementPointsSection extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _AchievementBanner extends ConsumerWidget {
+  const _AchievementBanner({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final achievements = ref.watch(achievementsProvider);
+    final unlockedCount = ref.watch(unlockedCountProvider);
+
+    if (unlockedCount == 0) return const SizedBox.shrink();
+
+    final nextLocked = achievements.where((a) => !a.isUnlocked).firstOrNull;
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.go('/achievements'),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor:
+                    theme.colorScheme.secondary.withValues(alpha: 0.15),
+                child: Icon(
+                  Icons.emoji_events,
+                  color: theme.colorScheme.secondary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '実績 $unlockedCount/${achievements.length}',
+                      style: theme.textTheme.titleSmall,
+                    ),
+                    if (nextLocked != null)
+                      Text(
+                        '次: ${nextLocked.definition.title}（${nextLocked.progressLabel}）',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

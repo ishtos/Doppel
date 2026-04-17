@@ -1,7 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../shared/data/achievements.dart';
+import '../providers/achievement_provider.dart';
 import '../providers/progress_provider.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
@@ -21,6 +24,8 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final days = _isWeekly ? 7 : 30;
     final scoreHistory = ref.watch(scoreHistoryProvider(days));
     final weakPatterns = ref.watch(weakPatternsProvider);
+    final achievements = ref.watch(achievementsProvider);
+    final unlockedCount = ref.watch(unlockedCountProvider);
 
     // Build chart spots
     final spots = scoreHistory.isEmpty
@@ -207,6 +212,14 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Achievements summary
+            _AchievementsSummary(
+              achievements: achievements,
+              unlockedCount: unlockedCount,
+              theme: theme,
+            ),
+            const SizedBox(height: 20),
+
             // Weekly review
             Card(
               color:
@@ -294,6 +307,102 @@ class _StatCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AchievementsSummary extends StatelessWidget {
+  const _AchievementsSummary({
+    required this.achievements,
+    required this.unlockedCount,
+    required this.theme,
+  });
+
+  final List<AchievementStatus> achievements;
+  final int unlockedCount;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final recentUnlocked =
+        achievements.where((a) => a.isUnlocked).take(3).toList();
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push('/achievements'),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.emoji_events,
+                    size: 20,
+                    color: theme.colorScheme.secondary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text('実績', style: theme.textTheme.titleSmall),
+                  const Spacer(),
+                  Text(
+                    '$unlockedCount/${achievements.length}',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: achievements.isEmpty
+                      ? 0.0
+                      : unlockedCount / achievements.length,
+                  minHeight: 6,
+                  color: theme.colorScheme.secondary,
+                  backgroundColor:
+                      theme.colorScheme.secondary.withValues(alpha: 0.15),
+                ),
+              ),
+              if (recentUnlocked.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: recentUnlocked.map((a) {
+                    return Chip(
+                      avatar: Icon(
+                        a.definition.icon,
+                        size: 16,
+                        color: theme.colorScheme.secondary,
+                      ),
+                      label: Text(
+                        a.definition.title,
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      backgroundColor:
+                          theme.colorScheme.secondary.withValues(alpha: 0.1),
+                      side: BorderSide.none,
+                      visualDensity: VisualDensity.compact,
+                    );
+                  }).toList(),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/lesson/presentation/screens/lesson_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart'; // FIXED: オンボーディング画面import追加
+import '../features/progress/presentation/screens/achievement_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/settings/presentation/screens/about_screen.dart'; // FIXED: About画面import追加
 import '../features/settings/presentation/screens/settings_screen.dart';
@@ -89,6 +90,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/achievements',
+        builder: (context, state) => const AchievementScreen(),
       ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
