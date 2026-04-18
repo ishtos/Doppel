@@ -5,6 +5,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
+import 'features/splash/presentation/screens/splash_screen.dart';
 import 'shared/data/seed_data.dart';
 import 'shared/services/notification_service.dart';
 
@@ -30,11 +31,18 @@ Future<void> main() async {
   runApp(const ProviderScope(child: DoppelApp()));
 }
 
-class DoppelApp extends ConsumerWidget {
+class DoppelApp extends ConsumerStatefulWidget {
   const DoppelApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DoppelApp> createState() => _DoppelAppState();
+}
+
+class _DoppelAppState extends ConsumerState<DoppelApp> {
+  bool _showSplash = true;
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(settingsProvider.select((s) => s.themeMode));
 
@@ -45,6 +53,19 @@ class DoppelApp extends ConsumerWidget {
       darkTheme: AppTheme.dark(),
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child!,
+            if (_showSplash)
+              Positioned.fill(
+                child: SplashOverlay(
+                  onComplete: () => setState(() => _showSplash = false),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
