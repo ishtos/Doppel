@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/progress_provider.dart';
+import '../widgets/streak_calendar.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -106,6 +107,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // FIXED: 練習ストリークカレンダー追加
+            const StreakCalendar(),
             const SizedBox(height: 20),
 
             // Weak points

@@ -2,6 +2,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import '../../../feedback/data/models/feedback_model.dart';
 import '../../../../shared/utils/hive_utils.dart'; // FIXED: deepCast を共通ユーティリティから参照
+import '../models/day_activity.dart';
 import '../models/user_progress_model.dart';
 
 class ProgressRepository {
@@ -76,6 +77,30 @@ class ProgressRepository {
         .where((f) => f.createdAt.isAfter(cutoff))
         .toList()
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
+
+  // FIXED: 月間カレンダー用の日別アクティビティを集計
+  Map<DateTime, DayActivity> getMonthlyActivity(int year, int month) {
+    final grouped = <DateTime, List<FeedbackModel>>{};
+
+    for (final raw in feedbackBox.values) {
+      final fb = FeedbackModel.fromJson(deepCast(raw));
+      final date = DateTime(
+          fb.createdAt.year, fb.createdAt.month, fb.createdAt.day);
+      if (date.year == year && date.month == month) {
+        grouped.putIfAbsent(date, () => []).add(fb);
+      }
+    }
+
+    return grouped.map((date, fbs) {
+      final scores = fbs.map((f) => f.overallScore);
+      final avg = scores.reduce((a, b) => a + b) / fbs.length;
+      final best = scores.reduce((a, b) => a > b ? a : b);
+      return MapEntry(
+        date,
+        DayActivity(practiceCount: fbs.length, avgScore: avg, bestScore: best),
+      );
+    });
   }
 
   /// Analyze weak pronunciation patterns from recent feedback.
