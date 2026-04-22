@@ -29,11 +29,12 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
-- [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
+- [x] Phase M: スプラッシュ画面 & リリースビルド基盤設定
+- [ ] Release準備 残り (アセット画像配置、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
-1. App icon (1024x1024 PNG) & Splash screen 設定
-2. Android ビルド確認 & リリース署名設定
+1. ~~App icon (1024x1024 PNG) & Splash screen 設定~~ → Phase M で設定完了、画像アセット配置のみ残り
+2. ~~Android ビルド確認 & リリース署名設定~~ → Phase M で build.gradle.kts 署名設定完了、key.properties 作成のみ残り
 3. ~~Privacy policy URL 作成~~ → About画面内にプライバシーポリシー表示を実装済み
 4. App Store / Google Play メタデータ準備
 5. Flutter DevTools でメモリリーク検証
@@ -50,13 +51,14 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 
 | 画面 | ルート | 主な機能 |
 |------|--------|----------|
+| Splash | `/splash` | アニメーション付きブランドスプラッシュ（ダークモード対応） |
 | Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
 | Home | `/home` | 挨拶、デイリー目標進捗、お気に入りレッスン、今日のレッスン、週間統計、改善ポイント、最近の練習 |
-| Library | `/library` | カテゴリ/難易度フィルタ、**ソート(4種)、ブックマークフィルタ、練習回数バッジ**、検索、WPMバッジ、スコアバッジ |
+| Library | `/library` | カテゴリ/難易度フィルタ、ソート(4種)、ブックマークフィルタ、練習回数バッジ、検索、WPMバッジ、スコアバッジ |
 | Lesson | `/lesson/:id` | TTS再生、速度調整、録音/キャンセル、テキスト非表示トグル、波形アニメ |
 | Feedback | `/feedback/:id` | スコア表示、テキスト比較 (diffハイライト)、録音再生、AIコーチ (リトライ対応) |
 | Progress | `/progress` | スコア推移グラフ、弱点分析、統計 |
-| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、**練習リマインダー通知**、データリセット、About・ライセンスへのリンク |
+| Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、練習リマインダー通知、データリセット、About・ライセンスへのリンク |
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
@@ -64,19 +66,22 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-04-22)
+- スプラッシュ画面 & リリースビルド基盤設定 (Phase M)
+  - `splash_screen.dart`: アニメーション付きブランドスプラッシュ画面（フェードイン + スケール + スライド）、ダークモード対応
+  - `router.dart`: `/splash` ルート追加、initialLocation を `/splash` に変更
+  - `pubspec.yaml`: flutter_native_splash ^2.4.4 / flutter_launcher_icons ^0.14.3 追加、設定セクション追加、assets ディレクトリ登録
+  - `build.gradle.kts`: リリース署名設定（key.properties 読み込み）、R8 minify / shrinkResources 有効化、ProGuard設定
+  - `proguard-rules.pro`: Flutter用ProGuardルール作成
+  - `key.properties.example`: リリース署名テンプレート作成
+  - `assets/icon/` & `assets/splash/`: ディレクトリ構造 + README 作成
+  - `AndroidManifest.xml`: android:label を "Doppel" に修正
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
-次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
-- Splash screen の設定 (flutter_native_splash)
-- Android ビルド確認 (`flutter build apk`) & リリース署名設定
-- App Store / Google Play メタデータ準備
+Phase A-M まで全て完了。スプラッシュ画面とリリースビルド基盤を追加済み。
+次のステップ:
+1. **画像アセット配置**: `assets/icon/app_icon.png` (1024x1024) と `assets/splash/splash_logo.png` (384x384) を配置し、`dart run flutter_launcher_icons` と `dart run flutter_native_splash:create` を実行
+2. **key.properties 作成**: `android/key.properties.example` を参考に `android/key.properties` を作成し、キーストアを生成
+3. **ビルド確認**: `flutter build apk --release` で Android ビルド確認
+4. App Store / Google Play メタデータ準備
+5. 追加レッスンコンテンツ拡充
