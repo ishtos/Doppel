@@ -95,6 +95,34 @@ const seedLessons = [
   // ── ビジネス ──
 
   LessonModel(
+    id: 'lesson-017',
+    title: 'Office Small Talk',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Hey, good morning! How was your weekend? '
+        'Oh, that sounds like fun. I just stayed home and watched some movies. '
+        'Have you seen the new series on the streaming service? It is really good. '
+        'I watched the whole thing on Saturday. Anyway, did you hear about the team lunch on Friday? '
+        'The manager said we can go to that new Italian restaurant near the office. '
+        'I have heard they have amazing pasta. I hope they take reservations though, because it is always packed at lunchtime. '
+        'Oh, by the way, the meeting this afternoon has been moved to three o clock. '
+        'Sarah sent an email about it this morning. She wants to go over the new project timeline. '
+        'I think we need to finalize the design documents before the end of the week. '
+        'It should not be too hard if we split the work between the two of us. '
+        'Do you want to grab a coffee before we start? '
+        'The machine in the break room is broken again, but there is a nice cafe right downstairs. My treat. '
+        'I could really use some caffeine right now. I stayed up way too late last night finishing that report. '
+        'Speaking of reports, did you submit your monthly summary yet? The deadline is tomorrow. '
+        'I still have to add some numbers to mine. I will probably stay a bit late today to get it done. '
+        'But first, coffee. Let me just reply to this one email and I will meet you downstairs in about five minutes. '
+        'Sound good? Great, see you there. Oh wait, do you want me to grab something for you on the way? '
+        'No? All right then. I will just get my usual. See you in five!',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 172,
+    wordCount: 286,
+  ),
+  LessonModel(
     id: 'lesson-002',
     title: 'Business Meeting Basics',
     category: 'ビジネス',
@@ -190,6 +218,68 @@ const seedLessons = [
   // ── 日常会話 ──
 
   LessonModel(
+    id: 'lesson-018',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hi, I am here to see the apartment you listed online. '
+        'Is this the one-bedroom unit on the third floor? Great, it looked really nice in the photos. '
+        'Could you show me around? Oh wow, the living room is quite spacious. '
+        'Is this hardwood flooring or laminate? It looks beautiful either way. '
+        'And the natural light coming through these windows is wonderful. Which direction does this face? '
+        'South-facing? That explains the brightness. I really like that. '
+        'Now, what about the kitchen? Oh, I see it has been recently renovated. '
+        'These countertops look brand new. Is the stove gas or electric? '
+        'I prefer gas for cooking, so that is a nice bonus. And there is a dishwasher too. '
+        'That was on my must-have list. Let me take a look at the bedroom. '
+        'This is a good size. I think my queen bed and desk would fit comfortably in here. '
+        'Is there a closet? A walk-in closet? That is fantastic. I have way too many clothes, to be honest. '
+        'What about the bathroom? The tiles look modern. Is the water pressure good in this building? '
+        'That has been an issue in some of the other places I have looked at. '
+        'Now, I have a few practical questions. What are the monthly utility costs on average? '
+        'And is internet included in the rent, or do I set that up on my own? '
+        'How about laundry? There is a shared facility in the basement? That works for me. '
+        'One more thing. I noticed the listing mentioned a no-pet policy. '
+        'Is that strict, or would a small cat be acceptable? '
+        'I completely understand. I will think it over and get back to you by tomorrow. Thank you so much for showing me around.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 133,
+    wordCount: 288,
+  ),
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Dinner Party Conversations',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thank you so much for having us over. Your apartment looks absolutely stunning. '
+        'Did you redecorate recently? I love what you have done with the bookshelves. '
+        'And something smells incredible coming from the kitchen. What are you making tonight? '
+        'Homemade risotto with wild mushrooms? That sounds absolutely divine. '
+        'You know, I tried making risotto once and it turned into a complete disaster. '
+        'I think I added all the broth at once instead of gradually stirring it in. '
+        'It ended up with the consistency of porridge. My partner still teases me about it to this day. '
+        'So tell me, how did your presentation at work go last week? '
+        'I remember you were quite nervous about it. '
+        'It went well? That is wonderful. I knew you would do a fantastic job. '
+        'You always underestimate yourself when it comes to public speaking, '
+        'but every time I have seen you present, you have been completely engaging and articulate. '
+        'Oh, have you two met before? Let me introduce you. This is my colleague from the marketing department. '
+        'She just relocated here from Melbourne about three months ago. '
+        'We actually bonded over our shared obsession with running. '
+        'We have been training together for the city marathon in October. '
+        'Neither of us expects to win, of course, but finishing would be an incredible achievement. '
+        'Oh, I think the risotto is ready. Shall we move to the dining table? '
+        'This looks absolutely beautiful. You really outdid yourself tonight. '
+        'Before we start eating, I just want to raise a toast. '
+        'To wonderful friends, good food, and evenings like this that remind us what really matters in life. '
+        'Cheers, everyone. Now let us dig in before it gets cold.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 112,
+    wordCount: 279,
+  ),
+  LessonModel(
     id: 'lesson-003',
     title: 'At the Coffee Shop',
     category: '日常会話',
@@ -247,6 +337,66 @@ const seedLessons = [
 
   // ── TEDスタイル ──
 
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Joy of Reading',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'I want to talk to you today about something very simple but very powerful. Reading. '
+        'When was the last time you sat down and read a book from start to finish? '
+        'For many of us, it has been a while. We live in a world full of short videos and quick messages. '
+        'Our attention spans have become shorter and shorter over the years. '
+        'But reading a book is different from scrolling through your phone. '
+        'When you read, your brain has to do the work of creating images, sounds, and feelings all by itself. '
+        'This is like exercise for your mind. It makes your brain stronger and more flexible. '
+        'Studies show that people who read regularly have better memory and focus. '
+        'They are also more creative and better at solving problems in their daily lives. '
+        'But here is what I find most interesting. Reading makes us kinder. '
+        'When you read a story, you step into another person\'s life. '
+        'You see the world through their eyes. You feel what they feel. '
+        'Scientists call this empathy, and it is one of the most important skills we can develop as human beings. '
+        'You do not need to read difficult or fancy books to get these benefits. '
+        'Any book that you enjoy will do the trick. The important thing is to make reading a habit. '
+        'Start small. Read for just ten minutes before bed each night. '
+        'Put your phone in another room and pick up a book instead. '
+        'After a few weeks, you will notice something wonderful happening. '
+        'You will feel calmer. You will sleep better. And you will start seeing the world in a richer way. '
+        'So my message to you today is simple. Read more. Your brain will thank you for it.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 173,
+    wordCount: 289,
+  ),
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'We spend roughly one third of our lives asleep, yet most people know surprisingly little about what happens during those hours. '
+        'Tonight I want to change that. Sleep is not simply a period of rest where your body shuts down. '
+        'It is an incredibly active process during which your brain performs essential maintenance and repair. '
+        'While you sleep, your brain sorts through the experiences of the day, '
+        'deciding what to keep and what to discard. Important memories are strengthened and moved into long-term storage. '
+        'This is why students who get a full night of sleep after studying perform significantly better on exams '
+        'than those who stay up all night cramming. The information literally needs sleep to stick. '
+        'But memory consolidation is just one piece of the puzzle. '
+        'During deep sleep, your brain activates a cleaning system that washes away toxic waste products '
+        'that accumulate during waking hours. Researchers believe that when this cleaning process is disrupted over many years, '
+        'it may contribute to the development of neurodegenerative diseases. '
+        'So how much sleep do we actually need? The answer varies by individual, '
+        'but most adults require between seven and nine hours for optimal function. '
+        'Consistently getting less than six hours has been linked to increased risks of heart disease, obesity, and depression. '
+        'The quality of your sleep matters just as much as the quantity. '
+        'Simple changes can make a big difference. Keep your bedroom cool and dark. '
+        'Avoid screens for at least thirty minutes before bed because the blue light they emit interferes with melatonin production. '
+        'Try to go to sleep and wake up at the same time every day, even on weekends. '
+        'Your body thrives on routine. The science is clear. '
+        'Sleep is not a luxury. It is a biological necessity, and prioritizing it is one of the best decisions you can make for your health.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 141,
+    wordCount: 306,
+  ),
   LessonModel(
     id: 'lesson-004',
     title: 'TED: The Power of Habit',
