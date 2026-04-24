@@ -30,6 +30,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
 - [x] Phase M: レッスンコンテンツ拡充 (16→24レッスン、全カテゴリ×難易度カバー)
+- [x] Phase N: テクノロジーカテゴリ追加 (新カテゴリ「テクノロジー」3レッスン追加、24→27レッスン)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -40,7 +41,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
-8. ~~追加レッスンコンテンツ拡充~~ → Phase M で実装済み (16→24レッスン)
+8. ~~追加レッスンコンテンツ拡充~~ → Phase M+N で実装済み (16→27レッスン、7カテゴリ)
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -61,27 +62,21 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
-- **24レッスン** (各約254-317語)
-- **カテゴリ:** ニュース(4)、ビジネス(4)、日常会話(4)、TEDスタイル(4)、スポーツ(4)、時事ネタ(4)
+- **27レッスン** (各約254-317語)
+- **カテゴリ:** ニュース(4)、ビジネス(4)、日常会話(4)、TEDスタイル(4)、スポーツ(4)、時事ネタ(4)、**テクノロジー(3)**
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 - **カテゴリ×難易度:** 全組み合わせをカバー
 
-## 8. 本日完了したタスク (2026-04-12)
-- レッスンコンテンツ拡充 (Phase M)
-  - `seed_data.dart`: 8つの新レッスンを追加 (lesson-017 〜 lesson-024)
-  - カテゴリ×難易度のギャップ5箇所を埋め、各カテゴリ4レッスンに統一
-  - 新規レッスン一覧:
-    - lesson-017: First Day at the Office (ビジネス・初級)
-    - lesson-018: At the Doctor's Office (日常会話・中級)
-    - lesson-019: Apartment Hunting (日常会話・上級)
-    - lesson-020: TED: The Magic of Reading (TEDスタイル・初級)
-    - lesson-021: TED: The Science of Sleep (TEDスタイル・中級)
-    - lesson-022: Health and Wellness Report (ニュース・中級)
-    - lesson-023: Basketball Season Highlights (スポーツ・中級)
-    - lesson-024: Renewable Energy Revolution (時事ネタ・中級)
+## 8. 本日完了したタスク (2026-04-24)
+- テクノロジーカテゴリ追加 (Phase N)
+  - `seed_data.dart`: 3レッスン追加 (lesson-025〜027)
+    - テクノロジー初級: "Getting Started with Smartphones"
+    - テクノロジー中級: "Staying Safe Online"
+    - テクノロジー上級: "The Future of Quantum Computing"
+  - `library_screen.dart`: カテゴリフィルタに「テクノロジー」追加
 
 ## 9. Handover Note for Next Run
-Phase A-M まで全て完了。レッスンコンテンツを16→24に拡充済み。全カテゴリ(6種)×全難易度(3段階)の組み合わせをカバー。
+Phase A-N まで全て完了。レッスンコンテンツを27レッスンに拡充し、全7カテゴリ×3難易度の完全カバレッジを達成。新カテゴリ「テクノロジー」を追加。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Splash screen の設定 (flutter_native_splash)

@@ -752,4 +752,97 @@ const seedLessons = [
     durationSeconds: 129,
     wordCount: 278,
   ),
+
+  // ── テクノロジー ──
+
+  LessonModel(
+    id: 'lesson-025',
+    title: 'Getting Started with Smartphones',
+    category: 'テクノロジー',
+    difficulty: 1,
+    transcriptText:
+        'Smartphones have become an essential part of our daily lives. '
+        'They help us stay connected with friends and family, find information, and get things done. '
+        'If you are new to using a smartphone, do not worry. It is easier than you think. '
+        'Let me walk you through the basics. '
+        'When you first turn on your phone, you will see the home screen. '
+        'This is where all your apps are displayed. Apps are small programs that do different things. '
+        'For example, there is an app for making phone calls, an app for sending messages, and an app for taking photos. '
+        'To open an app, just tap on its icon with your finger. To go back to the home screen, swipe up from the bottom. '
+        'One of the most useful features is the internet browser. '
+        'You can use it to search for anything you want, from recipes to directions to the nearest store. '
+        'Just open the browser app and type your question into the search bar. '
+        'Another important thing to know is how to connect to Wi-Fi. '
+        'Wi-Fi lets you use the internet without using your mobile data. '
+        'To connect, go to your phone settings, tap on Wi-Fi, and choose your network from the list. '
+        'You will need to enter a password if it is a private network. '
+        'Do not forget to keep your phone charged. Most smartphones need to be charged every day. '
+        'Just plug in the charging cable before you go to bed, and it will be ready in the morning. '
+        'With a little practice, you will feel comfortable using your smartphone in no time.',
+    audioAssetPath: 'assets/audio/lesson_025.mp3',
+    durationSeconds: 162,
+    wordCount: 262,
+  ),
+  LessonModel(
+    id: 'lesson-026',
+    title: 'Staying Safe Online',
+    category: 'テクノロジー',
+    difficulty: 2,
+    transcriptText:
+        'In today\'s digital world, protecting yourself online has never been more important. '
+        'Cybercriminals are constantly developing new ways to steal personal information and money. '
+        'But the good news is that by following a few simple practices, you can significantly reduce your risk. '
+        'The first and most critical step is creating strong passwords. '
+        'A strong password should be at least twelve characters long and include a mix of uppercase letters, '
+        'lowercase letters, numbers, and special symbols. '
+        'Avoid using obvious information like your birthday or your pet\'s name. '
+        'Ideally, you should use a different password for every account. '
+        'A password manager can help you keep track of all your passwords securely. '
+        'The second major threat to watch out for is phishing. '
+        'Phishing is when someone sends you a fake email or message that looks like it comes from a trusted source. '
+        'They might pretend to be your bank, a delivery service, or even a friend. '
+        'The goal is to trick you into clicking a link or providing your personal details. '
+        'Always check the sender\'s email address carefully and never click on suspicious links. '
+        'If you are unsure, contact the company directly through their official website. '
+        'Third, keep your software up to date. Software updates often include security patches that fix known vulnerabilities. '
+        'When your phone or computer asks you to install an update, do not ignore it. '
+        'Finally, be cautious about what you share on social media. '
+        'Personal details like your home address, vacation plans, or daily routine can be used by criminals. '
+        'Think carefully before posting anything publicly. '
+        'By staying informed and practicing these habits, you can enjoy the internet safely and with confidence.',
+    audioAssetPath: 'assets/audio/lesson_026.mp3',
+    durationSeconds: 134,
+    wordCount: 278,
+  ),
+  LessonModel(
+    id: 'lesson-027',
+    title: 'The Future of Quantum Computing',
+    category: 'テクノロジー',
+    difficulty: 3,
+    transcriptText:
+        'Quantum computing represents one of the most revolutionary technological advances of the twenty-first century. '
+        'Unlike classical computers, which process information using bits that exist as either zero or one, '
+        'quantum computers use quantum bits, or qubits, that can exist in multiple states simultaneously. '
+        'This property, known as superposition, allows quantum computers to explore an enormous number of possibilities at once. '
+        'Combined with another quantum phenomenon called entanglement, '
+        'where qubits become interconnected regardless of distance, '
+        'these machines have the potential to solve problems that would take classical computers millions of years. '
+        'The implications are staggering. In pharmaceutical research, quantum computers could simulate molecular interactions '
+        'with unprecedented accuracy, dramatically accelerating the discovery of new drugs and treatments. '
+        'In cryptography, they pose both a threat and an opportunity. '
+        'Current encryption methods that protect our banking systems and communications could be broken by sufficiently powerful quantum machines. '
+        'However, quantum cryptography also offers the possibility of unbreakable encryption based on the laws of physics. '
+        'Financial institutions are particularly interested in quantum computing\'s ability to optimize complex portfolios '
+        'and model risk scenarios that are currently beyond computational reach. '
+        'Climate scientists believe quantum simulations could transform our understanding of atmospheric processes '
+        'and help develop more effective strategies for addressing climate change. '
+        'Despite this enormous potential, significant challenges remain. '
+        'Current quantum processors are extremely sensitive to environmental interference and require cooling to temperatures '
+        'near absolute zero. Error rates are still too high for many practical applications. '
+        'Nevertheless, major technology companies and governments are investing billions of dollars in quantum research, '
+        'betting that whoever achieves quantum advantage first will gain an extraordinary competitive edge.',
+    audioAssetPath: 'assets/audio/lesson_027.mp3',
+    durationSeconds: 110,
+    wordCount: 260,
+  ),
 ];

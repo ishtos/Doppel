@@ -17,6 +17,7 @@ class LibraryScreen extends ConsumerWidget {
     'TEDスタイル',
     'スポーツ',
     '時事ネタ',
+    'テクノロジー',
   ];
 
   // FIXED: ソート種別のラベルマップを定義
