@@ -78,6 +78,17 @@ class ProgressRepository {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
+  /// Get distinct practice days from feedback records.
+  Set<DateTime> getPracticeDays() {
+    return feedbackBox.values
+        .map((e) => FeedbackModel.fromJson(deepCast(e)))
+        .map((f) {
+          final d = f.createdAt;
+          return DateTime(d.year, d.month, d.day);
+        })
+        .toSet();
+  }
+
   /// Analyze weak pronunciation patterns from recent feedback.
   Map<String, double> getWeakPatterns() {
     final feedbacks = feedbackBox.values

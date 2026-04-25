@@ -19,3 +19,8 @@ final scoreHistoryProvider =
 final weakPatternsProvider = Provider<Map<String, double>>((ref) {
   return ref.watch(progressRepositoryProvider).getWeakPatterns();
 });
+
+/// Distinct practice days for calendar display.
+final practiceDaysProvider = Provider<Set<DateTime>>((ref) {
+  return ref.watch(progressRepositoryProvider).getPracticeDays();
+});

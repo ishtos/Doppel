@@ -108,6 +108,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Practice Calendar
+            _PracticeCalendarSection(theme: theme),
+            const SizedBox(height: 20),
+
             // Weak points
             Card(
               elevation: 1,
@@ -257,6 +261,276 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
         ),
       ),
     );
+  }
+}
+
+class _PracticeCalendarSection extends ConsumerStatefulWidget {
+  const _PracticeCalendarSection({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  ConsumerState<_PracticeCalendarSection> createState() =>
+      _PracticeCalendarSectionState();
+}
+
+class _PracticeCalendarSectionState
+    extends ConsumerState<_PracticeCalendarSection> {
+  late DateTime _displayedMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    final now = DateTime.now();
+    _displayedMonth = DateTime(now.year, now.month);
+  }
+
+  void _previousMonth() {
+    setState(() {
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month - 1,
+      );
+    });
+  }
+
+  void _nextMonth() {
+    final now = DateTime.now();
+    final currentMonth = DateTime(now.year, now.month);
+    if (!_displayedMonth.isBefore(currentMonth)) return;
+    setState(() {
+      _displayedMonth = DateTime(
+        _displayedMonth.year,
+        _displayedMonth.month + 1,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = widget.theme;
+    final practiceDays = ref.watch(practiceDaysProvider);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final currentMonth = DateTime(now.year, now.month);
+    final canGoNext = _displayedMonth.isBefore(currentMonth);
+
+    final daysInMonth = DateUtils.getDaysInMonth(
+      _displayedMonth.year,
+      _displayedMonth.month,
+    );
+    final firstWeekday = DateTime(_displayedMonth.year, _displayedMonth.month, 1)
+        .weekday; // 1=Mon, 7=Sun
+
+    int monthPracticeCount = 0;
+    for (int day = 1; day <= daysInMonth; day++) {
+      final date = DateTime(_displayedMonth.year, _displayedMonth.month, day);
+      if (practiceDays.contains(date)) monthPracticeCount++;
+    }
+
+    const weekDays = ['月', '火', '水', '木', '金', '土', '日'];
+
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  size: 18,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 6),
+                Text('練習カレンダー', style: theme.textTheme.titleSmall),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Month navigation
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: _previousMonth,
+                  iconSize: 20,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                ),
+                Text(
+                  '${_displayedMonth.year}年${_displayedMonth.month}月',
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.chevron_right,
+                    color: canGoNext
+                        ? null
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                  ),
+                  onPressed: canGoNext ? _nextMonth : null,
+                  iconSize: 20,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Weekday headers
+            Row(
+              children: weekDays.map((d) {
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      d,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 4),
+
+            // Day grid
+            ..._buildWeekRows(
+              theme: theme,
+              daysInMonth: daysInMonth,
+              firstWeekday: firstWeekday,
+              practiceDays: practiceDays,
+              today: today,
+            ),
+            const SizedBox(height: 12),
+
+            // Monthly summary
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.local_fire_department,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$monthPracticeCount日練習 / $daysInMonth日',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildWeekRows({
+    required ThemeData theme,
+    required int daysInMonth,
+    required int firstWeekday,
+    required Set<DateTime> practiceDays,
+    required DateTime today,
+  }) {
+    final rows = <Widget>[];
+    final offset = firstWeekday - 1; // Mon=0 offset
+    final totalCells = offset + daysInMonth;
+    final rowCount = (totalCells / 7).ceil();
+
+    for (int row = 0; row < rowCount; row++) {
+      final cells = <Widget>[];
+      for (int col = 0; col < 7; col++) {
+        final index = row * 7 + col;
+        final dayNum = index - offset + 1;
+
+        if (dayNum < 1 || dayNum > daysInMonth) {
+          cells.add(const Expanded(child: SizedBox(height: 36)));
+          continue;
+        }
+
+        final date = DateTime(
+          _displayedMonth.year,
+          _displayedMonth.month,
+          dayNum,
+        );
+        final isPracticed = practiceDays.contains(date);
+        final isToday = date == today;
+
+        cells.add(
+          Expanded(
+            child: Container(
+              height: 36,
+              margin: const EdgeInsets.all(1),
+              decoration: BoxDecoration(
+                color: isPracticed
+                    ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                    : null,
+                border: isToday
+                    ? Border.all(color: theme.colorScheme.primary, width: 1.5)
+                    : null,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              // FIXED: Stack を Container 直下に配置し Positioned が Container 基準になるよう修正
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Text(
+                    '$dayNum',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isPracticed
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                      fontWeight:
+                          isPracticed || isToday ? FontWeight.w700 : null,
+                    ),
+                  ),
+                  if (isPracticed)
+                    Positioned(
+                      bottom: 2,
+                      child: Container(
+                        width: 4,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+      rows.add(Row(children: cells));
+    }
+
+    return rows;
   }
 }
 
