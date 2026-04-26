@@ -29,6 +29,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase M: レッスンコンテンツ拡充 (8本追加 → 全24レッスン、全カテゴリ4本均等化)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -39,7 +40,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
-8. 追加レッスンコンテンツ拡充
+8. ~~追加レッスンコンテンツ拡充~~ → Phase M で実装済み (16→24レッスン)
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -60,23 +61,35 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
-- **16レッスン** (各約250-320語)
-- **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
+- **24レッスン** (各約250-320語) ← 16→24に拡充
+- **カテゴリ (各4本):** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
+- **追加レッスン (Phase M):**
+  - Global Health Update (ニュース/中級)
+  - Your First Day at Work (ビジネス/初級)
+  - At the Doctor's Office (日常会話/中級)
+  - Apartment Hunting (日常会話/上級)
+  - TED: The Science of Sleep (TEDスタイル/初級)
+  - TED: Learning from Failure (TEDスタイル/中級)
+  - Marathon Training Guide (スポーツ/中級)
+  - Social Media and Society (時事ネタ/初級)
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-04-26)
+- レッスンコンテンツ拡充 (Phase M)
+  - `seed_data.dart`: 8本の新レッスンを追加 (lesson-017 〜 lesson-024)
+  - 全6カテゴリを各4レッスンに均等化 (合計16→24レッスン)
+  - 不足していた難易度レベルを補完:
+    - 日常会話: 中級・上級を追加
+    - TEDスタイル: 初級・中級を追加
+    - ビジネス: 初級を追加
+    - ニュース・スポーツ: 中級を追加
+    - 時事ネタ: 初級を追加
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
+Phase A-M まで全て完了。レッスンコンテンツを24本に拡充し、全カテゴリ4本・難易度バランスを改善済み。
 次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
+- App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Splash screen の設定 (flutter_native_splash)
 - Android ビルド確認 (`flutter build apk`) & リリース署名設定
 - App Store / Google Play メタデータ準備
+- Widget tests の補強 (Feedback / Lesson 画面)

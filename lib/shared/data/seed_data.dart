@@ -487,4 +487,271 @@ const seedLessons = [
     durationSeconds: 108,
     wordCount: 270,
   ),
+
+  // ── ニュース（追加） ──
+
+  LessonModel(
+    id: 'lesson-017',
+    title: 'Global Health Update',
+    category: 'ニュース',
+    difficulty: 2,
+    transcriptText:
+        'The World Health Organization released its annual report today, '
+        'highlighting both progress and ongoing challenges in global health. '
+        'According to the report, vaccination rates have reached record levels in many developing countries, '
+        'thanks to international cooperation and improved distribution networks. '
+        'This is welcome news, as vaccines remain one of the most cost-effective tools for preventing disease and saving lives. '
+        'However, the report also warns that mental health continues to be a growing concern worldwide. '
+        'An estimated one in four people will experience a mental health condition at some point in their lives, '
+        'yet access to treatment remains limited in many regions. '
+        'Experts are calling for governments to invest more in mental health services '
+        'and reduce the stigma that prevents people from seeking help. '
+        'In other findings, the report noted a significant decline in smoking rates among young adults, '
+        'particularly in countries that have implemented strict tobacco regulations. '
+        'Public health campaigns and higher taxes on cigarettes appear to be making a real difference. '
+        'On the other hand, obesity rates continue to rise in both developed and developing nations, '
+        'driven by changes in diet and physical activity levels. '
+        'The report emphasized the importance of preventive care, '
+        'noting that many of the world\'s most common health problems can be avoided through simple lifestyle changes. '
+        'Regular exercise, a balanced diet, adequate sleep, and stress management were identified as the four pillars of good health. '
+        'Medical experts agree that investing in prevention is far more efficient than treating diseases after they develop. '
+        'Looking ahead, the organization called for greater investment in healthcare infrastructure, '
+        'particularly in rural and underserved communities.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 125,
+    wordCount: 270,
+  ),
+
+  // ── ビジネス（追加） ──
+
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Your First Day at Work',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Welcome to the team. We are very glad to have you here. '
+        'Let me show you around the office and introduce you to some of your colleagues. '
+        'This is the main work area where most of the team sits. '
+        'Your desk is right over there by the window. I hope you like the spot. '
+        'Let me introduce you to Sarah. She works in the marketing department '
+        'and has been with the company for about three years. '
+        'She is a great person to ask if you have any questions about our products or customers. '
+        'And this is James from the engineering team. He will be working closely with you on your first project. '
+        'Now let me show you the break room. We have free coffee and tea throughout the day, '
+        'and there is a refrigerator where you can keep your lunch. '
+        'Most people take their lunch break around noon, but you can take it whenever works best for your schedule. '
+        'Here are a few things to keep in mind during your first week. '
+        'First, we have a team meeting every Monday morning at ten o\'clock. It usually lasts about thirty minutes. '
+        'Second, if you need any supplies like pens, notebooks, or other office materials, '
+        'just let the front desk know and they will take care of it. '
+        'Our dress code is business casual, which means you do not need to wear a suit every day, '
+        'but please keep things professional. '
+        'If you have any questions or need help with anything at all, please do not hesitate to ask. '
+        'Everyone here is very friendly and happy to help new team members get settled in. '
+        'We want you to feel comfortable and confident from day one.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 157,
+    wordCount: 262,
+  ),
+
+  // ── 日常会話（追加） ──
+
+  LessonModel(
+    id: 'lesson-019',
+    title: 'At the Doctor\'s Office',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Good morning, I have an appointment at ten thirty. My name is Alex Thompson. '
+        'Oh, you need me to fill out this form? Sure, no problem. Do I need to show my insurance card as well? '
+        'Great, here it is. The doctor will see me in about fifteen minutes? That is fine, I will wait here. '
+        'Actually, while I am waiting, could I ask the nurse a quick question? '
+        'I have been having some headaches lately and I am not sure if I should be worried. '
+        'Thank you, doctor. So, as I mentioned, I have been getting headaches almost every day for the past two weeks. '
+        'They usually start in the afternoon and last for a few hours. '
+        'The pain is mostly in the front of my head, around my forehead area. '
+        'I have tried taking over-the-counter medicine, and it helps a little, but the headaches keep coming back. '
+        'Have I changed anything in my routine recently? Well, I started a new job about three weeks ago, '
+        'and I have been spending a lot more time in front of a computer screen. '
+        'I also have not been sleeping very well. I usually go to bed around midnight but wake up several times during the night. '
+        'You think it might be related to stress and screen time? That makes sense. What would you recommend? '
+        'I should try to take breaks from the screen every thirty minutes? '
+        'And you are suggesting I try to go to bed earlier? I will definitely work on that. '
+        'Should I come back if the headaches do not improve? '
+        'Two weeks? All right, I will make a follow-up appointment. '
+        'Thank you very much for your time, doctor. I appreciate your help.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 122,
+    wordCount: 265,
+  ),
+  LessonModel(
+    id: 'lesson-020',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Hi, I\'m calling about the two-bedroom apartment you listed online. Is it still available? '
+        'Wonderful. Could you tell me a bit more about it? '
+        'The rent is fifteen hundred a month, and that includes water and garbage? '
+        'What about electricity and internet? Those are separate? That\'s fine. '
+        'How much would you estimate the electricity runs during the summer months? '
+        'Around eighty to a hundred dollars? That\'s reasonable. '
+        'Now, I noticed in the listing that it mentions the apartment was recently renovated. '
+        'What exactly was updated? New kitchen appliances, hardwood floors throughout, and a modern bathroom? '
+        'That sounds fantastic. Does the kitchen have a dishwasher? It does? Great, that\'s really important to me. '
+        'What about parking? Is there a designated spot that comes with the unit, or is it street parking only? '
+        'There\'s an underground garage with one spot included? Perfect. '
+        'And what about laundry facilities? In-unit washer and dryer? '
+        'That is such a relief. I\'ve been dealing with shared laundry in my current place and it\'s been incredibly frustrating. '
+        'Could you tell me about the neighborhood? Are there grocery stores and restaurants within walking distance? '
+        'There\'s a supermarket just two blocks away and plenty of dining options on the main street? That sounds ideal. '
+        'What about public transportation? The nearest subway station is a five-minute walk? Excellent. '
+        'I would love to schedule a viewing as soon as possible. '
+        'I\'m available any evening this week or Saturday morning. Thursday at six would work perfectly for me. '
+        'I\'ll bring all the necessary documents just in case I decide to apply on the spot. '
+        'What do you typically require? Pay stubs, a credit report, and references from previous landlords? '
+        'I\'ll have everything ready. Thank you so much for your time. I\'ll see you Thursday.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 112,
+    wordCount: 280,
+  ),
+
+  // ── TEDスタイル（追加） ──
+
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'Today I want to talk about something we all do but most of us do not fully understand: sleep. '
+        'We spend roughly one third of our lives sleeping, yet many people treat it as if it were optional. '
+        'The truth is, sleep is one of the most important things we can do for our health and well-being. '
+        'When you sleep, your brain is actually very busy. '
+        'It is processing the information you gathered during the day and creating new connections between ideas. '
+        'This is why you sometimes wake up with the solution to a problem that seemed impossible the night before. '
+        'Your brain has been working on it while you were resting. '
+        'Sleep also plays a critical role in physical health. '
+        'During deep sleep, your body repairs muscles, strengthens your immune system, and releases important hormones. '
+        'People who consistently get less than seven hours of sleep per night '
+        'are more likely to get sick and take longer to recover from illness. '
+        'So what happens when we do not get enough sleep? The effects are more serious than just feeling tired. '
+        'Poor sleep affects your ability to concentrate, make decisions, and control your emotions. '
+        'Studies have shown that being awake for twenty hours straight '
+        'impairs your judgment as much as being legally drunk. '
+        'Here is the good news. Improving your sleep does not require anything expensive or complicated. '
+        'Start by going to bed and waking up at the same time every day, even on weekends. '
+        'Avoid screens for at least thirty minutes before bed. '
+        'Keep your bedroom cool, dark, and quiet. '
+        'These simple changes can make a dramatic difference in the quality of your sleep and the quality of your life.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 157,
+    wordCount: 262,
+  ),
+  LessonModel(
+    id: 'lesson-022',
+    title: 'TED: Learning from Failure',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'I want to share something personal with you today. '
+        'Five years ago, I started a company that I was absolutely certain would change the world. '
+        'I had a brilliant team, solid funding, and what I thought was an unbeatable product. '
+        'Within eighteen months, the company had failed completely. '
+        'I lost everything I had invested, both financially and emotionally. '
+        'At the time, it felt like the worst thing that had ever happened to me. '
+        'But standing here today, I can tell you honestly that it was the best thing that ever happened to me. '
+        'Let me explain why. '
+        'When everything was going well, I never questioned my assumptions. '
+        'I was so confident in my vision that I ignored feedback from customers, '
+        'dismissed concerns from my team, and refused to adapt when the market changed. '
+        'Failure forced me to confront an uncomfortable truth: I was wrong about almost everything. '
+        'The research on this topic is fascinating. '
+        'Psychologists have found that success and failure activate completely different learning pathways in the brain. '
+        'When we succeed, we tend to attribute it to our own abilities and move on quickly. '
+        'But when we fail, we engage in deep analysis. We ask why. We examine our decisions. We look for patterns. '
+        'This deeper processing leads to more durable and transferable learning. '
+        'Here is what I learned from my failure. '
+        'First, listen to your customers more than you listen to yourself. '
+        'Second, build a team that feels safe disagreeing with you. '
+        'Third, be willing to change your plan when the evidence tells you to. '
+        'My second company, built entirely on these lessons, is now more successful than I ever imagined. '
+        'Failure was not the end of my story. It was the beginning of a much better one.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 126,
+    wordCount: 272,
+  ),
+
+  // ── スポーツ（追加） ──
+
+  LessonModel(
+    id: 'lesson-023',
+    title: 'Marathon Training Guide',
+    category: 'スポーツ',
+    difficulty: 2,
+    transcriptText:
+        'Running a marathon is one of the greatest physical challenges most people will ever attempt. '
+        'The distance of forty-two point two kilometers pushes your body and mind to their absolute limits. '
+        'But with the right training plan, anyone in reasonable health can cross that finish line. '
+        'The most important principle of marathon training is gradual progression. '
+        'You should never increase your weekly running distance by more than ten percent from one week to the next. '
+        'This gives your muscles, tendons, and joints time to adapt to the increasing demands. '
+        'Pushing too hard too fast is the number one cause of running injuries. '
+        'A typical marathon training plan lasts between sixteen and twenty weeks. '
+        'During this time, you will gradually build up your long runs from around ten kilometers to thirty-two kilometers. '
+        'Most coaches recommend doing your longest run about three weeks before race day, '
+        'then reducing your training to let your body recover fully. '
+        'Nutrition plays a crucial role in marathon preparation. '
+        'Runners need more carbohydrates than the average person to fuel their long training sessions. '
+        'During runs lasting more than ninety minutes, '
+        'you should also practice taking energy gels or sports drinks to maintain your blood sugar levels. '
+        'Recovery is just as important as the training itself. '
+        'Make sure you are getting enough sleep, staying hydrated, and including rest days in your schedule. '
+        'Many experienced runners also recommend regular stretching and foam rolling '
+        'to prevent tightness and reduce the risk of injury. '
+        'On race day, the most common mistake beginners make is starting too fast. '
+        'The excitement of the crowd can push you to run faster than planned in the early kilometers. '
+        'Stay disciplined, stick to your target pace, '
+        'and save your energy for the final ten kilometers when you will need it most.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 125,
+    wordCount: 271,
+  ),
+
+  // ── 時事ネタ（追加） ──
+
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Social Media and Society',
+    category: '時事ネタ',
+    difficulty: 1,
+    transcriptText:
+        'Social media has become a central part of modern life. '
+        'Over four billion people around the world now use platforms like Facebook, Instagram, and TikTok on a regular basis. '
+        'These tools have changed how we communicate, share information, and connect with others. '
+        'But they have also raised important questions about their impact on society. '
+        'One of the biggest benefits of social media is the ability to stay connected with friends and family, '
+        'no matter where they live. '
+        'You can share photos, send messages, and even have video calls with people on the other side of the world, '
+        'all for free. This has made the world feel much smaller and more connected. '
+        'Social media has also given ordinary people a powerful voice. '
+        'In the past, only journalists and public figures could reach large audiences. '
+        'Today, anyone with a smartphone can share their ideas and experiences with millions of people. '
+        'This has led to important social movements '
+        'and helped bring attention to issues that might otherwise have been ignored. '
+        'However, there are growing concerns about the negative effects of social media. '
+        'Many studies have found a link between heavy social media use and feelings of anxiety and loneliness, '
+        'especially among young people. '
+        'The constant comparison with others can damage self-esteem and create unrealistic expectations about life. '
+        'There are also serious concerns about the spread of false information online. '
+        'Misleading stories can travel much faster than accurate ones, '
+        'making it difficult for people to know what is true and what is not. '
+        'Experts suggest setting limits on daily social media use and being mindful about the content you consume. '
+        'Taking regular breaks from your phone can help improve your mental health '
+        'and give you more time for face-to-face connections.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 157,
+    wordCount: 262,
+  ),
 ];
