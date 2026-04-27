@@ -29,6 +29,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase O: シード冪等化 & テスト拡充 (シード処理バグ修正、text_diff テスト16件、home_provider テスト10件追加)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -39,12 +40,14 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
-8. 追加レッスンコンテンツ拡充
+8. ~~追加レッスンコンテンツ拡充~~ → 別ブランチ (feat/expand-lesson-content) で実装済み
 
 ## 5. Technical Debt & Issues
-- `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
+- `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり → **テスト追加済み (16件)**
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
-- Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足
+- Widget tests は 22件 → **48件に拡充** (text_diff 16件 + home_provider 10件追加)
+- Feedback / Lesson 画面のwidget testはネイティブプラグイン依存のためモック設計が必要（次回対応候補）
+- **シード処理冪等化済み**: 既存ユーザーにも新規レッスンが自動追加される
 
 ## 6. Screens & Architecture
 
@@ -60,23 +63,23 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
-- **16レッスン** (各約250-320語)
+- **16レッスン** (各約250-320語) ※別ブランチで27レッスンに拡充済み
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-04-27)
+- シード処理の冪等化 (Phase O)
+  - `main.dart`: `if (lessonsBox.isEmpty)` → `if (!lessonsBox.containsKey(lesson.id))` に変更
+  - 既存ユーザーのブックマーク・進捗データを保持したまま新レッスンのみ追加
+- テスト拡充 (Phase O)
+  - `test/text_diff_test.dart`: computeWordDiff 11件 + buildDiffTextSpan 5件 = 16件
+  - `test/home_provider_test.dart`: DailyGoalProgress 7件 + ImprovementPoint 2件 + WeeklyStats 1件 = 10件
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
+Phase O でシード処理を冪等化し、text_diff と home_provider のユニットテストを26件追加（合計48件）。
+`feat/expand-lesson-content` ブランチにレッスン拡充コードがあり、mainへのマージ待ち。マージ後はシード冪等化により既存ユーザーにも自動適用される。
 次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
+- App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Splash screen の設定 (flutter_native_splash)
 - Android ビルド確認 (`flutter build apk`) & リリース署名設定
 - App Store / Google Play メタデータ準備

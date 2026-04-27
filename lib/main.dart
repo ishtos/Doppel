@@ -17,9 +17,9 @@ Future<void> main() async {
   await Hive.openBox<Map>('feedbacks');
   await Hive.openBox<Map>('progress');
 
-  // Seed lessons if empty
-  if (lessonsBox.isEmpty) {
-    for (final lesson in seedLessons) {
+  // Seed lessons: add any missing seed lessons (idempotent)
+  for (final lesson in seedLessons) {
+    if (!lessonsBox.containsKey(lesson.id)) {
       await lessonsBox.put(lesson.id, lesson.toJson());
     }
   }
