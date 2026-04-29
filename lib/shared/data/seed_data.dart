@@ -487,4 +487,338 @@ const seedLessons = [
     durationSeconds: 108,
     wordCount: 270,
   ),
+
+  // ── ビジネス（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-017',
+    title: 'First Day at the Office',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Welcome to the team! My name is David, and I\'ll be helping you settle in today. '
+        'Let me start by showing you around the office. '
+        'This is the main workspace where most of our team sits. '
+        'Your desk is right over here by the window. '
+        'I\'ve already set up your computer and you should have received a temporary password by email. '
+        'If you have any trouble logging in, just let me know and I\'ll call IT support for you. '
+        'Down the hall, you\'ll find the kitchen area. '
+        'Feel free to help yourself to coffee and tea anytime. '
+        'We also have a fridge where you can store your lunch. '
+        'Just make sure to label your food with your name. '
+        'The bathrooms are just past the kitchen on the left side. '
+        'Our team usually has a standup meeting every morning at nine thirty. '
+        'It\'s quick, just about fifteen minutes. '
+        'Each person shares what they worked on yesterday, what they plan to do today, '
+        'and if they have any blockers. '
+        'Don\'t worry if you don\'t have much to say at first. '
+        'That\'s completely normal for new team members. '
+        'For lunch, most people go to the cafeteria downstairs, '
+        'but there are also some great restaurants within walking distance. '
+        'A few of us usually eat together, so you\'re welcome to join. '
+        'Oh, and one more thing. We have a casual dress code here, '
+        'so you don\'t need to wear a suit every day. '
+        'Most people wear smart casual, which means a nice shirt and comfortable pants are perfectly fine. '
+        'I think that covers the basics. '
+        'If you have any questions at all during your first week, please don\'t hesitate to ask. '
+        'Everyone here is very friendly and happy to help.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 162,
+    wordCount: 268,
+  ),
+
+  // ── 日常会話（中級追加） ──
+
+  LessonModel(
+    id: 'lesson-018',
+    title: 'At the Doctor\'s Office',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Good morning. I have an appointment at ten o\'clock. '
+        'My name is Sarah Mitchell. Yes, I\'m here to see Doctor Thompson about these headaches I\'ve been having. '
+        'Thank you for seeing me, Doctor. '
+        'So, the headaches started about two weeks ago. '
+        'At first, they were mild and would go away after a few hours. '
+        'But over the past few days, they\'ve become more frequent and more intense. '
+        'I usually feel the pain behind my eyes and across my forehead. '
+        'I\'ve been taking over-the-counter painkillers, but they only provide temporary relief. '
+        'The headaches seem to come back every afternoon, usually around three or four o\'clock. '
+        'I also notice that they get worse when I\'ve been staring at my computer screen for a long time. '
+        'I haven\'t had any changes in my vision, but I have been feeling a bit more tired than usual. '
+        'My sleep has been okay, about seven hours a night, '
+        'but I wake up feeling like I haven\'t rested properly. '
+        'I drink about three cups of coffee a day, '
+        'and I try to drink enough water, but I\'m probably not drinking as much as I should. '
+        'No, I don\'t have any allergies that I know of, '
+        'and I\'m not currently taking any other medications. '
+        'The only thing that\'s changed recently is that I started a new project at work, '
+        'which has been quite stressful. '
+        'I\'ve been spending more hours at my desk and skipping my lunch breaks. '
+        'I see. So you think it could be tension headaches related to stress and screen time? '
+        'That makes sense. What would you recommend? '
+        'Should I be concerned about anything more serious? '
+        'I\'d feel better knowing we\'ve ruled out any underlying issues. '
+        'When should I come back if the headaches don\'t improve?',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 132,
+    wordCount: 275,
+  ),
+
+  // ── 日常会話（上級追加） ──
+
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Hi, I\'m calling about the two-bedroom apartment listed on your website. '
+        'The one on Park Street, close to the university? Yes, that\'s the one. '
+        'I was wondering if it\'s still available and if I could schedule a viewing sometime this week. '
+        'The listing says the rent is fifteen hundred dollars per month. '
+        'Does that include utilities, or are those separate? '
+        'Just water and garbage collection are included? '
+        'So I\'d need to set up electricity and internet myself? '
+        'That\'s fine, I just want to make sure I\'m budgeting correctly. '
+        'Could you tell me a bit more about the building? '
+        'How old is it, and when was the apartment last renovated? '
+        'The kitchen was updated two years ago? That\'s good to hear. '
+        'What about the appliances? '
+        'Does it come with a washer and dryer, or would I need to use a shared laundry facility? '
+        'I noticed the listing didn\'t mention parking. Is there a garage or a lot for tenants? '
+        'An additional eighty dollars per month for a covered parking spot? That\'s reasonable. '
+        'Is there also visitor parking available? '
+        'What about the lease terms? '
+        'I\'m looking for a one-year lease, ideally starting at the beginning of next month. '
+        'Is that timeline realistic? And what\'s the security deposit? '
+        'First and last month\'s rent plus a one-month security deposit? '
+        'So that would be forty-five hundred dollars upfront? '
+        'One more question about the neighborhood. '
+        'I work downtown and I\'ll be commuting by train. '
+        'How far is the nearest station? A ten-minute walk? That\'s perfect. '
+        'Are there grocery stores and restaurants nearby? '
+        'I don\'t have a car, so being close to amenities is really important for me. '
+        'Great, I\'d love to schedule a viewing. Would Thursday afternoon work? '
+        'Three o\'clock is perfect. '
+        'Could you send me the exact address and any documents I should bring? '
+        'Wonderful, I\'ll see you on Thursday then. Thank you for your time.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 120,
+    wordCount: 301,
+  ),
+
+  // ── TEDスタイル（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Joy of Reading',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'I want to talk to you today about something very simple but incredibly powerful, '
+        'and that is reading. '
+        'Reading is one of the most important things you can do for your brain. '
+        'Studies show that people who read regularly have better memory, '
+        'stronger focus, and greater empathy for others. '
+        'When you read a book, your brain creates a mental movie. '
+        'You imagine the characters, the places, and the events. '
+        'This process exercises parts of your brain '
+        'that watching television or scrolling through social media simply cannot reach. '
+        'It\'s like a workout for your mind. '
+        'But here is what I find most interesting. '
+        'Reading also makes you a better communicator. '
+        'When you read widely, you naturally absorb new words, new sentence structures, '
+        'and new ways of expressing ideas. '
+        'This happens without you even trying. '
+        'Over time, you find that you can express your own thoughts more clearly and more effectively. '
+        'Now, I know what some of you might be thinking. I don\'t have time to read. '
+        'But the truth is, you probably do. '
+        'Think about all the small moments in your day. '
+        'Waiting for the bus, sitting in a coffee shop, lying in bed before sleep. '
+        'Even fifteen minutes a day can make a difference. '
+        'That adds up to almost one hundred hours a year, enough to read about twenty books. '
+        'The key is to start with something you enjoy. '
+        'It doesn\'t have to be a classic novel or a serious nonfiction book. '
+        'It can be a comic book, a mystery, a travel guide, anything that sparks your curiosity. '
+        'The goal is simply to build the habit. '
+        'So here is my challenge to you. Pick up a book this week. '
+        'Give it just fifteen minutes a day. '
+        'I promise you will notice the difference within a month. '
+        'Your mind will be sharper, your vocabulary will grow, '
+        'and your life will be richer for it.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 174,
+    wordCount: 286,
+  ),
+
+  // ── TEDスタイル（中級追加） ──
+
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'Most of us spend about a third of our lives sleeping, '
+        'yet very few of us truly understand what happens during those crucial hours. '
+        'Tonight, I want to share some fascinating discoveries from sleep science '
+        'that might change how you think about your nightly rest. '
+        'When you fall asleep, your brain doesn\'t simply shut down. '
+        'In fact, it becomes incredibly active. '
+        'During the first stage of sleep, your brain begins organizing the day\'s experiences, '
+        'sorting through memories and deciding what to keep and what to discard. '
+        'This process is essential for learning, '
+        'which is why students who sleep well consistently outperform those who stay up late studying. '
+        'But the real magic happens during deep sleep and REM sleep. '
+        'During deep sleep, your body repairs itself at the cellular level. '
+        'Growth hormones are released, muscles are rebuilt, '
+        'and your immune system gets a powerful boost. '
+        'People who regularly miss out on deep sleep are significantly more likely to get sick '
+        'and take longer to recover from illness. '
+        'REM sleep, the stage where most dreaming occurs, is equally critical but for different reasons. '
+        'During REM, your brain processes emotions '
+        'and strengthens creative connections between seemingly unrelated ideas. '
+        'This is why you sometimes wake up with the solution to a problem '
+        'that seemed impossible the night before. '
+        'So how much sleep do you actually need? '
+        'The research consistently points to seven to nine hours for most adults. '
+        'Sleeping less than six hours regularly has been linked '
+        'to increased risk of heart disease, obesity, and cognitive decline. '
+        'And contrary to popular belief, you cannot train yourself to need less sleep. '
+        'Your body will always demand the sleep it requires, one way or another. '
+        'The single most important thing you can do to improve your sleep is consistency. '
+        'Go to bed and wake up at the same time every day, even on weekends. '
+        'Your body\'s internal clock thrives on routine, '
+        'and once you establish that pattern, falling asleep becomes effortless.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 143,
+    wordCount: 305,
+  ),
+
+  // ── ニュース（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-022',
+    title: 'Local Community News',
+    category: 'ニュース',
+    difficulty: 1,
+    transcriptText:
+        'Good evening, and welcome to your local community news update. '
+        'We have several stories to share with you tonight, so let\'s get started. '
+        'First up, the city council has approved plans for a brand new public library in the downtown area. '
+        'The library will be three stories tall '
+        'and will include a children\'s reading room, a quiet study area, '
+        'and a modern technology center with free computers and internet access. '
+        'Construction is expected to begin next month and should be completed within eighteen months. '
+        'The mayor called it an important investment in the community\'s future '
+        'and said she hopes it will become a gathering place for people of all ages. '
+        'In other local news, the annual food festival will take place this Saturday at Central Park. '
+        'Over thirty restaurants and food trucks from across the region will be serving their best dishes. '
+        'There will also be live music, cooking demonstrations, and activities for children. '
+        'The event runs from eleven in the morning until eight in the evening, and admission is free. '
+        'Organizers are expecting a record number of visitors this year. '
+        'Turning to education news, the local school district announced '
+        'that test scores have improved for the third year in a row. '
+        'Math scores were up by five percent, '
+        'and reading scores improved by seven percent compared to last year. '
+        'The superintendent credited the improvement to a new tutoring program '
+        'and additional training for teachers. '
+        'On a lighter note, a local animal shelter is hosting an adoption event this weekend. '
+        'They currently have over fifty dogs and cats looking for new homes. '
+        'The shelter is offering reduced adoption fees for the event, '
+        'and all animals come fully vaccinated. '
+        'If you\'ve been thinking about adding a furry friend to your family, '
+        'this could be the perfect opportunity. '
+        'That\'s all for tonight\'s community news. Stay safe, and we\'ll see you tomorrow.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 174,
+    wordCount: 285,
+  ),
+
+  // ── スポーツ（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-023',
+    title: 'City Marathon Race Day',
+    category: 'スポーツ',
+    difficulty: 1,
+    transcriptText:
+        'What a beautiful morning for the city marathon! '
+        'The sun is shining, the crowds are gathering along the streets, '
+        'and over ten thousand runners are getting ready at the starting line. '
+        'This is the twenty-fifth year of this popular event, '
+        'and the energy here is absolutely wonderful. '
+        'The starting horn has just sounded, and the runners are off! '
+        'The lead group is already pulling away from the main pack. '
+        'Among the favorites today are last year\'s champion, who is wearing number one, '
+        'and a talented newcomer from Kenya who has been training specifically for this race. '
+        'We are now at the five kilometer mark, and the leaders are maintaining a strong pace. '
+        'The streets are lined with cheering spectators holding signs and ringing bells to encourage the runners. '
+        'Volunteers at the water stations are handing out cups of water and energy drinks. '
+        'Their help is so important on a warm day like this. '
+        'As the runners pass the halfway point, the crowd\'s cheering gets even louder. '
+        'Some runners are waving to their families. '
+        'Others are focused and determined, keeping their eyes on the road ahead. '
+        'It is truly inspiring to see people of all ages and abilities participating. '
+        'Some are running their very first marathon, while others have completed dozens. '
+        'The leaders are now approaching the final stretch. The crowd is going wild! '
+        'Number one is in the lead, but the newcomer is closing the gap with every step. '
+        'They are running side by side now! '
+        'In the final hundred meters, the newcomer finds an extra burst of speed '
+        'and crosses the finish line first! '
+        'What an incredible finish! The crowd erupts in applause. '
+        'The winner collapses on the ground in joy, overwhelmed by the achievement. '
+        'His finish time is two hours and eight minutes, a new course record. '
+        'Congratulations to all the runners who participated today. '
+        'Every single one of you is a champion.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 180,
+    wordCount: 293,
+  ),
+
+  // ── 時事ネタ（中級追加） ──
+
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Digital Privacy Debate',
+    category: '時事ネタ',
+    difficulty: 2,
+    transcriptText:
+        'The debate over digital privacy has intensified in recent months '
+        'as governments around the world consider new regulations for technology companies. '
+        'At the heart of the discussion is a fundamental question: '
+        'how much of our personal data should companies be allowed to collect, '
+        'and what should they be permitted to do with it? '
+        'A recent survey found that seventy-eight percent of internet users '
+        'are concerned about how their data is being used, '
+        'yet the majority continue to use services that collect vast amounts of personal information. '
+        'Experts call this the privacy paradox. '
+        'People say they care about privacy, but their behavior suggests otherwise. '
+        'Part of the problem is that most people don\'t fully understand what data is being collected. '
+        'Every time you use a search engine, post on social media, or shop online, '
+        'you leave a trail of digital footprints. '
+        'These footprints reveal your interests, your habits, your location, '
+        'and even your political opinions. '
+        'Companies use this information to build detailed profiles '
+        'that can be sold to advertisers or used to influence your behavior. '
+        'The European Union has taken the lead on privacy regulation '
+        'with its comprehensive data protection framework. '
+        'Under these rules, companies must get clear consent before collecting personal data '
+        'and must allow users to request deletion of their information. '
+        'Several other countries are now developing similar legislation. '
+        'However, technology companies argue that data collection is essential for providing free services. '
+        'Without advertising revenue driven by targeted data, '
+        'many popular platforms would need to charge users directly. '
+        'They also point out that data analysis enables genuinely useful features '
+        'like personalized recommendations and improved search results. '
+        'Finding the right balance between privacy and convenience '
+        'is one of the defining challenges of our digital age. '
+        'As citizens, we must educate ourselves about these issues '
+        'and make informed choices about the services we use and the data we share. '
+        'The decisions we make today will shape the digital landscape for generations to come.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 138,
+    wordCount: 296,
+  ),
 ];
