@@ -487,4 +487,270 @@ const seedLessons = [
     durationSeconds: 108,
     wordCount: 270,
   ),
+
+  // ── ビジネス（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-017',
+    title: 'Office Self-Introduction',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Good morning everyone. Thank you for taking the time to be here today. '
+        'My name is Sarah Thompson and I just joined the marketing team last week. '
+        'I wanted to take a moment to introduce myself and tell you a little bit about my background. '
+        'Before coming here, I worked at a small advertising agency for about three years. '
+        'My main responsibility was managing social media accounts for our clients. '
+        'I really enjoyed the creative side of that work, and I learned a lot about understanding what customers want. '
+        'I studied business communications at university. '
+        'During my time there, I also spent a semester studying abroad in London, which was an amazing experience. '
+        'It helped me understand different cultures and how to communicate with people from all over the world. '
+        'In my free time, I enjoy reading books about design and technology. '
+        'I also like hiking on weekends. It helps me clear my mind and come up with fresh ideas for work. '
+        'I am really excited to be part of this team. '
+        'I have heard so many great things about the company culture here, '
+        'and I can already see that everyone is very supportive and friendly. '
+        'I look forward to learning from all of you and contributing to our upcoming projects. '
+        'If you ever need help with anything related to social media or content creation, '
+        'please do not hesitate to reach out. '
+        'My desk is on the third floor, right next to the coffee machine, so I am always happy to chat. '
+        'Thank you again for the warm welcome. I look forward to working together and making great things happen.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 162,
+    wordCount: 270,
+  ),
+
+  // ── 日常会話（中級追加） ──
+
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Planning a Weekend Trip',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hey, are you free this weekend? I was thinking we could take a day trip somewhere. '
+        'I have been wanting to get out of the city for a while. '
+        'How about we drive up to the mountains? I heard there is a really nice hiking trail about two hours from here. '
+        'The weather forecast says it should be sunny on Saturday, so the timing is perfect. '
+        'We could leave early in the morning, around seven, to avoid the traffic. '
+        'I know a great little restaurant near the trailhead where we could stop for breakfast. '
+        'They make the most amazing pancakes, and the coffee is really good too. '
+        'The hike itself is supposed to take about three hours round trip. '
+        'It is rated as moderate difficulty, so nothing too intense, but still a good workout. '
+        'At the top, there is a lookout point with incredible views of the valley. '
+        'I saw some photos online and they were absolutely stunning. '
+        'After the hike, we could explore the nearby town. '
+        'It is one of those charming places with little antique shops and art galleries. '
+        'There is also a farmers market that runs every Saturday afternoon. '
+        'We could pick up some fresh produce and local cheese to bring back home. '
+        'If we are not too tired, we might even catch the sunset from the lake on our way back. '
+        'One of my friends went there last month and said it was the most beautiful sunset she had ever seen. '
+        'What do you think? Does that sound like a plan? '
+        'We could invite a couple more people if you want, but honestly, a smaller group might be easier to manage. '
+        'Let me know by tonight so I can start looking at directions and parking information.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 134,
+    wordCount: 290,
+  ),
+
+  // ── 日常会話（上級追加） ──
+
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thanks for showing me this apartment. I have a few questions before we go any further. '
+        'First, you mentioned the rent is eighteen hundred dollars a month. Does that include utilities, '
+        'or would electricity, gas, and water be separate? '
+        'Just utilities are extra? Okay, roughly how much should I expect to pay on top of the rent each month? '
+        'Around a hundred and fifty? That is a bit more than I was hoping for, but it is manageable. '
+        'What about internet? I work from home three days a week, so I need a reliable connection. '
+        'Is there fiber available in the building, or am I limited to regular broadband? '
+        'Great, fiber is available. That is definitely a plus. '
+        'Now, I noticed the kitchen is a bit small. Is it possible to install a dishwasher? '
+        'The plumbing would need to be modified? I understand. Would the landlord be willing to cover that cost, '
+        'or would it come out of my pocket? '
+        'Let me think about that. Moving on, what is the policy on pets? '
+        'I have a small dog, about eight kilograms. He is very well behaved and does not bark much. '
+        'A pet deposit of five hundred dollars plus an additional fifty per month? '
+        'That seems quite steep, but I suppose it is standard in this neighborhood. '
+        'How about the lease terms? I would prefer a twelve-month lease to start, '
+        'with the option to renew for a longer period if everything works out. '
+        'Is there a penalty for early termination? Two months rent as a penalty? '
+        'That is something I will need to factor into my decision. '
+        'Overall, I like the apartment. The location is excellent and the natural light is really beautiful. '
+        'Could I have until Friday to think it over and get back to you? Perfect, I appreciate your patience.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 121,
+    wordCount: 302,
+  ),
+
+  // ── TEDスタイル（初級追加） ──
+
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: Simple Happiness',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'What makes people truly happy? '
+        'Scientists have been trying to answer this question for decades, and the results might surprise you. '
+        'It turns out that happiness is not about having more money, a bigger house, or a fancier car. '
+        'The number one factor in long-term happiness is the quality of your relationships with other people. '
+        'Think about the happiest moments in your life. '
+        'Chances are, most of them involve spending time with family, friends, or people you care about. '
+        'A warm conversation over dinner. Laughing together at a silly joke. Helping someone through a difficult time. '
+        'These simple moments are what our brains remember and value the most. '
+        'Research from Harvard University followed over seven hundred people for more than seventy-five years. '
+        'It is one of the longest studies on happiness ever conducted. '
+        'The conclusion was clear: good relationships keep us happier and healthier. '
+        'People who had strong connections with others lived longer and reported greater satisfaction with their lives. '
+        'Meanwhile, people who were more isolated than they wanted to be were less happy, '
+        'their health declined earlier, and their brain function decreased faster. '
+        'So what can you do today to increase your happiness? '
+        'The answer is surprisingly simple. Reach out to someone you have not spoken to in a while. '
+        'Have a real conversation, not just a text message. Listen to what they have to say. '
+        'Share something about your own life. These small acts of connection add up over time. '
+        'Happiness is not something you find. It is something you build, one relationship at a time.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 155,
+    wordCount: 258,
+  ),
+
+  // ── TEDスタイル（中級追加） ──
+
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'We spend roughly one third of our lives sleeping, yet most of us know very little about what happens during those hours. '
+        'Sleep is not simply a passive state where the body shuts down. '
+        'It is an incredibly active process during which the brain performs essential maintenance work. '
+        'During deep sleep, your brain clears out toxic waste products that accumulate during the day. '
+        'Think of it as a cleaning crew that comes in at night to sweep the floors and take out the trash. '
+        'Without this process, those waste products build up, '
+        'and research suggests this may contribute to conditions like Alzheimer\'s disease. '
+        'But that is only part of the story. Sleep also plays a crucial role in memory consolidation. '
+        'While you sleep, your brain replays the experiences of the day and decides which ones to keep and which to discard. '
+        'This is why students who sleep well after studying consistently outperform those who stay up all night cramming. '
+        'The information literally gets wired into long-term memory during sleep. '
+        'Now here is the problem. Modern society is in the middle of a sleep deprivation epidemic. '
+        'The average adult needs seven to nine hours of sleep per night, '
+        'but studies show that nearly a third of adults regularly get less than six. '
+        'The consequences are severe. Sleep deprivation impairs judgment, weakens the immune system, '
+        'and increases the risk of heart disease, obesity, and depression. '
+        'Some researchers have compared the cognitive effects of sleep deprivation to being legally drunk. '
+        'So what is the solution? Prioritize sleep the way you prioritize exercise and nutrition. '
+        'Set a consistent bedtime, limit screen exposure before bed, and create a cool, dark environment for sleeping. '
+        'Your future self will thank you for every extra hour of quality rest you get tonight.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 136,
+    wordCount: 294,
+  ),
+
+  // ── 科学・テクノロジー ──
+
+  LessonModel(
+    id: 'lesson-022',
+    title: 'How Smartphones Work',
+    category: '科学・テクノロジー',
+    difficulty: 1,
+    transcriptText:
+        'Have you ever wondered how your smartphone actually works? '
+        'Most of us use our phones every single day, but few people understand what is happening inside them. '
+        'Let me explain it in simple terms. '
+        'At the heart of every smartphone is a tiny computer chip called a processor. '
+        'This chip is about the size of your fingernail, but it can perform billions of calculations every second. '
+        'When you open an app, the processor reads the instructions and makes things appear on your screen. '
+        'Speaking of the screen, modern smartphones use a technology called OLED. '
+        'Each tiny dot on the screen, called a pixel, produces its own light. '
+        'Your phone has millions of these pixels, and they work together to create the images you see. '
+        'When you touch the screen, a layer of sensors detects exactly where your finger is '
+        'and sends that information to the processor. '
+        'Your phone connects to the internet through radio waves. '
+        'It sends and receives invisible signals to cell towers and wireless routers nearby. '
+        'These signals travel at the speed of light, which is why web pages load almost instantly. '
+        'The camera on your phone uses a small sensor to capture light. '
+        'Software then processes that light into the beautiful photos you take every day. '
+        'Modern phone cameras are so good that many professional photographers now use them for their work. '
+        'All of your photos, apps, and messages are stored on a small memory chip inside the phone. '
+        'This chip can hold hundreds of gigabytes of data, which is more storage '
+        'than the biggest computers in the world had just thirty years ago. '
+        'It is truly amazing how much technology fits inside something that fits in your pocket.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 169,
+    wordCount: 282,
+  ),
+  LessonModel(
+    id: 'lesson-023',
+    title: 'The Future of Electric Cars',
+    category: '科学・テクノロジー',
+    difficulty: 2,
+    transcriptText:
+        'Electric vehicles are no longer a futuristic concept. They are rapidly becoming a mainstream reality. '
+        'Global sales of electric cars surpassed ten million units last year, '
+        'and analysts predict that number will double within the next three years. '
+        'But what is driving this dramatic shift away from traditional gasoline-powered vehicles? '
+        'The first factor is battery technology. Lithium-ion batteries have become significantly cheaper and more efficient '
+        'over the past decade. The cost per kilowatt hour has dropped by nearly ninety percent since twenty-ten, '
+        'making electric cars increasingly affordable for ordinary consumers. '
+        'At the same time, driving range has improved dramatically. '
+        'Early electric vehicles could barely manage a hundred kilometers on a single charge. '
+        'Today, many models offer ranges of five hundred kilometers or more, effectively eliminating range anxiety '
+        'for most daily driving needs. '
+        'The second major factor is charging infrastructure. '
+        'Governments and private companies are investing billions to build networks of fast-charging stations. '
+        'Some of these stations can add three hundred kilometers of range in just twenty minutes, '
+        'making long-distance travel in an electric car almost as convenient as in a gasoline car. '
+        'Environmental regulations are also playing a significant role. '
+        'Several countries and major cities have announced plans to ban the sale of new gasoline vehicles '
+        'within the next ten to fifteen years. '
+        'This regulatory pressure is pushing automakers to accelerate their electric vehicle programs. '
+        'However, challenges remain. Mining the raw materials for batteries raises environmental and ethical concerns. '
+        'Recycling programs for used batteries are still in their early stages. '
+        'And electricity grids in many regions will need substantial upgrades to handle the increased demand. '
+        'Despite these hurdles, the transition to electric transportation appears irreversible, '
+        'and the pace of change is only accelerating.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 131,
+    wordCount: 283,
+  ),
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Quantum Computing Explained',
+    category: '科学・テクノロジー',
+    difficulty: 3,
+    transcriptText:
+        'Classical computers, the ones we use every day, process information using bits, '
+        'which can be either a zero or a one at any given time. '
+        'Quantum computers fundamentally change this paradigm by using quantum bits, or qubits, '
+        'which can exist in a state called superposition, effectively representing zero and one simultaneously. '
+        'This property, combined with another quantum phenomenon called entanglement, '
+        'allows quantum computers to explore vast numbers of possible solutions in parallel. '
+        'For certain types of problems, this gives quantum machines an exponential advantage over classical computers. '
+        'Consider the challenge of simulating molecular interactions for drug discovery. '
+        'A classical computer would need billions of years to accurately model a moderately complex molecule. '
+        'A sufficiently powerful quantum computer could potentially solve the same problem in hours or even minutes. '
+        'This capability could revolutionize fields ranging from pharmaceuticals to materials science to cryptography. '
+        'However, building practical quantum computers is extraordinarily difficult. '
+        'Qubits are extremely fragile and sensitive to environmental interference, '
+        'a problem known as quantum decoherence. '
+        'To maintain stable operation, most current quantum processors must be cooled to temperatures '
+        'colder than outer space, just a fraction of a degree above absolute zero. '
+        'Even with this extreme cooling, errors accumulate rapidly, requiring sophisticated error correction techniques '
+        'that consume the majority of available qubits. '
+        'Despite these engineering challenges, the field is advancing at a remarkable pace. '
+        'Major technology companies and governments worldwide are investing tens of billions of dollars in quantum research. '
+        'In the past year alone, researchers demonstrated quantum advantage on several practical optimization problems '
+        'for the first time, proving that the technology has moved beyond purely theoretical demonstrations. '
+        'Experts predict that within the next decade, quantum computers will begin solving real-world problems '
+        'that are genuinely beyond the reach of any classical supercomputer.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 116,
+    wordCount: 290,
+  ),
 ];
