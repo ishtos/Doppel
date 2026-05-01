@@ -17,9 +17,9 @@ Future<void> main() async {
   await Hive.openBox<Map>('feedbacks');
   await Hive.openBox<Map>('progress');
 
-  // Seed lessons if empty
-  if (lessonsBox.isEmpty) {
-    for (final lesson in seedLessons) {
+  // FIXED: 新レッスン追加時に既存ユーザーにも配信されるよう改善
+  for (final lesson in seedLessons) {
+    if (!lessonsBox.containsKey(lesson.id)) {
       await lessonsBox.put(lesson.id, lesson.toJson());
     }
   }

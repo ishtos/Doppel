@@ -29,6 +29,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase M: レッスンコンテンツ拡充 (6レッスン追加、全22レッスン、カテゴリ均等化、シード処理改善)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -39,7 +40,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
-8. 追加レッスンコンテンツ拡充
+8. ~~追加レッスンコンテンツ拡充~~ → Phase M で実装済み (16→22レッスン)
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -60,21 +61,25 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
 ## 7. Lesson Content
-- **16レッスン** (各約250-320語)
-- **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
+- **22レッスン** (各約260-320語)
+- **カテゴリ:** ニュース(3)、ビジネス(4)、日常会話(4)、TEDスタイル(4)、スポーツ(3)、時事ネタ(4)
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
+- **難易度分布:** 初級7 / 中級7 / 上級8
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-05-01)
+- レッスンコンテンツ拡充 (Phase M)
+  - `seed_data.dart`: 6レッスン追加 (合計16→22)
+    - lesson-017: Weekend Plans (日常会話, 中級)
+    - lesson-018: Job Interview Practice (日常会話, 上級)
+    - lesson-019: TED: The Science of Sleep (TEDスタイル, 初級)
+    - lesson-020: TED: Digital Minimalism (TEDスタイル, 中級)
+    - lesson-021: Email Writing Tips (ビジネス, 初級)
+    - lesson-022: Renewable Energy Revolution (時事ネタ, 上級)
+  - `main.dart`: シード処理改善 (既存ユーザーにも新レッスンが配信される)
+  - `widget_test.dart`: テストのシード処理をmain.dartと一致させた
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
+Phase A-M まで全て完了。レッスンコンテンツを22本に拡充し、カテゴリ間バランスと難易度分布を改善。シード処理を改善し、アプリ更新時に新レッスンが既存ユーザーにも自動配信される。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)

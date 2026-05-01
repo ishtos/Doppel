@@ -22,8 +22,8 @@ void main() {
     await Hive.openBox<Map>('feedbacks');
     await Hive.openBox<Map>('progress');
 
-    if (lessonsBox.isEmpty) {
-      for (final lesson in seedLessons) {
+    for (final lesson in seedLessons) {
+      if (!lessonsBox.containsKey(lesson.id)) {
         await lessonsBox.put(lesson.id, lesson.toJson());
       }
     }

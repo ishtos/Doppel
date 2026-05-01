@@ -487,4 +487,200 @@ const seedLessons = [
     durationSeconds: 108,
     wordCount: 270,
   ),
+  // ── 日常会話（追加） ──
+
+  LessonModel(
+    id: 'lesson-017',
+    title: 'Weekend Plans',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hey, do you have any plans for this weekend? '
+        'I was thinking we could do something fun together. '
+        'Actually, I heard there is a new farmers market that just opened near the station. '
+        'They have fresh produce, homemade bread, and even some local crafts. It sounds really nice, doesn\'t it? '
+        'We could go there on Saturday morning and grab some things for a picnic. '
+        'There is a beautiful park nearby with a lake where we could sit and relax. '
+        'Oh, and speaking of Saturday, I need to return some books to the library before noon. '
+        'Would you mind if we stopped there on the way? It should only take a few minutes. '
+        'After the market and the picnic, I thought maybe we could check out that new movie everyone has been talking about. '
+        'The one about the chef who travels around the world. I have heard it is really heartwarming. '
+        'If the movie finishes early enough, we could grab dinner at that Thai place you recommended last time. '
+        'I have been craving their green curry ever since you told me about it. '
+        'On Sunday, I promised my sister I would help her move into her new apartment. '
+        'She does not have much furniture, so it should not take too long. '
+        'But after that, I am free. Maybe we could go for a walk along the river in the evening. '
+        'The cherry blossoms should be in full bloom by now, and the path looks amazing when they are lit up at night. '
+        'Does that sound like a good plan to you? We can always adjust things depending on the weather. '
+        'I just want to make the most of the weekend since we have both been so busy with work lately. '
+        'It would be nice to unwind and catch up properly.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 125,
+    wordCount: 271,
+  ),
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Job Interview Practice',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thank you for having me today. I am really excited about this opportunity and I would love to tell you a bit about myself. '
+        'I graduated from university with a degree in computer science five years ago, '
+        'and since then I have been working as a software developer at a mid-sized technology company. '
+        'My primary focus has been on building web applications using modern frameworks, '
+        'but I have also had the chance to lead a small team on several projects. '
+        'One accomplishment I am particularly proud of is the customer portal I built last year. '
+        'The old system was slow and difficult to navigate, and our customer satisfaction scores were dropping because of it. '
+        'I proposed a complete redesign, got approval from management, '
+        'and led a team of four developers to build it from scratch in just three months. '
+        'After launching, customer satisfaction jumped by thirty-five percent and support tickets decreased by half. '
+        'I am interested in joining your company because I have always admired your approach to innovation. '
+        'I read your recent article about sustainable technology practices, and it really resonated with my own values. '
+        'I believe technology should solve real problems while being mindful of its environmental impact. '
+        'In terms of my working style, I am very collaborative. '
+        'I enjoy pair programming and code reviews because I think the best solutions come from diverse perspectives. '
+        'I also believe in continuous learning, which is why I regularly attend conferences and contribute to open source projects. '
+        'Looking ahead, I would love to grow into a technical lead role where I can mentor junior developers while still staying hands-on with code. '
+        'I think this position aligns perfectly with that goal. '
+        'Do you have any questions about my experience, or is there anything specific you would like me to elaborate on?',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 109,
+    wordCount: 272,
+  ),
+
+  // ── TEDスタイル（追加） ──
+
+  LessonModel(
+    id: 'lesson-019',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'Today I want to talk to you about something we all do every single night. Sleep. '
+        'We spend about one third of our lives sleeping, yet most of us do not really understand why it is so important. '
+        'Let me start with a simple fact. When you sleep, your brain does not just shut down. It actually becomes very busy. '
+        'During sleep, your brain sorts through everything you learned during the day. '
+        'It decides what to keep and what to forget. '
+        'This is why students who get a good night of sleep before an exam tend to perform better than those who stay up all night studying. '
+        'Your body is also hard at work while you sleep. Your muscles repair themselves. Your immune system gets stronger. '
+        'Growth hormones are released, which is especially important for children and teenagers. '
+        'So what happens when we do not get enough sleep? The effects are serious and they show up quickly. '
+        'After just one night of poor sleep, your ability to concentrate drops significantly. You make more mistakes. Your mood suffers. '
+        'And over time, lack of sleep has been linked to heart disease, weight gain, and depression. '
+        'The good news is that improving your sleep is not as hard as you might think. '
+        'Here are three simple things you can do tonight. '
+        'First, try to go to bed and wake up at the same time every day, even on weekends. '
+        'Second, avoid looking at your phone or computer screen for at least thirty minutes before bed. '
+        'Third, keep your bedroom cool and dark. '
+        'Small changes can make a big difference. '
+        'Your future self will thank you for taking sleep seriously starting today.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 161,
+    wordCount: 268,
+  ),
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: Digital Minimalism',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'How many times did you check your phone today? '
+        'If you are like the average person, the answer is somewhere around ninety-six times. '
+        'That is once every ten minutes during your waking hours. Let that sink in for a moment. '
+        'We live in an age of constant digital stimulation. '
+        'Notifications buzz, emails pile up, and social media feeds scroll endlessly. '
+        'We have become so accustomed to this noise that we barely notice it anymore. '
+        'But our brains do notice. Every notification triggers a small dopamine hit, '
+        'training us to crave more and more digital interaction. '
+        'The concept of digital minimalism is not about rejecting technology entirely. '
+        'It is about being intentional with how we use it. '
+        'Instead of mindlessly scrolling through content that someone else chose for you, '
+        'you consciously decide which digital tools add genuine value to your life '
+        'and which ones simply consume your time and attention. '
+        'I experimented with this approach for thirty days. '
+        'I removed all social media apps from my phone. I turned off every non-essential notification. '
+        'I set specific times during the day when I would check and respond to emails, rather than doing it constantly. '
+        'The results surprised me. During the first week, I felt anxious and restless, '
+        'like I was missing out on something important. But by the second week, something shifted. '
+        'I started reading books again. I had longer, deeper conversations with friends. '
+        'I noticed details in my neighborhood that I had walked past hundreds of times without seeing. '
+        'The most profound change was in my ability to think. '
+        'Without constant digital interruptions, my mind had space to wander, to connect ideas, and to solve problems creatively. '
+        'Our attention is perhaps our most valuable resource, and we should guard it carefully.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 126,
+    wordCount: 272,
+  ),
+
+  // ── ビジネス（追加） ──
+
+  LessonModel(
+    id: 'lesson-021',
+    title: 'Email Writing Tips',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Writing clear and professional emails is one of the most important skills in the modern workplace. '
+        'Whether you are communicating with a colleague, a client, or your manager, '
+        'a well-written email can make a strong impression and save everyone time. '
+        'Let us start with the subject line. '
+        'A good subject line tells the reader exactly what the email is about. '
+        'Instead of writing something vague like question, try something specific like question about the Friday meeting schedule. '
+        'This helps the reader prioritize their inbox and find your email later. '
+        'Next, keep your emails short and focused. '
+        'Most people receive dozens of emails every day, so they appreciate messages that get to the point quickly. '
+        'Start with the most important information. '
+        'If you need something from the reader, state it clearly at the beginning of the email. '
+        'Use simple and direct language. Avoid using complicated words when simple ones will do. '
+        'For example, instead of saying I would like to inquire about the possibility of, just say can I ask about. '
+        'Your message will be clearer and easier to understand. '
+        'Always proofread before you hit send. '
+        'Read your email once to check for spelling mistakes and grammar errors. '
+        'Read it again to make sure your tone sounds professional and friendly. '
+        'A small mistake might seem unimportant, but it can affect how people perceive you. '
+        'Finally, do not forget to include a clear closing. '
+        'If you need a response by a specific date, say so politely. '
+        'Something like could you let me know by Wednesday is both clear and professional. '
+        'Good email habits take practice, but once you develop them, they will serve you well throughout your entire career.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 158,
+    wordCount: 263,
+  ),
+
+  // ── 時事ネタ（追加） ──
+
+  LessonModel(
+    id: 'lesson-022',
+    title: 'Renewable Energy Revolution',
+    category: '時事ネタ',
+    difficulty: 3,
+    transcriptText:
+        'The global transition to renewable energy has reached a remarkable tipping point that few analysts predicted would arrive so soon. '
+        'Last year, renewable sources accounted for over forty percent of the world\'s electricity generation for the first time in history, '
+        'surpassing fossil fuels in several major economies. '
+        'Solar energy has been the biggest driver of this transformation. '
+        'The cost of solar panels has plummeted by ninety percent over the past decade, '
+        'making it the cheapest source of new electricity in most parts of the world. '
+        'Countries that were once entirely dependent on imported oil and gas '
+        'are now building massive solar farms that generate clean power for millions of homes and businesses. '
+        'Wind energy has also made extraordinary progress, particularly offshore. '
+        'New floating turbine technology allows wind farms to be installed in deep ocean waters, '
+        'unlocking vast energy resources that were previously inaccessible. '
+        'A single modern offshore turbine can produce enough electricity to power fifteen thousand homes. '
+        'Battery storage technology is solving the intermittency challenge that once made renewables unreliable. '
+        'Advanced lithium-ion and solid-state batteries can now store excess energy generated during sunny and windy periods '
+        'for use when conditions are less favorable. '
+        'The economic implications are equally transformative. '
+        'The renewable energy sector now employs over fourteen million people globally, '
+        'exceeding employment in the fossil fuel industry for the first time. '
+        'Investment in clean energy exceeded one point seven trillion dollars last year, '
+        'attracting capital from pension funds, sovereign wealth funds, and major institutional investors. '
+        'Critics point out that the transition has created new challenges, '
+        'including the environmental impact of mining rare earth minerals and the need to upgrade aging electrical grids. '
+        'Nevertheless, the momentum behind renewable energy appears unstoppable, '
+        'reshaping geopolitics and economics in ways that will define the coming decades.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 108,
+    wordCount: 271,
+  ),
 ];
