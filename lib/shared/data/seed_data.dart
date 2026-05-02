@@ -94,6 +94,36 @@ const seedLessons = [
 
   // ── ビジネス ──
 
+  // FIXED: 初級ビジネスレッスンを追加（難易度ギャップを解消）
+  LessonModel(
+    id: 'lesson-017',
+    title: 'First Day at Work',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Good morning and welcome to the team. My name is Sarah, and I will be helping you get started on your first day. '
+        'Let me begin by showing you around the office. This is the main work area where most of our team sits. '
+        'Over there is the break room where you can find coffee, tea, and water anytime you need a drink. '
+        'The meeting rooms are on the second floor. You can book them through our online calendar system. '
+        'Now let me explain a few important things about how we work here. '
+        'Our office hours are from nine in the morning until five in the afternoon, Monday through Friday. '
+        'Most people arrive a little early to get settled in before the day starts. '
+        'We have a team meeting every Monday at ten o\'clock. It usually lasts about thirty minutes. '
+        'During the meeting, each person shares what they are working on and whether they need any help. '
+        'Your manager will meet with you every two weeks to discuss your progress and answer your questions. '
+        'We use email for most of our communication, but for quick questions you can use our messaging app. '
+        'Please check your email at least twice a day so you do not miss anything important. '
+        'For lunch, there are several restaurants and cafes within walking distance of the office. '
+        'Many people also bring their own lunch and eat together in the break room. '
+        'It is a great way to get to know your colleagues and feel at home. '
+        'If you ever have a problem or need help with anything, please do not hesitate to ask. '
+        'Everyone here is very friendly and always happy to help new team members. '
+        'I hope you enjoy your first day with us. Let me now take you to meet your team.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 179,
+    wordCount: 299,
+  ),
+
   LessonModel(
     id: 'lesson-002',
     title: 'Business Meeting Basics',
@@ -245,7 +275,127 @@ const seedLessons = [
     wordCount: 260,
   ),
 
+  // FIXED: 日常会話の中級・上級レッスンを追加（難易度ギャップを解消）
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Weekend Plans with Friends',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hey, have you made any plans for this weekend yet? I was thinking we could do something fun together. '
+        'There is a new Italian restaurant that just opened on Oak Street. I have heard the food is really good. '
+        'A friend of mine went there last week and she said the pasta was incredible. '
+        'Would you be interested in trying it out on Saturday evening? '
+        'We could meet up around six thirty and grab a table before it gets too crowded. '
+        'Actually, now that I think about it, we should probably make a reservation. '
+        'Popular restaurants tend to fill up quickly on weekends, especially new ones that everyone is talking about. '
+        'I will call them this afternoon and see if I can get us a table for four. '
+        'Do you think James and Lisa would want to come along? It has been ages since we all got together. '
+        'Last time we met up was at that barbecue in July, and that was months ago. '
+        'Speaking of which, there is also a food festival happening in the park on Sunday. '
+        'They are supposed to have stalls from all different countries, with live music and cooking demonstrations. '
+        'It starts at eleven in the morning and goes until nine at night, so we could go anytime. '
+        'I was thinking we could head over after lunch, walk around, and try a few things. '
+        'The weather forecast says it should be sunny and warm, which would be perfect for an outdoor event. '
+        'If it does rain though, we could always go to the cinema instead. '
+        'There is that new science fiction movie that just came out. The reviews have been really positive. '
+        'Either way, it would be nice to spend some time together outside of work. '
+        'Let me know what you think and I will start making arrangements.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 140,
+    wordCount: 303,
+  ),
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'I have been looking at apartments for the past three weeks, and honestly, the whole experience has been quite exhausting. '
+        'The rental market right now is incredibly competitive, and anything decent gets snapped up within days of being listed. '
+        'Last Tuesday, I visited a place in the city center that looked absolutely perfect in the photos. '
+        'Two bedrooms, a modern kitchen, plenty of natural light, and a small balcony overlooking the park. '
+        'The rent was within my budget, and the location was ideal for my commute to work. '
+        'But when I arrived for the viewing, there were already twelve other people waiting to see the same apartment. '
+        'The landlord told me she had received over forty applications in the first twenty-four hours. '
+        'I submitted my application anyway, but I never heard back, which was incredibly frustrating. '
+        'Then on Thursday, I saw another listing that seemed promising. It was slightly further from the center, '
+        'but the neighborhood had a reputation for being quiet and family-friendly, with excellent cafes and restaurants nearby. '
+        'The apartment itself was spacious, with hardwood floors and high ceilings that gave it a really elegant feel. '
+        'The only downside was that the building did not have an elevator, and the unit was on the fifth floor. '
+        'I could probably manage the stairs for a while, but carrying groceries up five flights would get old pretty fast. '
+        'The real estate agent suggested I should widen my search radius and consider neighborhoods I had not previously thought about. '
+        'She mentioned that areas on the east side of the city are undergoing rapid development, '
+        'with new shops, restaurants, and transit connections being added all the time. '
+        'The prices there are still relatively affordable, though they are expected to rise significantly over the next few years. '
+        'I have a few more viewings scheduled for this weekend, so hopefully I will find something soon.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 124,
+    wordCount: 311,
+  ),
+
   // ── TEDスタイル ──
+
+  // FIXED: TEDスタイルの初級・中級レッスンを追加（難易度ギャップを解消）
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Magic of Reading',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'I want to talk to you today about something very simple but incredibly powerful. Reading. '
+        'When was the last time you sat down and read a book from beginning to end? '
+        'For many of us, the answer might be a long time ago. '
+        'Our lives are so busy that we forget how much a good book can change the way we think. '
+        'Reading does something amazing to our brains. When we read a story, our brain acts as if we are actually living it. '
+        'If a character in a book is running, the part of our brain that controls movement lights up. '
+        'If they are eating a delicious meal, we can almost taste the food ourselves. '
+        'This is why reading builds something called empathy, the ability to understand how other people feel. '
+        'Studies show that people who read fiction regularly are better at understanding emotions and connecting with others. '
+        'They become better listeners, better friends, and better leaders. '
+        'But reading is not just about stories. Reading anything at all helps your brain stay sharp and healthy. '
+        'Just like your body needs exercise, your brain needs to be challenged and stimulated. '
+        'People who read every day have better memory, stronger focus, and clearer thinking. '
+        'Some research even suggests that reading can slow down the effects of aging on the brain. '
+        'And here is the best part. You do not need to read for hours to see these benefits. '
+        'Just fifteen to twenty minutes a day is enough to make a real difference. '
+        'That could be on the train to work, during your lunch break, or before you go to sleep at night. '
+        'So my challenge to you is simple. Pick up a book this week. Any book. '
+        'Give your brain the workout it deserves, and I promise you will not regret it.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 181,
+    wordCount: 301,
+  ),
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: Sleep and Health',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'How many hours of sleep did you get last night? If your answer is less than seven, you are not alone. '
+        'Nearly a third of adults around the world are chronically sleep-deprived, '
+        'and the consequences are far more serious than just feeling tired during the day. '
+        'Let me share some of the science with you, because the research is genuinely alarming. '
+        'When you sleep fewer than six hours a night, your risk of developing heart disease increases by forty-eight percent. '
+        'Your immune system weakens significantly, making you more vulnerable to infections. '
+        'And your ability to form new memories drops by nearly forty percent compared to when you are well rested. '
+        'But perhaps the most surprising finding is how sleep affects our decision-making. '
+        'Sleep-deprived individuals consistently make riskier choices and are worse at reading social situations. '
+        'In fact, studies have shown that being awake for seventeen hours straight impairs your cognitive performance '
+        'as much as having a blood alcohol level of point zero five percent. '
+        'So why are so many of us not getting enough sleep? The answer lies partly in our modern lifestyle. '
+        'We work longer hours than any previous generation. We stare at screens that emit blue light, '
+        'which suppresses the production of melatonin, the hormone that tells our body it is time to sleep. '
+        'And we live in a culture that often treats sleep as a luxury rather than a biological necessity. '
+        'But there are practical steps you can take to improve your sleep starting tonight. '
+        'First, establish a consistent bedtime and wake-up time, even on weekends. '
+        'Second, avoid caffeine after two in the afternoon. Third, make your bedroom as dark and cool as possible. '
+        'And finally, put away your phone at least thirty minutes before bed. '
+        'These changes might seem small, but the impact on your health, your mood, and your productivity can be transformative.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 142,
+    wordCount: 308,
+  ),
 
   LessonModel(
     id: 'lesson-004',
@@ -310,6 +460,36 @@ const seedLessons = [
   ),
 
   // ── スポーツ ──
+
+  // FIXED: スポーツの追加レッスン
+  LessonModel(
+    id: 'lesson-023',
+    title: 'City Marathon Report',
+    category: 'スポーツ',
+    difficulty: 2,
+    transcriptText:
+        'What an extraordinary day it has been here at the city marathon, '
+        'with over thirty thousand runners taking part in what many are calling the most exciting race in the event\'s twenty-year history. '
+        'The men\'s race was won by Kenya\'s David Kimani, who crossed the finish line in a time of two hours, four minutes, and thirty-seven seconds. '
+        'This sets a new course record, beating the previous best by almost a full minute. '
+        'Kimani took control of the race at the halfway mark and gradually pulled away from the leading pack. '
+        'By the thirty-kilometer mark, his advantage had grown to nearly forty-five seconds, and he never looked back. '
+        'The women\'s race produced an equally thrilling result. Ethiopia\'s Marta Bekele ran a masterful tactical race, '
+        'staying with the leaders until the final three kilometers before unleashing a devastating finishing kick. '
+        'She crossed the line in two hours, nineteen minutes, and twelve seconds, a personal best by over two minutes. '
+        'Beyond the elite athletes, today was really about the thousands of ordinary runners who took on this incredible challenge. '
+        'From first-time marathon runners to dedicated charity fundraisers, each one of them has their own inspiring story. '
+        'One runner who caught everyone\'s attention was seventy-eight-year-old Margaret Chen, '
+        'who completed her fiftieth marathon to raise money for children\'s hospitals. '
+        'She finished in just under five hours and received a standing ovation as she crossed the line. '
+        'The event organizers reported that participants raised over twelve million dollars for various charitable causes this year, '
+        'setting a new record for the event. Weather conditions were nearly perfect for running, '
+        'with clear skies and temperatures hovering around fifteen degrees. '
+        'Next year\'s race is already generating excitement, with registration expected to open in September.',
+    audioAssetPath: 'assets/audio/lesson_023.mp3',
+    durationSeconds: 132,
+    wordCount: 286,
+  ),
 
   LessonModel(
     id: 'lesson-009',
@@ -398,6 +578,71 @@ const seedLessons = [
   ),
 
   // ── 時事ネタ ──
+
+  // FIXED: ニュースの追加中級レッスン
+  LessonModel(
+    id: 'lesson-022',
+    title: 'Technology News Update',
+    category: 'ニュース',
+    difficulty: 2,
+    transcriptText:
+        'Good evening and welcome to tonight\'s technology news update. '
+        'Our top story tonight concerns the rapid advancement of quantum computing. '
+        'Researchers at a leading European university have announced a breakthrough that could revolutionize the field. '
+        'Their new processor can perform calculations in minutes that would take traditional computers thousands of years. '
+        'While practical applications are still several years away, experts say this development brings us significantly closer '
+        'to solving some of humanity\'s most complex problems, from drug discovery to climate modeling. '
+        'In other tech news, a major social media company has introduced new features designed to protect younger users. '
+        'The updated platform will automatically limit screen time for users under sixteen years old '
+        'and restrict the types of content that appear in their feeds. '
+        'Parents will also be able to monitor their children\'s activity through a new dashboard. '
+        'Privacy advocates have praised the move, though some critics say the measures do not go far enough. '
+        'Turning to the world of electric vehicles, the latest industry report shows sales are continuing to surge. '
+        'Global sales rose twenty-five percent in the first quarter compared to the same period last year. '
+        'Battery technology improvements have led to longer driving ranges and shorter charging times, '
+        'making electric cars a more practical option for everyday use. '
+        'Several major automakers have announced plans to phase out traditional gasoline engines entirely within the next decade. '
+        'Finally, in the world of consumer technology, a new generation of smart home devices was unveiled at this week\'s trade show. '
+        'The products use advanced artificial intelligence to learn household routines and adjust settings automatically. '
+        'Industry analysts predict that the smart home market will double in size over the next three years. '
+        'That is all for tonight\'s tech update. Join us again tomorrow for the latest developments.',
+    audioAssetPath: 'assets/audio/lesson_022.mp3',
+    durationSeconds: 136,
+    wordCount: 295,
+  ),
+
+  // FIXED: 時事ネタの追加初級レッスン
+  LessonModel(
+    id: 'lesson-024',
+    title: 'Renewable Energy Revolution',
+    category: '時事ネタ',
+    difficulty: 1,
+    transcriptText:
+        'A quiet revolution is happening in the world of energy, and it is changing the way we power our homes and cities. '
+        'Solar and wind energy are now cheaper than coal and natural gas in most parts of the world. '
+        'This is a huge shift that seemed impossible just ten years ago. '
+        'Last year, renewable energy sources provided thirty percent of the world\'s electricity for the first time ever. '
+        'In some countries, that number is even higher. '
+        'Denmark gets more than half of its power from wind turbines, '
+        'and Portugal ran entirely on renewable energy for six straight days last summer. '
+        'So what is driving this change? The biggest reason is the falling cost of solar panels. '
+        'The price of solar energy has dropped by ninety percent over the past decade. '
+        'Today, building a new solar farm is often cheaper than running an existing coal plant. '
+        'Many countries are taking advantage of these lower costs by investing heavily in clean energy projects. '
+        'China installed more solar panels last year than the rest of the world combined. '
+        'The United States added enough wind power to supply electricity to five million homes. '
+        'And in Africa, small solar systems are bringing power to villages that have never had electricity before. '
+        'Of course, there are still challenges to overcome. '
+        'The sun does not always shine, and the wind does not always blow. '
+        'This means we need better ways to store energy for use at night and on calm days. '
+        'Battery technology is improving rapidly, but we still have a long way to go. '
+        'Experts believe that by twenty fifty, renewable energy could provide eighty percent of the world\'s power. '
+        'To reach that goal, governments, businesses, and individuals all need to work together. '
+        'The good news is that the transition has already begun, and there is no turning back.',
+    audioAssetPath: 'assets/audio/lesson_024.mp3',
+    durationSeconds: 182,
+    wordCount: 304,
+  ),
 
   LessonModel(
     id: 'lesson-012',
