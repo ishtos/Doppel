@@ -29,6 +29,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
+- [x] Phase M: テストカバレッジ向上 (Feedback/Lesson画面Widget テスト + text_diff ユニットテスト)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
@@ -44,7 +45,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
-- Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足
+- ~~Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足~~ → Phase M で解消（テスト約51件）
 
 ## 6. Screens & Architecture
 
@@ -64,19 +65,16 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-05-03)
+- テストカバレッジ向上 (Phase M)
+  - `test/text_diff_test.dart`: computeWordDiff ユニットテスト (7件) + buildDiffTextSpan テスト (3件)
+  - `test/feedback_screen_test.dart`: Feedback 画面 Widget テスト (10件) - スコア表示、改善ポイント、テキスト比較、AI コーチ、アクションボタン等
+  - `test/lesson_screen_test.dart`: Lesson 画面 Widget テスト (9件) - タイトル表示、TTS再生、速度スライダー、録音ボタン、WPM バッジ等
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
+Phase A-M まで全て完了。テストカバレッジを大幅に向上（22件 → 約51件）。Feedback / Lesson 画面の主要UIコンポーネントのテストとtext_diffユーティリティのユニットテストを追加済み。
 次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
+- App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Splash screen の設定 (flutter_native_splash)
 - Android ビルド確認 (`flutter build apk`) & リリース署名設定
 - App Store / Google Play メタデータ準備
