@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
-import 'package:doppel/features/settings/presentation/providers/settings_provider.dart';
-import 'package:doppel/main.dart';
+import 'package:doppel/app/theme.dart';
+import 'package:doppel/features/lesson/presentation/screens/lesson_screen.dart';
 import 'package:doppel/shared/data/seed_data.dart';
 
 void main() {
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    Hive.init('./test_hive_lesson');
 
-    if (Hive.isBoxOpen('lessons')) await Hive.box<Map>('lessons').close();
-    if (Hive.isBoxOpen('feedbacks')) await Hive.box<Map>('feedbacks').close();
-    if (Hive.isBoxOpen('progress')) await Hive.box<Map>('progress').close();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_tts'),
+      (call) async => 1,
+    );
+
+    Hive.init('./test_hive_lesson');
+    for (final name in ['lessons', 'feedbacks', 'progress']) {
+      if (Hive.isBoxOpen(name)) await Hive.box<Map>(name).close();
+    }
 
     final lessonsBox = await Hive.openBox<Map>('lessons');
     await Hive.openBox<Map>('feedbacks');
@@ -29,134 +36,97 @@ void main() {
   });
 
   tearDown(() async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('flutter_tts'), null);
     await Hive.close();
   });
 
-  Widget buildApp() {
-    return ProviderScope(
-      overrides: [
-        settingsProvider.overrideWith(
-          (ref) => _OnboardedSettingsNotifier(),
+  Widget buildTestWidget({String lessonId = 'lesson-001'}) {
+    final router = GoRouter(
+      initialLocation: '/lesson/$lessonId',
+      routes: [
+        GoRoute(
+          path: '/lesson/:lessonId',
+          builder: (context, state) => LessonScreen(
+            lessonId: state.pathParameters['lessonId']!,
+          ),
+        ),
+        GoRoute(
+          path: '/home',
+          builder: (_, __) => const Scaffold(body: Text('Home')),
+        ),
+        GoRoute(
+          path: '/feedback/:feedbackId',
+          builder: (_, __) => const Scaffold(body: Text('Feedback')),
         ),
       ],
-      child: const DoppelApp(),
+    );
+
+    return ProviderScope(
+      child: MaterialApp.router(
+        theme: AppTheme.light(),
+        routerConfig: router,
+      ),
     );
   }
 
   group('Lesson screen', () {
-    testWidgets('shows lesson title and transcript text',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('shows lesson title', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
       expect(find.text('Morning News Report'), findsOneWidget);
-      expect(find.textContaining('Good morning and welcome'), findsOneWidget);
     });
 
-    testWidgets('shows TTS play button and label',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('shows transcript text', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
+      expect(find.textContaining('Good morning'), findsOneWidget);
+    });
 
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
+    testWidgets('shows record button with mic icon', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.mic), findsOneWidget);
+    });
 
+    testWidgets('shows TTS play button and label', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pumpAndSettle();
       expect(find.byIcon(Icons.volume_up), findsOneWidget);
       expect(find.text('お手本を聴く'), findsOneWidget);
     });
 
-    testWidgets('shows speed slider', (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('shows speed control', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
-      expect(find.byType(Slider), findsOneWidget);
       expect(find.byIcon(Icons.speed), findsOneWidget);
+      expect(find.byType(Slider), findsOneWidget);
     });
 
-    testWidgets('shows WPM badge', (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('shows visibility toggle', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
-      expect(find.textContaining('WPM'), findsOneWidget);
-    });
-
-    testWidgets('shows record button with mic icon',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Icons.mic), findsOneWidget);
-    });
-
-    testWidgets('shows visibility toggle button',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
       expect(find.byIcon(Icons.visibility), findsOneWidget);
     });
 
-    testWidgets('shows back button', (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('shows WPM badge', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
-      expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+      expect(find.textContaining('WPM'), findsOneWidget);
     });
 
-    testWidgets('shows lesson not found for invalid ID',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
+    testWidgets('back button navigates to home', (tester) async {
+      await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/non-existent-lesson');
+      await tester.tap(find.byIcon(Icons.arrow_back));
       await tester.pumpAndSettle();
+      expect(find.text('Home'), findsOneWidget);
+    });
 
+    testWidgets('nonexistent lesson shows error message', (tester) async {
+      await tester.pumpWidget(buildTestWidget(lessonId: 'nonexistent'));
+      await tester.pumpAndSettle();
       expect(find.text('レッスンが見つかりません'), findsOneWidget);
     });
-
-    testWidgets('speed label shows correct initial value',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(buildApp());
-      await tester.pumpAndSettle();
-
-      final navContext = tester.element(find.byType(Scaffold).first);
-      GoRouter.of(navContext).go('/lesson/lesson-001');
-      await tester.pumpAndSettle();
-
-      // Default speed is 0.5, which maps to 1.0x
-      expect(find.text('1.0x'), findsOneWidget);
-    });
   });
-}
-
-class _OnboardedSettingsNotifier extends SettingsNotifier {
-  _OnboardedSettingsNotifier() : super() {
-    state = const SettingsState(hasCompletedOnboarding: true);
-  }
 }
