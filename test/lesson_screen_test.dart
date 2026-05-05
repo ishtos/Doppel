@@ -1,132 +1,124 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
-import 'package:doppel/app/theme.dart';
-import 'package:doppel/features/lesson/presentation/screens/lesson_screen.dart';
 import 'package:doppel/shared/data/seed_data.dart';
+
+import 'helpers/test_helpers.dart';
 
 void main() {
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    setupMockPlatformChannels();
+    setupMockSharedPreferences();
+    await setupTestHive('./test_hive_lesson');
 
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(
-      const MethodChannel('flutter_tts'),
-      (call) async => 1,
-    );
-
-    Hive.init('./test_hive_lesson');
-    for (final name in ['lessons', 'feedbacks', 'progress']) {
-      if (Hive.isBoxOpen(name)) await Hive.box<Map>(name).close();
-    }
-
-    final lessonsBox = await Hive.openBox<Map>('lessons');
-    await Hive.openBox<Map>('feedbacks');
-    await Hive.openBox<Map>('progress');
-
-    if (lessonsBox.isEmpty) {
-      for (final lesson in seedLessons) {
-        await lessonsBox.put(lesson.id, lesson.toJson());
-      }
+    final lessonsBox = Hive.box<Map>('lessons');
+    for (final lesson in seedLessons) {
+      await lessonsBox.put(lesson.id, lesson.toJson());
     }
   });
 
   tearDown(() async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(const MethodChannel('flutter_tts'), null);
+    tearDownMockPlatformChannels();
     await Hive.close();
   });
 
-  Widget buildTestWidget({String lessonId = 'lesson-001'}) {
-    final router = GoRouter(
-      initialLocation: '/lesson/$lessonId',
-      routes: [
-        GoRoute(
-          path: '/lesson/:lessonId',
-          builder: (context, state) => LessonScreen(
-            lessonId: state.pathParameters['lessonId']!,
-          ),
-        ),
-        GoRoute(
-          path: '/home',
-          builder: (_, __) => const Scaffold(body: Text('Home')),
-        ),
-        GoRoute(
-          path: '/feedback/:feedbackId',
-          builder: (_, __) => const Scaffold(body: Text('Feedback')),
-        ),
-      ],
-    );
-
-    return ProviderScope(
-      child: MaterialApp.router(
-        theme: AppTheme.light(),
-        routerConfig: router,
-      ),
-    );
-  }
-
   group('Lesson screen', () {
     testWidgets('shows lesson title', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.text('Morning News Report'), findsOneWidget);
     });
 
     testWidgets('shows transcript text', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.textContaining('Good morning'), findsOneWidget);
     });
 
     testWidgets('shows record button with mic icon', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.byIcon(Icons.mic), findsOneWidget);
     });
 
     testWidgets('shows TTS play button and label', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.byIcon(Icons.volume_up), findsOneWidget);
       expect(find.text('お手本を聴く'), findsOneWidget);
     });
 
     testWidgets('shows speed control', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.byIcon(Icons.speed), findsOneWidget);
       expect(find.byType(Slider), findsOneWidget);
     });
 
+    testWidgets('shows default speed label', (tester) async {
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
+      expect(find.text('1.0x'), findsOneWidget);
+    });
+
     testWidgets('shows visibility toggle', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.byIcon(Icons.visibility), findsOneWidget);
     });
 
     testWidgets('shows WPM badge', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       expect(find.textContaining('WPM'), findsOneWidget);
     });
 
     testWidgets('back button navigates to home', (tester) async {
-      await tester.pumpWidget(buildTestWidget());
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
       await tester.tap(find.byIcon(Icons.arrow_back));
       await tester.pumpAndSettle();
       expect(find.text('Home'), findsOneWidget);
     });
 
     testWidgets('nonexistent lesson shows error message', (tester) async {
-      await tester.pumpWidget(buildTestWidget(lessonId: 'nonexistent'));
-      await tester.pumpAndSettle();
+      await pumpLessonScreen(tester, lessonId: 'nonexistent');
       expect(find.text('レッスンが見つかりません'), findsOneWidget);
+    });
+  });
+
+  group('Lesson screen - past score banner', () {
+    testWidgets('shows past score when feedbacks exist', (tester) async {
+      final feedback = createTestFeedback(
+        id: 'fb-past-1',
+        lessonId: 'lesson-001',
+        overallScore: 78,
+      );
+      await seedTestFeedback(feedback);
+
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
+      expect(find.textContaining('前回:'), findsOneWidget);
+      expect(find.textContaining('78点'), findsOneWidget);
+      expect(find.textContaining('最高:'), findsOneWidget);
+      expect(find.text('1回練習'), findsOneWidget);
+      expect(find.text('詳細'), findsOneWidget);
+    });
+
+    testWidgets('hides past score when no feedbacks', (tester) async {
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
+      expect(find.textContaining('前回:'), findsNothing);
+      expect(find.text('詳細'), findsNothing);
+    });
+
+    testWidgets('shows correct practice count for multiple feedbacks',
+        (tester) async {
+      await seedTestFeedback(createTestFeedback(
+        id: 'fb-multi-1',
+        lessonId: 'lesson-001',
+        overallScore: 60,
+      ));
+      await seedTestFeedback(createTestFeedback(
+        id: 'fb-multi-2',
+        lessonId: 'lesson-001',
+        overallScore: 85,
+      ));
+
+      await pumpLessonScreen(tester, lessonId: 'lesson-001');
+      expect(find.text('2回練習'), findsOneWidget);
+      expect(find.textContaining('最高:'), findsOneWidget);
     });
   });
 }
