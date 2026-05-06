@@ -487,4 +487,161 @@ const seedLessons = [
     durationSeconds: 108,
     wordCount: 270,
   ),
+
+  // ── 追加コンテンツ: カテゴリ×難易度ギャップ補完 ──
+
+  // FIXED: ビジネス初級が欠落していたため追加
+  LessonModel(
+    id: 'lesson-017',
+    title: 'First Day at the Office',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Welcome to the company. My name is Sarah, and I will be showing you around the office today. '
+        'Let me start by introducing you to the team. This is the main work area where most of our staff sit. '
+        'Everyone here is very friendly, so please do not hesitate to ask if you need any help. '
+        'Your desk is right over here by the window. You will find your computer, a phone, and some basic supplies. '
+        'If you need anything else, just let me know and I will arrange it for you. '
+        'The kitchen is just down the hall on the left. We have coffee, tea, and water available all day. '
+        'There is also a refrigerator where you can store your lunch. Please make sure to label your food with your name. '
+        'The meeting rooms are on the second floor. You can book them through the calendar system on your computer. '
+        'We have a team meeting every Monday morning at nine thirty. It usually lasts about thirty minutes. '
+        'During the meeting, each person gives a quick update on what they are working on. '
+        'For lunch, most people go to the cafeteria downstairs. The food is quite good and reasonably priced. '
+        'Some people also bring their own lunch and eat in the break room. '
+        'Our working hours are from nine to six, but we have flexible arrangements if you need to adjust your schedule. '
+        'Just make sure to discuss it with your manager first. '
+        'If you have any questions about your benefits, the human resources department is on the third floor. '
+        'They can help you with everything from insurance to vacation days. '
+        'I hope you enjoy your first day here. Let me know if there is anything I can do to make your transition easier.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 161,
+    wordCount: 268,
+  ),
+
+  // FIXED: 日常会話中級が欠落していたため追加
+  LessonModel(
+    id: 'lesson-018',
+    title: 'Weekend Plans with Friends',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Hey, have you thought about what you want to do this weekend? '
+        'I was thinking we could try that new restaurant that just opened downtown. '
+        'I heard they have amazing pasta and the atmosphere is supposed to be really nice. '
+        'My colleague went there last week and she said the service was excellent. '
+        'We should probably make a reservation though, because it gets pretty crowded on Saturday nights. '
+        'If you are not in the mood for Italian, there is also a new Thai place near the station that everyone has been talking about. '
+        'The reviews online are really positive, especially for their green curry and pad thai. '
+        'After dinner, we could go see that new movie that just came out. I have been wanting to watch it for weeks. '
+        'The critics gave it really good ratings, and a few of my friends said it was one of the best films they have seen this year. '
+        'There is a showing at eight forty-five, which would work perfectly if we have dinner around six thirty. '
+        'Or, if you would rather do something more active, there is a live music event at the park on Sunday afternoon. '
+        'Several local bands are performing, and the best part is that admission is completely free. '
+        'We could pack a picnic lunch and spend the whole afternoon there. The weather forecast says it should be sunny and warm. '
+        'Actually, now that I think about it, why don\'t we do both? '
+        'Dinner and a movie on Saturday, and then the music event on Sunday. '
+        'That way we get the best of both worlds. What do you think? '
+        'Let me know which option sounds better to you, and I will start making the arrangements. '
+        'Oh, and should we invite anyone else? I think it would be fun if we got the whole group together.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 129,
+    wordCount: 279,
+  ),
+
+  // FIXED: 日常会話上級が欠落していたため追加
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Job Interview Conversation',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thank you for coming in today. Please have a seat and make yourself comfortable. '
+        'I have reviewed your resume and I am quite impressed with your background. '
+        'Before we dive into the specifics, could you tell me a little bit about yourself and what motivated you to apply for this position? '
+        'I see that you spent three years at your previous company working in project management. '
+        'What would you say was the most challenging project you handled there, and how did you overcome the obstacles you faced? '
+        'That is a very interesting example. It sounds like you had to balance multiple priorities simultaneously while managing a tight deadline. '
+        'The ability to handle pressure is definitely something we value highly in this role. '
+        'Let me tell you a bit about what we are looking for. '
+        'This position requires someone who can lead cross-functional teams, '
+        'communicate effectively with stakeholders at all levels, and adapt quickly to changing requirements. '
+        'We operate in a fast-paced environment where priorities can shift rapidly, '
+        'and we need someone who can remain calm and focused under those circumstances. '
+        'Can you give me an example of a time when you had to deal with a significant change in direction on a project? '
+        'How did you communicate that change to your team and ensure everyone stayed aligned? '
+        'That demonstrates excellent leadership skills. Now, I am curious about your technical abilities. '
+        'How comfortable are you with data analysis tools and project management software? '
+        'We use several different platforms here, and while we do provide training, '
+        'having a strong foundation makes the transition much smoother. '
+        'Looking ahead, where do you see yourself professionally in the next three to five years? '
+        'We like to invest in people who are committed to growing with the company over the long term. '
+        'Do you have any questions for me about the role or the company culture?',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 110,
+    wordCount: 275,
+  ),
+
+  // FIXED: TEDスタイル初級が欠落していたため追加
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'We spend about one third of our lives sleeping, but most of us know very little about why sleep matters so much. '
+        'Today I want to share some simple facts that might change the way you think about your bedtime routine. '
+        'First, let us talk about what happens when you sleep. Your brain does not just shut down. '
+        'In fact, it becomes incredibly active. It sorts through the experiences of your day, '
+        'deciding which memories to keep and which ones to let go. '
+        'This is why a good night of sleep helps you remember things better. '
+        'Students who sleep well after studying perform much better on tests than those who stay up all night. '
+        'Second, sleep is essential for your physical health. While you rest, your body repairs damaged cells, '
+        'strengthens your immune system, and restores your energy. '
+        'People who regularly get less than seven hours of sleep are more likely to get sick and take longer to recover. '
+        'Third, sleep affects your mood and emotions. When you are tired, you are more likely to feel stressed, '
+        'anxious, and irritable. Even one night of poor sleep can make everyday problems feel much more difficult to handle. '
+        'So what can you do to sleep better? The answer is surprisingly simple. '
+        'Try to go to bed and wake up at the same time every day, even on weekends. '
+        'This helps your body develop a natural rhythm. Also, avoid looking at your phone or computer screen '
+        'for at least thirty minutes before bed. The blue light from these devices tricks your brain into thinking it is still daytime. '
+        'Finally, make your bedroom cool, dark, and quiet. These small changes can make a big difference. '
+        'Remember, sleep is not a luxury. It is a necessity. Give your body the rest it deserves, '
+        'and you will be amazed at how much better you feel during the day.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 174,
+    wordCount: 290,
+  ),
+
+  // FIXED: TEDスタイル中級が欠落していたため追加
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: Why We Procrastinate',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'Raise your hand if you have ever put off something important until the very last minute. '
+        'I thought so. Procrastination is one of the most common human behaviors, and almost everyone does it. '
+        'But why do we procrastinate, even when we know it causes us stress and anxiety? '
+        'The answer lies in how our brains process decisions about the future. '
+        'When you think about a task that is due next week, your brain treats it as someone else\'s problem. '
+        'It is only when the deadline gets close that your brain suddenly realizes the urgency and kicks into action. '
+        'Scientists call this the present bias. We naturally prefer immediate rewards over future benefits. '
+        'Watching a funny video right now feels much more appealing than working on a report that is due on Friday. '
+        'Your brain literally weighs the instant pleasure of procrastinating against the distant satisfaction of completing the task, '
+        'and the present almost always wins. '
+        'But here is what makes procrastination truly dangerous. It creates a vicious cycle. '
+        'You put things off, then you feel guilty about putting them off, and that guilt makes the task seem even more unpleasant, '
+        'so you avoid it even more. Before you know it, you are trapped in a loop of avoidance and anxiety. '
+        'The good news is that there are proven strategies to break this cycle. '
+        'One of the most effective approaches is called the two-minute rule. '
+        'If a task takes less than two minutes, do it immediately. Do not add it to a list. Do not think about it. Just do it. '
+        'For larger tasks, break them down into smaller pieces that feel less overwhelming. '
+        'Instead of telling yourself you need to write a twenty-page report, tell yourself you just need to write the first paragraph. '
+        'Once you start, you will often find that continuing is much easier than stopping. '
+        'The hardest part of any task is simply beginning.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 136,
+    wordCount: 295,
+  ),
 ];
