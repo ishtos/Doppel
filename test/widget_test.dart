@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:doppel/main.dart';
 import 'package:doppel/shared/data/seed_data.dart';
@@ -9,6 +10,7 @@ import 'package:doppel/shared/data/seed_data.dart';
 void main() {
   setUp(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    SharedPreferences.setMockInitialValues({'onboarding_completed': true});
     Hive.init('./test_hive');
     if (Hive.isBoxOpen('lessons')) await Hive.box<Map>('lessons').close();
     if (Hive.isBoxOpen('feedbacks')) {

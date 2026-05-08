@@ -29,7 +29,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
-- [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
+- [x] Phase M: テスト拡充 (Feedback/Lesson テスト 22件→55件超、text_diff・Repository・統合テスト)
+- [ ] Release準備 (アイコン、スプラッシュ、ストア申請) ← **Next**
 
 ## 4. Feature Backlog (Prioritized)
 1. App icon (1024x1024 PNG) & Splash screen 設定
@@ -44,7 +45,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
-- Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足
+- ~~Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足~~ → Phase M で 55件超に拡充済み
+- 既存 widget_test.dart に SharedPreferences mock 未設定の問題あり → Phase M で修正済み
 
 ## 6. Screens & Architecture
 
@@ -64,19 +66,31 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. Test Coverage
+- **総テスト数:** 55件以上
+- **test/widget_test.dart:** Home / Library / Progress / Navigation ウィジェットテスト (22件)
+- **test/score_utils_test.dart:** ScoreUtils ユニットテスト
+- **test/streak_logic_test.dart:** ProgressRepository ストリークロジックテスト
+- **test/text_diff_test.dart:** computeWordDiff / buildDiffTextSpan ユニットテスト (16件)
+- **test/feedback_repository_test.dart:** FeedbackRepository CRUD テスト (12件)
+- **test/lesson_repository_test.dart:** LessonRepository CRUD テスト (14件)
+- **test/home_with_feedback_test.dart:** Feedback データ統合表示テスト (7件)
 
-## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
+## 9. 本日完了したタスク (2026-05-08)
+- テスト拡充 (Phase M)
+  - `test/text_diff_test.dart`: computeWordDiff LCS アルゴリズムの16テスト（identical, missing, extra, case insensitive, partial overlap, duplicate words, long texts, swapped words + buildDiffTextSpan テスト）
+  - `test/feedback_repository_test.dart`: FeedbackRepository の12テスト（save/find/delete/serialization/problemWords 保存/nullable フィールド保存）
+  - `test/lesson_repository_test.dart`: LessonRepository の14テスト（CRUD/search/bookmark/difficulty filter/category filter/serialization）
+  - `test/home_with_feedback_test.dart`: ホーム画面でのフィードバック統合テスト7件（最近の練習表示、スコア表示、改善ポイント、週間統計、空状態、デイリー目標）
+  - `test/widget_test.dart`: SharedPreferences mock 追加（オンボーディングリダイレクト回避）
+
+## 10. Handover Note for Next Run
+Phase A-M まで全て完了。テストカバレッジを 22件 → 55件超に拡充。text_diff アルゴリズム、FeedbackRepository、LessonRepository のユニットテスト、ホーム画面でのフィードバック統合テストを追加。既存 widget_test.dart の SharedPreferences mock 未設定バグも修正。
+
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定
 - Splash screen の設定 (flutter_native_splash)
 - Android ビルド確認 (`flutter build apk`) & リリース署名設定
 - App Store / Google Play メタデータ準備
+
+**前提:** テスト実行前に `dart run build_runner build --delete-conflicting-outputs` で .freezed.dart / .g.dart を生成すること。
