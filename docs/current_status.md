@@ -29,10 +29,13 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
-- [x] Phase M: テスト強化 (Lesson/Feedback画面Widgetテスト + text_diffユニットテスト + 共通ヘルパー、22件→70件)
+- [x] Phase M: テスト強化 (Lesson/Feedback画面Widgetテスト + text_diffユニットテスト + 共通ヘルパー、22件→72件)
 - [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
 
-## 4. Feature Backlog (Prioritized)
+## 4. Progress
+Progress: 85%
+
+## 5. Feature Backlog (Prioritized)
 1. App icon (1024x1024 PNG) & Splash screen 設定
 2. Android ビルド確認 & リリース署名設定
 3. ~~Privacy policy URL 作成~~ → About画面内にプライバシーポリシー表示を実装済み
@@ -42,13 +45,13 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
 8. 追加レッスンコンテンツ拡充
 
-## 5. Technical Debt & Issues
+## 6. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
-- ~~Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足~~ → Phase M で解消済み (70件)
+- ~~Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足~~ → Phase M で解消済み (72件)
 - Settings / Onboarding 画面のテストがまだ未実装
 
-## 6. Screens & Architecture
+## 7. Screens & Architecture
 
 | 画面 | ルート | 主な機能 |
 |------|--------|----------|
@@ -61,21 +64,30 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 | Settings | `/settings` | テーマ、TTS速度、デイリー目標設定、**練習リマインダー通知**、データリセット、About・ライセンスへのリンク |
 | About | `/about` | バージョン情報、ライセンス一覧、プライバシーポリシー、利用規約 |
 
-## 7. Lesson Content
+## 8. Lesson Content
 - **16レッスン** (各約250-320語)
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-05-05)
-- テスト強化 (Phase M) - 共通ヘルパー導入 & テスト追加
-  - `test/helpers/test_helpers.dart`: 共通テストユーティリティ（テストデータファクトリ、Hiveセットアップ・クリア、プラットフォームチャネルモック、テストアプリラッパー）
-  - `test/text_diff_test.dart`: computeWordDiff ユニットテスト14件
-  - `test/lesson_screen_test.dart`: Lesson画面Widgetテスト13件 (+過去スコアバナー3件、速度ラベル1件)
-  - `test/feedback_screen_test.dart`: Feedback画面Widgetテスト22件 (+音声再生2件、スコアラベル範囲3件、空改善ポイント1件、シミュレータフォールバック1件)
-  - Hiveボックスクリアによるテスト間のデータ分離を改善
+## 9. Test Coverage
+- **テスト総数:** 72件
+- **score_utils_test.dart:** ScoreUtils のスコア色・ラベル (4件)
+- **streak_logic_test.dart:** ストリーク計算ロジック (4件)
+- **widget_test.dart:** Home / Navigation / Library / Progress 画面 (14件)
+- **feedback_screen_test.dart:** FeedbackScreen Widget テスト (23件)
+- **lesson_screen_test.dart:** LessonScreen Widget テスト (13件)
+- **text_diff_test.dart:** TextDiff ユニットテスト (14件)
+- **helpers/test_helpers.dart:** 共通テストユーティリティ (ファクトリ、Hive、モック)
 
-## 9. Handover Note for Next Run
-Phase A-M まで全て完了。テストカバレッジを22件→約70件に強化。共通テストヘルパーを導入し、Lesson画面の過去スコアバナー、Feedback画面の音声再生・スコアラベル範囲などのテストを追加。
+## 10. 本日完了したタスク (2026-05-09)
+- Phase M: テスト強化 - 共通ヘルパー導入 & Feedback/Lesson/TextDiff テスト追加
+  - `test/helpers/test_helpers.dart`: テストデータファクトリ、Hiveセットアップ、プラットフォームチャネルモック、GoRouterラッパー
+  - `test/feedback_screen_test.dart`: Widgetテスト23件 (スコア表示、サブスコア、テキスト比較、AIコーチ、音声再生、スコアラベル範囲、問題単語、フォールバック)
+  - `test/lesson_screen_test.dart`: Widgetテスト13件 (レッスン表示、TTS、録音、速度、WPM、過去スコアバナー)
+  - `test/text_diff_test.dart`: ユニットテスト14件 (computeWordDiff 9件 + buildDiffTextSpan 5件)
+
+## 11. Handover Note for Next Run
+Phase A-M まで全て完了。テストカバレッジを22件→72件に大幅強化。共通テストヘルパーを導入し、全画面のWidgetテストカバレッジを確保。
 次は **リリース準備の残り** として以下から着手:
 - App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Splash screen の設定 (flutter_native_splash)
