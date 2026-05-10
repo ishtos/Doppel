@@ -6,7 +6,8 @@ import '../features/feedback/presentation/screens/feedback_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/lesson/presentation/screens/lesson_screen.dart';
 import '../features/library/presentation/screens/library_screen.dart';
-import '../features/onboarding/presentation/screens/onboarding_screen.dart'; // FIXED: オンボーディング画面import追加
+import '../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/progress/presentation/screens/progress_screen.dart';
 import '../features/settings/presentation/screens/about_screen.dart'; // FIXED: About画面import追加
 import '../features/settings/presentation/screens/settings_screen.dart';
@@ -22,9 +23,9 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/home',
+    initialLocation: '/splash',
     redirect: (context, state) {
-      // FIXED: 初回起動時はオンボーディングへリダイレクト
+      if (state.uri.path == '/splash') return null;
       final isOnboarding = state.uri.path == '/onboarding';
       if (!hasCompletedOnboarding && !isOnboarding) {
         return '/onboarding';
@@ -35,7 +36,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // FIXED: オンボーディングルート追加
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         parentNavigatorKey: _rootNavigatorKey,
         path: '/onboarding',

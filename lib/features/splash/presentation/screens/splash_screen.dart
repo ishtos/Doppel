@@ -1,106 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class SplashOverlay extends StatefulWidget {
-  const SplashOverlay({super.key, required this.onComplete});
-
-  final VoidCallback onComplete;
+class SplashScreen extends ConsumerStatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<SplashOverlay> createState() => _SplashOverlayState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashOverlayState extends State<SplashOverlay>
-    with TickerProviderStateMixin {
-  late final AnimationController _logoController;
-  late final AnimationController _textController;
-  late final AnimationController _fadeOutController;
-
-  late final Animation<double> _logoScale;
-  late final Animation<double> _logoOpacity;
-  late final Animation<double> _titleOpacity;
-  late final Animation<double> _subtitleOpacity;
-  late final Animation<double> _fadeOut;
+class _SplashScreenState extends ConsumerState<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeIn;
+  late final Animation<double> _scale;
+  late final Animation<double> _subtitleFade;
 
   @override
   void initState() {
     super.initState();
-
-    _logoController = AnimationController(
+    _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 2000),
     );
 
-    _textController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
+    _fadeIn = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
     );
 
-    _fadeOutController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _logoScale = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
-    );
-
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
-        parent: _logoController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        parent: _controller,
+        curve: const Interval(0.0, 0.4, curve: Curves.easeOutBack),
       ),
     );
 
-    _titleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _textController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
-      ),
+    _subtitleFade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.2, 0.5, curve: Curves.easeOut),
     );
 
-    _subtitleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _textController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeIn),
-      ),
-    );
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        context.go('/home');
+      }
+    });
 
-    _fadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(parent: _fadeOutController, curve: Curves.easeOut),
-    );
-
-    _startSequence();
-  }
-
-  Future<void> _startSequence() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    if (!mounted) return;
-    _logoController.forward();
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    _textController.forward();
-    await Future.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-    _fadeOutController.forward();
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    widget.onComplete();
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    _logoController.dispose();
-    _textController.dispose();
-    _fadeOutController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeOut,
-      child: Container(
+    return Scaffold(
+      body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -109,59 +69,67 @@ class _SplashOverlayState extends State<SplashOverlay>
           ),
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ScaleTransition(
-                scale: _logoScale,
-                child: FadeTransition(
-                  opacity: _logoOpacity,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          blurRadius: 40,
-                          spreadRadius: 10,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, _) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FadeTransition(
+                    opacity: _fadeIn,
+                    child: ScaleTransition(
+                      scale: _scale,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              blurRadius: 40,
+                              spreadRadius: 10,
+                            ),
+                          ],
                         ),
-                      ],
+                        child: const Icon(
+                          Icons.record_voice_over,
+                          size: 56,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.record_voice_over,
-                      size: 56,
-                      color: Colors.white,
+                  ),
+                  const SizedBox(height: 32),
+                  FadeTransition(
+                    opacity: _fadeIn,
+                    child: ScaleTransition(
+                      scale: _scale,
+                      child: Text(
+                        'Doppel',
+                        style: GoogleFonts.notoSansJp(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              FadeTransition(
-                opacity: _titleOpacity,
-                child: Text(
-                  'Doppel',
-                  style: GoogleFonts.notoSansJp(
-                    fontSize: 36,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                  const SizedBox(height: 8),
+                  FadeTransition(
+                    opacity: _subtitleFade,
+                    child: Text(
+                      'AI Shadowing Coach',
+                      style: GoogleFonts.ibmPlexMono(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              FadeTransition(
-                opacity: _subtitleOpacity,
-                child: Text(
-                  'AI Shadowing Coach',
-                  style: GoogleFonts.ibmPlexMono(
-                    fontSize: 14,
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                ),
-              ),
-            ],
+                ],
+              );
+            },
           ),
         ),
       ),

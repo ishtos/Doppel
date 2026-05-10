@@ -29,18 +29,19 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
-- [x] Phase M: スプラッシュスクリーン (アニメーション付きアプリ起動画面 + flutter_native_splash 設定)
-- [ ] Release準備 (アイコン画像作成、ストア申請) <- **Next**
+- [x] Phase M: スプラッシュ画面 (ネイティブ+Dartアニメーション付きスプラッシュ画面、GoRouterルート統合)
+- [ ] Release準備 (アイコン、ストア申請) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
-1. App icon 画像作成 (1024x1024 PNG) & flutter_launcher_icons 設定
+1. App icon (1024x1024 PNG) 作成・設定 (flutter_launcher_icons)
 2. Android ビルド確認 & リリース署名設定
 3. ~~Privacy policy URL 作成~~ → About画面内にプライバシーポリシー表示を実装済み
 4. App Store / Google Play メタデータ準備
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
-8. 追加レッスンコンテンツ拡充
+8. ~~スプラッシュ画面設定~~ → Phase M で実装済み
+9. 追加レッスンコンテンツ拡充
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
@@ -51,7 +52,7 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 
 | 画面 | ルート | 主な機能 |
 |------|--------|----------|
-| Splash | (overlay) | アプリ起動時アニメーション (ロゴ + アプリ名 + フェードアウト) |
+| Splash | `/splash` | グラデーション背景、アプリ名アニメーション表示、自動遷移 |
 | Onboarding | `/onboarding` | 初回起動ガイド (3ページ) |
 | Home | `/home` | 挨拶、デイリー目標進捗、お気に入りレッスン、今日のレッスン、週間統計、改善ポイント、最近の練習 |
 | Library | `/library` | カテゴリ/難易度フィルタ、**ソート(4種)、ブックマークフィルタ、練習回数バッジ**、検索、WPMバッジ、スコアバッジ |
@@ -66,21 +67,17 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-18)
-- アニメーション付きスプラッシュスクリーン (Phase M)
-  - `splash_screen.dart`: SplashOverlay ウィジェット作成（3段階アニメーション: ロゴ拡大+フェードイン → テキストフェードイン → 全体フェードアウト）
-  - `main.dart`: DoppelApp を ConsumerStatefulWidget に変換、MaterialApp.router の builder で SplashOverlay をオーバーレイ表示
-  - `pubspec.yaml`: flutter_native_splash ^2.4.3 追加 (dev_dependency)
-  - `flutter_native_splash.yaml`: ネイティブスプラッシュ設定（ブランドカラー #1A237E）
+## 8. 本日完了したタスク (2026-05-10)
+- スプラッシュ画面 (Phase M) - 前回のオーバーレイ方式からGoRouterルート方式にリファクタリング
+  - Android: `launch_background.xml` をブランドカラー(#1A237E)背景に更新、`colors.xml` 新規作成、ダークモード対応
+  - iOS: `LaunchScreen.storyboard` 背景色をブランドカラーに更新
+  - Dart: `splash_screen.dart` をルートベースの `SplashScreen` に変更（グラデーション背景、フェードイン+スケールアニメーション、GoogleFonts使用）
+  - `router.dart`: `/splash` ルート追加、`initialLocation` を `/splash` に変更
+  - `main.dart`: オーバーレイ方式を削除、シンプルな `ConsumerWidget` に戻す
 
 ## 9. Handover Note for Next Run
-Phase A-M まで全て完了。アニメーション付きスプラッシュスクリーンを追加済み。
-アプリ起動時に深いインディゴグラデーション背景上でロゴ（record_voice_over アイコン）がスケールイン + フェードイン、続いてアプリ名「Doppel」とサブタイトル「AI Shadowing Coach」がフェードイン、最後に全体がフェードアウトしてメインアプリに遷移する。
-MaterialApp.router の builder を使ったオーバーレイ方式により、スプラッシュ表示中にメインアプリがバックグラウンドで初期化される。
-
-flutter_native_splash の設定ファイルも用意済み。実行コマンド: `dart run flutter_native_splash:create`
-
+Phase A-M まで全て完了。スプラッシュ画面を追加済み。ネイティブ(Android/iOS)とDartアニメーション付きの2段構成で、ブランドカラー(#1A237E→#0D1442)グラデーション背景にロゴ・アプリ名「Doppel」とサブタイトル「AI Shadowing Coach」をフェードイン表示。GoRouterの `/splash` ルートとして統合し、アニメーション完了後に自動遷移。
 次は **リリース準備の残り** として以下から着手:
-- App icon 画像 (1024x1024 PNG) の作成 & flutter_launcher_icons 設定
+- App icon (1024x1024 PNG) の作成・設定 (flutter_launcher_icons)
 - Android ビルド確認 (`flutter build apk`) & リリース署名設定
 - App Store / Google Play メタデータ準備
