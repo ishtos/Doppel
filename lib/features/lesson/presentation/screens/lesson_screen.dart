@@ -483,6 +483,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       final progressRepo = ref.read(progressRepositoryProvider);
       await progressRepo.recordPractice(durationMinutes: 3);
 
+      // FIXED: レッスンを完了済みに更新し、最終練習日を記録
+      await ref.read(lessonsProvider.notifier).markCompleted(lessonId);
+
       if (mounted) {
         setState(() => _isAnalyzing = false);
         context.go('/feedback/${feedback.id}');

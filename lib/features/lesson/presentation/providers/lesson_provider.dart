@@ -33,6 +33,19 @@ class LessonsNotifier extends StateNotifier<AsyncValue<List<LessonModel>>> {
     await _ref.read(lessonRepositoryProvider).toggleBookmark(id);
     load();
   }
+
+  // FIXED: レッスン完了・最終練習日を記録
+  Future<void> markCompleted(String lessonId) async {
+    final repo = _ref.read(lessonRepositoryProvider);
+    final lesson = repo.findById(lessonId);
+    if (lesson != null) {
+      await repo.save(lesson.copyWith(
+        isCompleted: true,
+        lastPracticedAt: DateTime.now(),
+      ));
+      load();
+    }
+  }
 }
 
 /// Single lesson provider by ID.

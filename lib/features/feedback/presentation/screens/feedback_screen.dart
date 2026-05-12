@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../../../../shared/utils/text_diff.dart';
@@ -38,7 +40,27 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           onPressed: () => context.go('/home'),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          // FIXED: シェアボタンにクリップボードコピー機能を実装
+          IconButton(
+            icon: const Icon(Icons.share),
+            onPressed: () {
+              final lesson = ref
+                  .read(lessonRepositoryProvider)
+                  .findById(feedback.lessonId);
+              final text = 'Doppel シャドーイング結果\n'
+                  '${lesson != null ? '${lesson.title}\n' : ''}'
+                  '総合スコア: ${feedback.overallScore}点\n'
+                  '発音: ${feedback.pronunciationScore} / '
+                  'リズム: ${feedback.rhythmScore} / '
+                  '抑揚: ${feedback.intonationScore}';
+              Clipboard.setData(ClipboardData(text: text));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('結果をクリップボードにコピーしました'),
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
