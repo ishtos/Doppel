@@ -18,6 +18,7 @@ class SettingsState {
     this.isReminderEnabled = false,
     this.reminderHour = 20,
     this.reminderMinute = 0,
+    this.isInitialized = false,
   });
 
   final ThemeMode themeMode;
@@ -27,6 +28,7 @@ class SettingsState {
   final bool isReminderEnabled;
   final int reminderHour;
   final int reminderMinute;
+  final bool isInitialized;
 
   String get reminderTimeLabel =>
       '${reminderHour.toString().padLeft(2, '0')}:${reminderMinute.toString().padLeft(2, '0')}';
@@ -39,6 +41,7 @@ class SettingsState {
     bool? isReminderEnabled,
     int? reminderHour,
     int? reminderMinute,
+    bool? isInitialized,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -49,6 +52,7 @@ class SettingsState {
       isReminderEnabled: isReminderEnabled ?? this.isReminderEnabled,
       reminderHour: reminderHour ?? this.reminderHour,
       reminderMinute: reminderMinute ?? this.reminderMinute,
+      isInitialized: isInitialized ?? this.isInitialized,
     );
   }
 }
@@ -87,6 +91,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       isReminderEnabled: reminderEnabled,
       reminderHour: reminderHour,
       reminderMinute: reminderMinute,
+      isInitialized: true,
     );
   }
 
