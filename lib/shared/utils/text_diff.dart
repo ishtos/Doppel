@@ -23,43 +23,74 @@ DiffResult computeWordDiff(String model, String user) {
   final modelWords = _tokenize(model);
   final userWords = _tokenize(user);
 
-  final lcs = _lcs(modelWords, userWords);
+  // FIXED: Early return for empty inputs
+  if (modelWords.isEmpty && userWords.isEmpty) {
+    return const DiffResult(modelSpans: [], userSpans: []);
+  }
+  if (modelWords.isEmpty) {
+    return DiffResult(
+      modelSpans: const [],
+      userSpans: userWords.map((w) => DiffSpan(w, DiffType.extra)).toList(),
+    );
+  }
+  if (userWords.isEmpty) {
+    return DiffResult(
+      modelSpans:
+          modelWords.map((w) => DiffSpan(w, DiffType.missing)).toList(),
+      userSpans: const [],
+    );
+  }
+
+  // FIXED: Strip common prefix/suffix to shrink LCS subproblem
+  final minLen = modelWords.length < userWords.length
+      ? modelWords.length
+      : userWords.length;
+
+  var prefixLen = 0;
+  while (prefixLen < minLen &&
+      _eq(modelWords[prefixLen], userWords[prefixLen])) {
+    prefixLen++;
+  }
+
+  var suffixLen = 0;
+  while (suffixLen < minLen - prefixLen &&
+      _eq(
+        modelWords[modelWords.length - 1 - suffixLen],
+        userWords[userWords.length - 1 - suffixLen],
+      )) {
+    suffixLen++;
+  }
 
   final modelSpans = <DiffSpan>[];
   final userSpans = <DiffSpan>[];
 
-  var mi = 0;
-  var ui = 0;
-  var li = 0;
+  for (var i = 0; i < prefixLen; i++) {
+    modelSpans.add(DiffSpan(modelWords[i], DiffType.match));
+    userSpans.add(DiffSpan(userWords[i], DiffType.match));
+  }
 
-  while (mi < modelWords.length || ui < userWords.length) {
-    if (li < lcs.length &&
-        mi < modelWords.length &&
-        ui < userWords.length &&
-        _eq(modelWords[mi], lcs[li]) &&
-        _eq(userWords[ui], lcs[li])) {
-      // Matched word
-      modelSpans.add(DiffSpan(modelWords[mi], DiffType.match));
-      userSpans.add(DiffSpan(userWords[ui], DiffType.match));
-      mi++;
-      ui++;
-      li++;
+  final mEnd = modelWords.length - suffixLen;
+  final uEnd = userWords.length - suffixLen;
+  final modelMiddle = modelWords.sublist(prefixLen, mEnd);
+  final userMiddle = userWords.sublist(prefixLen, uEnd);
+
+  if (modelMiddle.isNotEmpty || userMiddle.isNotEmpty) {
+    if (modelMiddle.isEmpty) {
+      userSpans.addAll(userMiddle.map((w) => DiffSpan(w, DiffType.extra)));
+    } else if (userMiddle.isEmpty) {
+      modelSpans
+          .addAll(modelMiddle.map((w) => DiffSpan(w, DiffType.missing)));
     } else {
-      // Consume non-matching model words (missing from user)
-      if (mi < modelWords.length &&
-          (li >= lcs.length || !_eq(modelWords[mi], lcs[li]))) {
-        modelSpans.add(DiffSpan(modelWords[mi], DiffType.missing));
-        mi++;
-        continue;
-      }
-      // Consume non-matching user words (extra from user)
-      if (ui < userWords.length &&
-          (li >= lcs.length || !_eq(userWords[ui], lcs[li]))) {
-        userSpans.add(DiffSpan(userWords[ui], DiffType.extra));
-        ui++;
-        continue;
-      }
+      final lcs = _lcs(modelMiddle, userMiddle);
+      _buildSpans(modelMiddle, userMiddle, lcs, modelSpans, userSpans);
     }
+  }
+
+  for (var i = mEnd; i < modelWords.length; i++) {
+    modelSpans.add(DiffSpan(modelWords[i], DiffType.match));
+  }
+  for (var i = uEnd; i < userWords.length; i++) {
+    userSpans.add(DiffSpan(userWords[i], DiffType.match));
   }
 
   return DiffResult(modelSpans: modelSpans, userSpans: userSpans);
@@ -99,35 +130,82 @@ TextSpan buildDiffTextSpan({
 
 // ── Helpers ──
 
+// FIXED: Return empty list for empty/whitespace-only input
 List<String> _tokenize(String text) {
-  return text.trim().split(RegExp(r'\s+'));
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return [];
+  return trimmed.split(RegExp(r'\s+'));
 }
 
 bool _eq(String a, String b) => a.toLowerCase() == b.toLowerCase();
 
+void _buildSpans(
+  List<String> modelWords,
+  List<String> userWords,
+  List<String> lcs,
+  List<DiffSpan> modelSpans,
+  List<DiffSpan> userSpans,
+) {
+  var mi = 0;
+  var ui = 0;
+  var li = 0;
+
+  while (mi < modelWords.length || ui < userWords.length) {
+    if (li < lcs.length &&
+        mi < modelWords.length &&
+        ui < userWords.length &&
+        _eq(modelWords[mi], lcs[li]) &&
+        _eq(userWords[ui], lcs[li])) {
+      modelSpans.add(DiffSpan(modelWords[mi], DiffType.match));
+      userSpans.add(DiffSpan(userWords[ui], DiffType.match));
+      mi++;
+      ui++;
+      li++;
+    } else {
+      if (mi < modelWords.length &&
+          (li >= lcs.length || !_eq(modelWords[mi], lcs[li]))) {
+        modelSpans.add(DiffSpan(modelWords[mi], DiffType.missing));
+        mi++;
+        continue;
+      }
+      if (ui < userWords.length &&
+          (li >= lcs.length || !_eq(userWords[ui], lcs[li]))) {
+        userSpans.add(DiffSpan(userWords[ui], DiffType.extra));
+        ui++;
+        continue;
+      }
+    }
+  }
+}
+
 /// Longest Common Subsequence of two word lists (case-insensitive).
+// FIXED: Use shorter list as columns to minimize per-row allocation
 List<String> _lcs(List<String> a, List<String> b) {
-  final m = a.length;
-  final n = b.length;
+  final bool swapped = a.length < b.length;
+  final List<String> rows = swapped ? b : a;
+  final List<String> cols = swapped ? a : b;
+  final m = rows.length;
+  final n = cols.length;
+
   final dp = List.generate(m + 1, (_) => List.filled(n + 1, 0));
 
   for (var i = 1; i <= m; i++) {
     for (var j = 1; j <= n; j++) {
-      if (_eq(a[i - 1], b[j - 1])) {
+      if (_eq(rows[i - 1], cols[j - 1])) {
         dp[i][j] = dp[i - 1][j - 1] + 1;
       } else {
-        dp[i][j] = dp[i - 1][j] > dp[i][j - 1] ? dp[i - 1][j] : dp[i][j - 1];
+        dp[i][j] =
+            dp[i - 1][j] > dp[i][j - 1] ? dp[i - 1][j] : dp[i][j - 1];
       }
     }
   }
 
-  // Backtrack to find the LCS.
   final result = <String>[];
   var i = m;
   var j = n;
   while (i > 0 && j > 0) {
-    if (_eq(a[i - 1], b[j - 1])) {
-      result.add(a[i - 1]);
+    if (_eq(rows[i - 1], cols[j - 1])) {
+      result.add(rows[i - 1]);
       i--;
       j--;
     } else if (dp[i - 1][j] > dp[i][j - 1]) {
