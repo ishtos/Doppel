@@ -18,48 +18,107 @@ class DiffSpan {
 
 enum DiffType { match, missing, extra }
 
-/// Compute word-level diff using Longest Common Subsequence (LCS).
+// FIXED: prefix/suffix trimming to reduce LCS problem size for typical shadowing results
 DiffResult computeWordDiff(String model, String user) {
   final modelWords = _tokenize(model);
   final userWords = _tokenize(user);
 
-  final lcs = _lcs(modelWords, userWords);
+  if (modelWords.isEmpty && userWords.isEmpty) {
+    return const DiffResult(modelSpans: [], userSpans: []);
+  }
+  if (modelWords.isEmpty) {
+    return DiffResult(
+      modelSpans: const [],
+      userSpans: userWords.map((w) => DiffSpan(w, DiffType.extra)).toList(),
+    );
+  }
+  if (userWords.isEmpty) {
+    return DiffResult(
+      modelSpans:
+          modelWords.map((w) => DiffSpan(w, DiffType.missing)).toList(),
+      userSpans: const [],
+    );
+  }
+
+  // FIXED: trim matching prefix to shrink LCS input
+  var prefixLen = 0;
+  final minLen =
+      modelWords.length < userWords.length ? modelWords.length : userWords.length;
+  while (prefixLen < minLen &&
+      _eq(modelWords[prefixLen], userWords[prefixLen])) {
+    prefixLen++;
+  }
+
+  // FIXED: trim matching suffix (from remaining portion after prefix)
+  var suffixLen = 0;
+  final maxSuffix = minLen - prefixLen;
+  while (suffixLen < maxSuffix &&
+      _eq(modelWords[modelWords.length - 1 - suffixLen],
+          userWords[userWords.length - 1 - suffixLen])) {
+    suffixLen++;
+  }
+
+  if (prefixLen + suffixLen >= modelWords.length &&
+      prefixLen + suffixLen >= userWords.length) {
+    return DiffResult(
+      modelSpans:
+          modelWords.map((w) => DiffSpan(w, DiffType.match)).toList(),
+      userSpans:
+          userWords.map((w) => DiffSpan(w, DiffType.match)).toList(),
+    );
+  }
+
+  final modelMiddle =
+      modelWords.sublist(prefixLen, modelWords.length - suffixLen);
+  final userMiddle =
+      userWords.sublist(prefixLen, userWords.length - suffixLen);
+
+  final lcs = _lcs(modelMiddle, userMiddle);
 
   final modelSpans = <DiffSpan>[];
   final userSpans = <DiffSpan>[];
+
+  for (var i = 0; i < prefixLen; i++) {
+    modelSpans.add(DiffSpan(modelWords[i], DiffType.match));
+    userSpans.add(DiffSpan(userWords[i], DiffType.match));
+  }
 
   var mi = 0;
   var ui = 0;
   var li = 0;
 
-  while (mi < modelWords.length || ui < userWords.length) {
+  while (mi < modelMiddle.length || ui < userMiddle.length) {
     if (li < lcs.length &&
-        mi < modelWords.length &&
-        ui < userWords.length &&
-        _eq(modelWords[mi], lcs[li]) &&
-        _eq(userWords[ui], lcs[li])) {
-      // Matched word
-      modelSpans.add(DiffSpan(modelWords[mi], DiffType.match));
-      userSpans.add(DiffSpan(userWords[ui], DiffType.match));
+        mi < modelMiddle.length &&
+        ui < userMiddle.length &&
+        _eq(modelMiddle[mi], lcs[li]) &&
+        _eq(userMiddle[ui], lcs[li])) {
+      modelSpans.add(DiffSpan(modelMiddle[mi], DiffType.match));
+      userSpans.add(DiffSpan(userMiddle[ui], DiffType.match));
       mi++;
       ui++;
       li++;
     } else {
-      // Consume non-matching model words (missing from user)
-      if (mi < modelWords.length &&
-          (li >= lcs.length || !_eq(modelWords[mi], lcs[li]))) {
-        modelSpans.add(DiffSpan(modelWords[mi], DiffType.missing));
+      if (mi < modelMiddle.length &&
+          (li >= lcs.length || !_eq(modelMiddle[mi], lcs[li]))) {
+        modelSpans.add(DiffSpan(modelMiddle[mi], DiffType.missing));
         mi++;
         continue;
       }
-      // Consume non-matching user words (extra from user)
-      if (ui < userWords.length &&
-          (li >= lcs.length || !_eq(userWords[ui], lcs[li]))) {
-        userSpans.add(DiffSpan(userWords[ui], DiffType.extra));
+      if (ui < userMiddle.length &&
+          (li >= lcs.length || !_eq(userMiddle[ui], lcs[li]))) {
+        userSpans.add(DiffSpan(userMiddle[ui], DiffType.extra));
         ui++;
         continue;
       }
     }
+  }
+
+  for (var i = modelWords.length - suffixLen; i < modelWords.length; i++) {
+    modelSpans.add(DiffSpan(modelWords[i], DiffType.match));
+  }
+  for (var i = userWords.length - suffixLen; i < userWords.length; i++) {
+    userSpans.add(DiffSpan(userWords[i], DiffType.match));
   }
 
   return DiffResult(modelSpans: modelSpans, userSpans: userSpans);
@@ -99,8 +158,11 @@ TextSpan buildDiffTextSpan({
 
 // ── Helpers ──
 
+// FIXED: empty string produced [''] instead of [] causing phantom diff spans
 List<String> _tokenize(String text) {
-  return text.trim().split(RegExp(r'\s+'));
+  final trimmed = text.trim();
+  if (trimmed.isEmpty) return [];
+  return trimmed.split(RegExp(r'\s+'));
 }
 
 bool _eq(String a, String b) => a.toLowerCase() == b.toLowerCase();
