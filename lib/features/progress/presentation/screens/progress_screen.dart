@@ -108,6 +108,10 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Practice calendar heatmap
+            _PracticeCalendarCard(theme: theme),
+            const SizedBox(height: 20),
+
             // Weak points
             Card(
               elevation: 1,
@@ -255,6 +259,198 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PracticeCalendarCard extends ConsumerWidget {
+  const _PracticeCalendarCard({required this.theme});
+
+  final ThemeData theme;
+
+  static const _totalWeeks = 12;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final calendar = ref.watch(practiceCalendarProvider);
+    final today = DateTime.now();
+    final todayNorm = DateTime(today.year, today.month, today.day);
+
+    // FIXED: Align start to Monday of the earliest week
+    final rawStart =
+        todayNorm.subtract(const Duration(days: _totalWeeks * 7 - 1));
+    final startDate =
+        rawStart.subtract(Duration(days: rawStart.weekday - 1));
+
+    final totalDays = todayNorm.difference(startDate).inDays + 1;
+    final numWeeks = (totalDays / 7).ceil();
+
+    final practiceDays = calendar.keys
+        .where((d) => !d.isBefore(startDate) && !d.isAfter(todayNorm))
+        .length;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.calendar_month,
+                    size: 18, color: theme.colorScheme.primary),
+                const SizedBox(width: 6),
+                Text('練習カレンダー', style: theme.textTheme.titleSmall),
+                const Spacer(),
+                Text(
+                  '$practiceDays日練習',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // FIXED: Use explicit Row of Columns instead of Wrap for reliable layout
+            LayoutBuilder(
+              builder: (context, constraints) {
+                const labelWidth = 20.0;
+                const gap = 3.0;
+                final gridWidth = constraints.maxWidth - labelWidth;
+                final cellSize =
+                    ((gridWidth - (numWeeks - 1) * gap) / numWeeks)
+                        .clamp(8.0, 14.0);
+                final cellTotal = cellSize + gap;
+
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: labelWidth,
+                      child: Column(
+                        children: List.generate(7, (i) {
+                          final label =
+                              (i == 0) ? '月' : (i == 2) ? '水' : (i == 4) ? '金' : '';
+                          return SizedBox(
+                            height: cellTotal,
+                            child: Center(
+                              child: Text(
+                                label,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  fontSize: 9,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: List.generate(numWeeks, (weekIndex) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: weekIndex < numWeeks - 1 ? gap : 0,
+                            ),
+                            child: Column(
+                              children: List.generate(7, (dayIndex) {
+                                final date = startDate.add(
+                                  Duration(
+                                      days: weekIndex * 7 + dayIndex),
+                                );
+                                final isFuture =
+                                    date.isAfter(todayNorm);
+
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: dayIndex < 6 ? gap : 0,
+                                  ),
+                                  child: _calendarCell(
+                                    isFuture
+                                        ? null
+                                        : (calendar[date] ?? 0),
+                                    cellSize,
+                                  ),
+                                );
+                              }),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '少',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 3),
+                _legendCell(0),
+                const SizedBox(width: 2),
+                _legendCell(1),
+                const SizedBox(width: 2),
+                _legendCell(2),
+                const SizedBox(width: 2),
+                _legendCell(3),
+                const SizedBox(width: 3),
+                Text(
+                  '多',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontSize: 10,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _cellColor(int? count) {
+    if (count == null) return Colors.transparent;
+    if (count == 0) return theme.colorScheme.surfaceContainerHighest;
+    if (count == 1) {
+      return theme.colorScheme.primary.withValues(alpha: 0.25);
+    }
+    if (count == 2) {
+      return theme.colorScheme.primary.withValues(alpha: 0.55);
+    }
+    return theme.colorScheme.primary;
+  }
+
+  Widget _calendarCell(int? count, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: _cellColor(count),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+
+  Widget _legendCell(int level) {
+    return Container(
+      width: 10,
+      height: 10,
+      decoration: BoxDecoration(
+        color: _cellColor(level),
+        borderRadius: BorderRadius.circular(2),
       ),
     );
   }

@@ -78,6 +78,22 @@ class ProgressRepository {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
+  Map<DateTime, int> getPracticeCalendar({int weeks = 12}) {
+    final cutoff = DateTime.now().subtract(Duration(days: weeks * 7));
+    final feedbacks = feedbackBox.values
+        .map((e) => FeedbackModel.fromJson(deepCast(e)))
+        .where((f) => f.createdAt.isAfter(cutoff))
+        .toList();
+
+    final calendar = <DateTime, int>{};
+    for (final f in feedbacks) {
+      final day =
+          DateTime(f.createdAt.year, f.createdAt.month, f.createdAt.day);
+      calendar[day] = (calendar[day] ?? 0) + 1;
+    }
+    return calendar;
+  }
+
   /// Analyze weak pronunciation patterns from recent feedback.
   Map<String, double> getWeakPatterns() {
     final feedbacks = feedbackBox.values

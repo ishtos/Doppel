@@ -15,6 +15,11 @@ final scoreHistoryProvider =
   return ref.watch(progressRepositoryProvider).getScoreHistory(days: days);
 });
 
+/// Practice calendar heatmap data (date -> practice count).
+final practiceCalendarProvider = Provider<Map<DateTime, int>>((ref) {
+  return ref.watch(progressRepositoryProvider).getPracticeCalendar();
+});
+
 /// Weak pronunciation patterns.
 final weakPatternsProvider = Provider<Map<String, double>>((ref) {
   return ref.watch(progressRepositoryProvider).getWeakPatterns();
