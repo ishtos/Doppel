@@ -15,6 +15,8 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **Data Models:** Freezed + json_serializable
 - **Notifications:** flutter_local_notifications + timezone
 - **API Key 管理:** `--dart-define=OPENAI_API_KEY=xxx` (ビルド時注入)
+- **App Icon:** flutter_launcher_icons (Adaptive Icon 対応)
+- **Splash Screen:** flutter_native_splash (ライト/ダークモード対応)
 
 ## 3. Current Milestones
 - [x] Phase A: Foundation (プロジェクト初期設定、ルーティング、DB、テーマ)
@@ -29,22 +31,25 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - [x] Phase J: デイリー練習目標 (目標設定 & ホーム画面に進捗表示)
 - [x] Phase K: ライブラリ画面強化 (ソート・ブックマークフィルタ・練習回数バッジ) & Home画面お気に入りセクション
 - [x] Phase L: ローカル通知リマインダー (毎日の練習リマインダー通知、設定画面からの有効/無効・時刻設定)
-- [ ] Release準備 (アイコン、スプラッシュ、ストア申請) <- **Next**
+- [x] Phase M: Release準備 - App Icon, Splash Screen & Android Release Build Configuration
+- [ ] Release最終準備 (ストア申請メタデータ、実機テスト) <- **Next**
 
 ## 4. Feature Backlog (Prioritized)
-1. App icon (1024x1024 PNG) & Splash screen 設定
-2. Android ビルド確認 & リリース署名設定
+1. ~~App icon (1024x1024 PNG) & Splash screen 設定~~ → Phase M で実装済み
+2. ~~Android ビルド確認 & リリース署名設定~~ → Phase M で設定済み (keystore 要作成)
 3. ~~Privacy policy URL 作成~~ → About画面内にプライバシーポリシー表示を実装済み
 4. App Store / Google Play メタデータ準備
 5. Flutter DevTools でメモリリーク検証
 6. iOS 16+ / Android API 23+ 実機テスト
 7. ~~ローカル通知によるリマインダー機能~~ → Phase L で実装済み
 8. 追加レッスンコンテンツ拡充
+9. Widget tests 拡充 (Feedback / Lesson 画面)
 
 ## 5. Technical Debt & Issues
 - `text_diff.dart` の LCS アルゴリズムはO(n*m)であり、非常に長いテキストではパフォーマンス懸念あり
 - シミュレーターでは録音が不可のためフォールバック処理で分析をスキップしている（実機テストが必要）
 - Widget tests は 22件だが、Feedback / Lesson 画面のテストが不足
+- widget_test.dart の一部テストがNavigation/Hive モック不足で失敗中
 
 ## 6. Screens & Architecture
 
@@ -64,19 +69,27 @@ AIを活用した英語シャドーイングコーチアプリ。TTS による�
 - **カテゴリ:** ニュース、ビジネス、日常会話、TEDスタイル、スポーツ、時事ネタ
 - **難易度別 WPM:** 初級 100 / 中級 130 / 上級 150
 
-## 8. 本日完了したタスク (2026-04-11)
-- ローカル通知リマインダー機能 (Phase L)
-  - `notification_service.dart`: NotificationService シングルトン作成（初期化、権限リクエスト、毎日リマインダースケジュール、キャンセル）
-  - `settings_provider.dart`: `isReminderEnabled` / `reminderHour` / `reminderMinute` フィールド追加、`setReminderEnabled()` / `setReminderTime()` メソッド追加、権限拒否時の自動リバート
-  - `settings_screen.dart`: 「通知」セクション追加（SwitchListTile + タイムピッカー）
-  - `main.dart`: NotificationService 初期化処理追加
-  - `pubspec.yaml`: flutter_local_notifications ^18.0.0, timezone ^0.10.0 追加
-  - `AndroidManifest.xml`: POST_NOTIFICATIONS, RECEIVE_BOOT_COMPLETED 権限追加
+## 8. 本日完了したタスク (2026-05-21)
+- Release準備 Phase M: App Icon, Splash Screen & Android Release Build Configuration
+  - `scripts/generate_icons.py`: Python/Pillow によるアイコン・スプラッシュ画像生成スクリプト
+  - `assets/icon/app_icon.png`: 1024x1024 アプリアイコン (深インディゴ + "D" + 音波)
+  - `assets/icon/app_icon_foreground.png`: Android Adaptive Icon フォアグラウンド
+  - `assets/splash/splash_logo.png`: スプラッシュスクリーンロゴ (ライトモード)
+  - `assets/splash/splash_logo_dark.png`: スプラッシュスクリーンロゴ (ダークモード)
+  - `pubspec.yaml`: flutter_launcher_icons ^0.14.3, flutter_native_splash ^2.4.4 追加 + 設定
+  - Android/iOS 全密度アイコン生成完了 (mipmap-mdpi〜xxxhdpi, AppIcon.appiconset)
+  - Android Adaptive Icon 設定 (ic_launcher.xml, colors.xml, foreground drawable)
+  - Android/iOS スプラッシュスクリーン生成完了 (ライト/ダーク/Android 12対応)
+  - `android/app/build.gradle.kts`: リリース署名設定 (key.properties 読み込み)、ProGuard有効化
+  - `android/key.properties.example`: 署名設定テンプレート
+  - `android/app/proguard-rules.pro`: ProGuardルール
+  - `AndroidManifest.xml`: アプリ表示名を "Doppel" に修正
 
 ## 9. Handover Note for Next Run
-Phase A-L まで全て完了。ローカル通知リマインダー機能を追加済み。設定画面で有効/無効の切り替えと通知時刻の設定が可能。権限拒否時はトグルが自動的にオフに戻る。
-次は **リリース準備の残り** として以下から着手:
-- App icon (1024x1024 PNG) の作成・設定
-- Splash screen の設定 (flutter_native_splash)
-- Android ビルド確認 (`flutter build apk`) & リリース署名設定
-- App Store / Google Play メタデータ準備
+Phase A-M まで全て完了。アプリアイコン、スプラッシュスクリーン、Android リリースビルド設定が完了。
+リリース署名には実際の keystore 作成が必要 (`keytool -genkey` で JKS を作成し `android/key.properties` に設定)。
+次は **Release最終準備** として以下から着手:
+- 実際の keystore 作成 & `flutter build apk --release` でのビルド確認
+- App Store / Google Play メタデータ準備 (スクリーンショット、説明文)
+- iOS 16+ / Android API 23+ 実機テスト
+- Widget tests 拡充 (Feedback / Lesson 画面のカバレッジ向上)
