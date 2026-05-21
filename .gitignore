@@ -67,5 +67,8 @@ app.*.map.json
 test_hive/
 test_hive_streak/
 
+# Web (not a target platform for this project)
+/web/
+
 # Steering files (local planning docs)
 .steering/
