@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/progress_provider.dart';
+import '../widgets/practice_calendar.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -21,6 +22,11 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
     final days = _isWeekly ? 7 : 30;
     final scoreHistory = ref.watch(scoreHistoryProvider(days));
     final weakPatterns = ref.watch(weakPatternsProvider);
+    // FIXED: 練習カレンダーヒートマップデータ取得
+    final calendarData = ref.watch(practiceCalendarProvider);
+    final practiceDays = calendarData.keys.length;
+    final totalSessions =
+        calendarData.values.fold<int>(0, (sum, c) => sum + c);
 
     // Build chart spots
     final spots = scoreHistory.isEmpty
@@ -204,6 +210,38 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 20),
+
+            // FIXED: 練習カレンダーヒートマップカード追加
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_month,
+                            size: 18, color: theme.colorScheme.primary),
+                        const SizedBox(width: 6),
+                        Text('練習カレンダー',
+                            style: theme.textTheme.titleSmall),
+                        const Spacer(),
+                        if (practiceDays > 0)
+                          Text(
+                            '$practiceDays日 / $totalSessions回',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    PracticeCalendar(practiceData: calendarData),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 20),
 

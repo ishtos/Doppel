@@ -78,6 +78,24 @@ class ProgressRepository {
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
   }
 
+  // FIXED: 練習カレンダーヒートマップ用の日別練習回数データ
+  Map<DateTime, int> getPracticeCalendarData({int days = 91}) {
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final result = <DateTime, int>{};
+    for (final raw in feedbackBox.values) {
+      final feedback = FeedbackModel.fromJson(deepCast(raw));
+      if (feedback.createdAt.isAfter(cutoff)) {
+        final key = DateTime(
+          feedback.createdAt.year,
+          feedback.createdAt.month,
+          feedback.createdAt.day,
+        );
+        result[key] = (result[key] ?? 0) + 1;
+      }
+    }
+    return result;
+  }
+
   /// Analyze weak pronunciation patterns from recent feedback.
   Map<String, double> getWeakPatterns() {
     final feedbacks = feedbackBox.values

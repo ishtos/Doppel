@@ -19,3 +19,8 @@ final scoreHistoryProvider =
 final weakPatternsProvider = Provider<Map<String, double>>((ref) {
   return ref.watch(progressRepositoryProvider).getWeakPatterns();
 });
+
+// FIXED: 練習カレンダーヒートマップ用プロバイダー追加
+final practiceCalendarProvider = Provider<Map<DateTime, int>>((ref) {
+  return ref.watch(progressRepositoryProvider).getPracticeCalendarData();
+});
