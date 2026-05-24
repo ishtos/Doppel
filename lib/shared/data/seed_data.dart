@@ -95,6 +95,40 @@ const seedLessons = [
   // ── ビジネス ──
 
   LessonModel(
+    id: 'lesson-017',
+    title: 'Office Small Talk',
+    category: 'ビジネス',
+    difficulty: 1,
+    transcriptText:
+        'Good morning. How are you doing today? '
+        'I am doing well, thank you. Did you have a good weekend? '
+        'Yes, it was really nice. I went hiking with my family on Saturday. '
+        'The weather was perfect for it. How about you? '
+        'I stayed home and relaxed. I watched a movie and did some cooking. '
+        'That sounds lovely. By the way, have you met the new team member? '
+        'Her name is Sarah, and she joined the marketing department last week. '
+        'She seems really friendly and has a lot of experience in social media. '
+        'I think she will be a great addition to the team. '
+        'Speaking of work, did you see the email about the office party next Friday? '
+        'The company is celebrating its tenth anniversary, and everyone is invited. '
+        'There will be food, drinks, and a short presentation from the CEO. '
+        'I heard they are also giving out small gifts to all employees. '
+        'It should be a fun event. Are you planning to go? '
+        'Definitely. I would not miss it. I think it is a great way to bring everyone together. '
+        'We do not get many chances to talk to people from other departments. '
+        'That is true. I barely know anyone on the third floor. '
+        'Maybe we can sit together at the party and meet some new people. '
+        'That would be great. Oh, I almost forgot. '
+        'The meeting with the client has been moved to two o\'clock this afternoon. '
+        'The manager sent an update about an hour ago. '
+        'Thanks for letting me know. I will make sure to prepare my notes before then. '
+        'No problem. Well, I should get back to my desk. Talk to you later. '
+        'See you later. Have a productive morning.',
+    audioAssetPath: 'assets/audio/lesson_017.mp3',
+    durationSeconds: 158,
+    wordCount: 263,
+  ),
+  LessonModel(
     id: 'lesson-002',
     title: 'Business Meeting Basics',
     category: 'ビジネス',
@@ -190,6 +224,67 @@ const seedLessons = [
   // ── 日常会話 ──
 
   LessonModel(
+    id: 'lesson-018',
+    title: 'At the Doctor\'s Office',
+    category: '日常会話',
+    difficulty: 2,
+    transcriptText:
+        'Good afternoon. I have an appointment at three o\'clock. My name is Tanaka. '
+        'Yes, I can see your appointment here. Please take a seat and the doctor will be with you shortly. '
+        'Thank you. Actually, could I update my address while I wait? I moved to a new apartment last month. '
+        'Of course. Just fill out this form and hand it back to me when you are done. '
+        'The doctor will see you now. Please follow me to room two. '
+        'Hello. What brings you in today? '
+        'I have been having headaches almost every day for the past two weeks. '
+        'They usually start in the afternoon and get worse toward the evening. '
+        'I see. Have you noticed anything else? Any changes in your vision or difficulty sleeping? '
+        'Now that you mention it, I have been having trouble falling asleep recently. '
+        'I often stay up late working on my computer, and my eyes feel very tired by the end of the day. '
+        'That could be a contributing factor. Screen time before bed can affect both your sleep quality and cause tension headaches. '
+        'Let me check your blood pressure and do a quick examination. '
+        'Everything looks normal. I do not think there is anything serious to worry about, '
+        'but I want you to try a few things over the next two weeks. '
+        'First, try to limit your screen time in the evening, especially in the hour before bed. '
+        'Second, make sure you are drinking enough water throughout the day. Dehydration is a very common cause of headaches. '
+        'Third, I am going to recommend a mild pain reliever that you can take when the headaches are particularly bad. '
+        'If things do not improve after two weeks, please come back and we will run some additional tests. '
+        'Thank you, doctor. I will try those suggestions and see how it goes.',
+    audioAssetPath: 'assets/audio/lesson_018.mp3',
+    durationSeconds: 135,
+    wordCount: 285,
+  ),
+  LessonModel(
+    id: 'lesson-019',
+    title: 'Apartment Hunting',
+    category: '日常会話',
+    difficulty: 3,
+    transcriptText:
+        'Thank you for showing me this apartment. I have been looking for a place in this neighborhood for quite some time. '
+        'The location is incredibly convenient, with the train station just a five-minute walk away '
+        'and several grocery stores and restaurants within walking distance. '
+        'Could you tell me more about the lease terms? I noticed the listing mentioned a two-year contract. '
+        'Is there any flexibility on the duration, or would I be locked in for the entire period? '
+        'The landlord typically prefers a two-year commitment, but we have arranged shorter leases in exceptional circumstances. '
+        'There would be a modest increase in the monthly rent for a one-year contract, roughly five percent more than the listed price. '
+        'That is reasonable. Now, I had a few questions about the apartment itself. '
+        'The kitchen looks quite modern. Were the appliances recently replaced? '
+        'Yes, the refrigerator, oven, and dishwasher were all installed about six months ago as part of a renovation. '
+        'The bathroom was also updated at the same time with new tiles and fixtures. '
+        'That is great to hear. What about utilities? Are they included in the rent, or are they separate? '
+        'Electricity, gas, and water are the tenant\'s responsibility. '
+        'However, internet and building maintenance fees are included in the monthly rent. '
+        'On average, previous tenants have paid around eighty to one hundred dollars per month for utilities, '
+        'depending on the season. Summer tends to be higher because of air conditioning. '
+        'I also wanted to ask about the pet policy. I have a small dog, about seven kilograms. '
+        'Would that be permitted under the current lease agreement? '
+        'Small pets are allowed with a refundable deposit of five hundred dollars. '
+        'The building does have quiet hours after ten p.m., so we ask that pet owners be mindful of noise. '
+        'This apartment is exactly what I have been searching for. I would like to move forward with the application if possible.',
+    audioAssetPath: 'assets/audio/lesson_019.mp3',
+    durationSeconds: 115,
+    wordCount: 295,
+  ),
+  LessonModel(
     id: 'lesson-003',
     title: 'At the Coffee Shop',
     category: '日常会話',
@@ -247,6 +342,70 @@ const seedLessons = [
 
   // ── TEDスタイル ──
 
+  LessonModel(
+    id: 'lesson-020',
+    title: 'TED: The Joy of Reading',
+    category: 'TEDスタイル',
+    difficulty: 1,
+    transcriptText:
+        'I want to talk to you today about something simple but powerful. Reading. '
+        'When was the last time you sat down with a good book and truly lost yourself in it? '
+        'For many of us, it has been far too long. '
+        'We live in a world full of short videos, quick messages, and endless notifications. '
+        'Our attention is pulled in a hundred different directions every single day. '
+        'But reading offers us something that nothing else can. It gives us the chance to slow down. '
+        'When you read a book, your brain works in a very special way. '
+        'It creates pictures in your mind. It connects new ideas to things you already know. '
+        'It builds understanding one page at a time. '
+        'Studies show that people who read regularly are better at solving problems. '
+        'They have larger vocabularies and stronger memory skills. '
+        'But the benefits go beyond just thinking better. '
+        'Reading also helps us understand other people. '
+        'When you read a story, you experience the world through someone else\'s eyes. '
+        'You feel their joy, their sadness, and their fears. This builds empathy, '
+        'which is the ability to understand how others feel. '
+        'And here is the best part. You do not need to read difficult books to get these benefits. '
+        'Any kind of reading counts. Novels, comics, magazines, or even cookbooks. '
+        'The important thing is to make reading a part of your daily life. '
+        'Start with just ten minutes a day. Pick something you enjoy and let yourself get lost in the words. '
+        'You might be surprised at how much calmer and more focused you feel. '
+        'Reading is not just a hobby. It is one of the best things you can do for your mind. '
+        'So tonight, instead of reaching for your phone, try reaching for a book.',
+    audioAssetPath: 'assets/audio/lesson_020.mp3',
+    durationSeconds: 162,
+    wordCount: 275,
+  ),
+  LessonModel(
+    id: 'lesson-021',
+    title: 'TED: The Science of Sleep',
+    category: 'TEDスタイル',
+    difficulty: 2,
+    transcriptText:
+        'We spend roughly one third of our lives asleep, yet most of us know surprisingly little about what happens during those hours. '
+        'Sleep is not simply a period of rest. It is an active and essential process that affects every system in your body. '
+        'Let me explain why sleep matters so much more than most people realize. '
+        'During deep sleep, your brain performs a remarkable cleaning operation. '
+        'A system called the glymphatic pathway flushes out waste products that accumulate during waking hours. '
+        'These waste products include proteins that, if left to build up over time, are associated with neurodegenerative diseases. '
+        'In other words, your brain literally washes itself while you sleep. '
+        'But that is only part of the story. Sleep also plays a critical role in memory consolidation. '
+        'Throughout the day, your brain temporarily stores new information in a region called the hippocampus. '
+        'During sleep, this information is transferred to the cortex for long-term storage. '
+        'If you skip sleep after learning something new, your ability to retain that information drops by as much as forty percent. '
+        'This is why students who pull all-night study sessions often perform worse on exams than those who get adequate rest. '
+        'Now here is where it gets really interesting. '
+        'Recent research has shown that sleep deprivation affects your emotional regulation as well. '
+        'When you are sleep deprived, the amygdala, the part of your brain responsible for processing emotions, '
+        'becomes up to sixty percent more reactive. This means you are more likely to overreact to minor frustrations '
+        'and less able to maintain a balanced perspective. '
+        'So what can you do? The science points to a few clear recommendations. '
+        'Maintain a consistent sleep schedule, even on weekends. Keep your bedroom cool and dark. '
+        'And give yourself at least thirty minutes of screen-free time before bed. '
+        'Your future self will thank you.',
+    audioAssetPath: 'assets/audio/lesson_021.mp3',
+    durationSeconds: 132,
+    wordCount: 280,
+  ),
   LessonModel(
     id: 'lesson-004',
     title: 'TED: The Power of Habit',
