@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
@@ -9,24 +10,23 @@ import 'shared/data/seed_data.dart';
 import 'shared/services/notification_service.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Initialize Hive
   await Hive.initFlutter();
   final lessonsBox = await Hive.openBox<Map>('lessons');
   await Hive.openBox<Map>('feedbacks');
   await Hive.openBox<Map>('progress');
 
-  // Seed lessons if empty
   if (lessonsBox.isEmpty) {
     for (final lesson in seedLessons) {
       await lessonsBox.put(lesson.id, lesson.toJson());
     }
   }
 
-  // Initialize notification service
   await NotificationService.instance.initialize();
 
+  FlutterNativeSplash.remove();
   runApp(const ProviderScope(child: DoppelApp()));
 }
 
