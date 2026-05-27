@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,35 @@ class LessonScreen extends ConsumerStatefulWidget {
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   bool _isAnalyzing = false;
   bool _hideTextOnRecord = false;
+  final _stopwatch = Stopwatch();
+  Timer? _tickTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _stopwatch.start();
+    _tickTimer = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => setState(() {}),
+    );
+  }
+
+  @override
+  void dispose() {
+    _tickTimer?.cancel();
+    _stopwatch.stop();
+    super.dispose();
+  }
+
+  int get _elapsedMinutes =>
+      (_stopwatch.elapsedMilliseconds / 60000).ceil().clamp(1, 999);
+
+  String get _elapsedLabel {
+    final total = _stopwatch.elapsed.inSeconds;
+    final m = total ~/ 60;
+    final s = total % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +76,33 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Stop TTS when leaving
             ref.read(ttsServiceProvider.notifier).stop();
             context.go('/home');
           },
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 16,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _elapsedLabel,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: _isAnalyzing
           ? const Center(
@@ -481,7 +533,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
       // Record practice in progress
       final progressRepo = ref.read(progressRepositoryProvider);
-      await progressRepo.recordPractice(durationMinutes: 3);
+      await progressRepo.recordPractice(durationMinutes: _elapsedMinutes);
 
       if (mounted) {
         setState(() => _isAnalyzing = false);
