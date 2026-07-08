@@ -11,6 +11,7 @@ import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../../../feedback/presentation/providers/feedback_provider.dart';
 import '../providers/lesson_provider.dart';
+import '../providers/shadowing_session_provider.dart';
 
 class LessonScreen extends ConsumerStatefulWidget {
   const LessonScreen({super.key, required this.lessonId});
@@ -23,12 +24,12 @@ class LessonScreen extends ConsumerStatefulWidget {
 
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   bool _isAnalyzing = false;
-  bool _hideTextOnRecord = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final lesson = ref.watch(lessonByIdProvider(widget.lessonId));
+    final session = ref.watch(shadowingSessionProvider(widget.lessonId));
     final ttsState = ref.watch(ttsServiceProvider);
     final recorderState = ref.watch(audioRecorderProvider);
     final pastFeedbacks = ref.watch(feedbacksByLessonProvider(widget.lessonId));
@@ -46,7 +47,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Stop TTS when leaving
             ref.read(ttsServiceProvider.notifier).stop();
             context.go('/home');
           },
@@ -59,302 +59,150 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('分析中...'),
+                  Text('採点中...'),
                 ],
               ),
             )
-          : Column(
-              children: [
-                // Past score banner
-                if (pastFeedbacks.isNotEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    color: theme.colorScheme.primary
-                        .withValues(alpha: 0.05),
-                    child: Row(
-                      children: [
-                        Icon(Icons.history,
-                            size: 16,
-                            color: theme.colorScheme.onSurfaceVariant),
-                        const SizedBox(width: 8),
-                        Text(
-                          '前回: ${pastFeedbacks.first.overallScore}点',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: ScoreUtils.scoreColor(
-                              pastFeedbacks.first.overallScore,
-                              theme.colorScheme,
-                            ),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '最高: ${pastFeedbacks.map((f) => f.overallScore).reduce((a, b) => a > b ? a : b)}点',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          '${pastFeedbacks.length}回練習',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const Spacer(),
-                        TextButton(
-                          onPressed: () => _showPastResults(
-                              context, theme, pastFeedbacks),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 0),
-                            tapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: const Text('詳細'),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                // Transcript area
-                Expanded(
-                  child: Stack(
-                    children: [
-                      SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-                        child: Text(
-                          lesson.transcriptText,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            height: 1.8,
-                          ),
-                        ),
+          : !session.hasChunks
+              ? const Center(child: Text('このレッスンには練習できる文がありません'))
+              : Column(
+                  children: [
+                    // Past score banner (reused)
+                    if (pastFeedbacks.isNotEmpty)
+                      _PastScoreBanner(
+                        feedbacks: pastFeedbacks,
+                        onDetails: () =>
+                            _showPastResults(context, theme, pastFeedbacks),
                       ),
-                      // Hide overlay when recording with toggle on
-                      if (_hideTextOnRecord && recorderState.isRecording)
-                        Positioned.fill(
-                          child: Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.95),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.visibility_off,
-                                    size: 32,
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'テキスト非表示中',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      // Toggle button
-                      Positioned(
-                        top: 0,
-                        right: 8,
-                        child: IconButton(
-                          icon: Icon(
-                            _hideTextOnRecord
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            size: 20,
-                          ),
-                          tooltip: _hideTextOnRecord
-                              ? '録音中テキスト非表示 ON'
-                              : '録音中テキスト非表示 OFF',
-                          onPressed: () =>
-                              setState(() => _hideTextOnRecord = !_hideTextOnRecord),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                // Waveform area (visible when TTS speaking or recording)
-                if (ttsState.isSpeaking || recorderState.isRecording)
-                  Container(
-                    height: 64,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: recorderState.isRecording
-                          ? theme.colorScheme.error.withValues(alpha: 0.05)
-                          : theme.colorScheme.primary.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: _WaveformPlaceholder(
-                        color: recorderState.isRecording
-                            ? theme.colorScheme.error.withValues(alpha: 0.7)
-                            : theme.colorScheme.primary.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ),
-
-                // Playback controls (TTS)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 8),
-                  child: Column(
-                    children: [
-                      Row(
+                    // Progress bar + chunk counter
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
+                      child: Row(
                         children: [
-                          // Play/Stop model audio via TTS
-                          IconButton.filled(
-                            icon: Icon(
-                              ttsState.isSpeaking
-                                  ? Icons.stop
-                                  : Icons.volume_up,
-                            ),
-                            onPressed: () => ref
-                                .read(ttsServiceProvider.notifier)
-                                .speak(lesson.transcriptText),
-                            tooltip: ttsState.isSpeaking ? '停止' : 'お手本を再生',
-                          ),
-                          const SizedBox(width: 8),
                           Text(
-                            ttsState.isSpeaking ? '再生中...' : 'お手本を聴く',
-                            style: theme.textTheme.bodyMedium,
+                            '${session.currentIndex + 1} / ${session.chunks.length}',
+                            style: theme.textTheme.labelLarge,
                           ),
-                          const Spacer(),
-                          // WPM badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.tertiary
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              '${_estimateWpm(lesson.wordCount, lesson.durationSeconds, ttsState.speed)} WPM',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.tertiary,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      // Speed slider row
-                      Row(
-                        children: [
-                          const Icon(Icons.speed, size: 18),
+                          const SizedBox(width: 12),
                           Expanded(
-                            child: Slider(
-                              value: ttsState.speed,
-                              min: 0.25,
-                              max: 0.6,
-                              divisions: 7,
-                              label: _speedLabel(ttsState.speed),
-                              onChanged: (v) => ref
-                                  .read(ttsServiceProvider.notifier)
-                                  .setSpeed(v),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                value: session.progressFraction,
+                                minHeight: 6,
+                                backgroundColor: theme
+                                    .colorScheme.surfaceContainerHighest,
+                              ),
                             ),
                           ),
-                          SizedBox(
-                            width: 42,
-                            child: Text(
-                              _speedLabel(ttsState.speed),
-                              style: theme.textTheme.labelLarge,
+                          const SizedBox(width: 12),
+                          Text(
+                            '${session.recordedCount}録音',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
 
-                // Record button + cancel
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 32),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Cancel button (visible only while recording)
-                      AnimatedOpacity(
-                        opacity: recorderState.isRecording ? 1.0 : 0.0,
-                        duration: const Duration(milliseconds: 200),
-                        child: IgnorePointer(
-                          ignoring: !recorderState.isRecording,
-                          child: GestureDetector(
-                            onTap: _handleCancelRecording,
-                            child: Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: theme.colorScheme.surfaceContainerHighest,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                size: 24,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
+                    // Mode toggles
+                    _ModeToggleRow(lessonId: widget.lessonId),
+
+                    // Chunk list
+                    Expanded(
+                      child: _ChunkListView(lessonId: widget.lessonId),
+                    ),
+
+                    // Waveform (reused) — visible while speaking or recording
+                    if (ttsState.isSpeaking || recorderState.isRecording)
+                      Container(
+                        height: 56,
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: recorderState.isRecording
+                              ? theme.colorScheme.error.withValues(alpha: 0.05)
+                              : theme.colorScheme.primary
+                                  .withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      SizedBox(width: recorderState.isRecording ? 24 : 0),
-                      // Record / Stop button
-                      GestureDetector(
-                        onTap: () => _handleRecordTap(lesson.id, lesson.transcriptText),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: recorderState.isRecording ? 112 : 96,
-                          height: recorderState.isRecording ? 112 : 96,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
+                        child: Center(
+                          child: _WaveformPlaceholder(
                             color: recorderState.isRecording
-                                ? theme.colorScheme.error
-                                : theme.colorScheme.primary,
-                            boxShadow: [
-                              BoxShadow(
-                                color: (recorderState.isRecording
-                                        ? theme.colorScheme.error
-                                        : theme.colorScheme.primary)
-                                    .withValues(alpha: 0.3),
-                                blurRadius: 16,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            recorderState.isRecording
-                                ? Icons.stop
-                                : Icons.mic,
-                            size: 32,
-                            color: Colors.white,
+                                ? theme.colorScheme.error.withValues(alpha: 0.7)
+                                : theme.colorScheme.primary
+                                    .withValues(alpha: 0.6),
                           ),
                         ),
                       ),
-                      // Spacer to balance the cancel button
-                      SizedBox(width: recorderState.isRecording ? 72 : 0),
-                    ],
-                  ),
+
+                    // Chunk control bar (listen / loop / replay / nav + speed)
+                    _ChunkControlBar(
+                      lessonId: widget.lessonId,
+                      wpm: _estimateWpm(
+                        lesson.wordCount,
+                        lesson.durationSeconds,
+                        ttsState.speed,
+                      ),
+                      speedLabel: _speedLabel(ttsState.speed),
+                    ),
+
+                    // Record bar
+                    _RecordBar(
+                      lessonId: widget.lessonId,
+                      onScore: () => _scoreAndNavigate(lesson.id),
+                    ),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 
-  void _showPastResults(BuildContext context, ThemeData theme,
-      List<dynamic> feedbacks) {
+  Future<void> _scoreAndNavigate(String lessonId) async {
+    final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
+
+    // Stop any playback / flush an in-progress recording first, then read the
+    // (now up-to-date) session state for scoring.
+    ref.read(ttsServiceProvider.notifier).stop();
+    if (ref.read(audioRecorderProvider).isRecording) {
+      await notifier.stopRecordCurrent();
+    }
+    final session = ref.read(shadowingSessionProvider(lessonId));
+
+    setState(() => _isAnalyzing = true);
+
+    try {
+      final analysis = ref.read(speechAnalysisServiceProvider);
+      final feedback = await analysis.analyzeChunks(
+        lessonId: lessonId,
+        modelChunks: session.chunks,
+        chunkAudioPaths: session.orderedAudioPaths,
+      );
+
+      await ref.read(feedbackRepositoryProvider).save(feedback);
+      await ref
+          .read(progressRepositoryProvider)
+          .recordPractice(durationMinutes: 3);
+
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+        context.go('/feedback/${feedback.id}');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isAnalyzing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('採点中にエラーが発生しました。もう一度お試しください。'),
+            action: SnackBarAction(label: '閉じる', onPressed: () {}),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showPastResults(
+      BuildContext context, ThemeData theme, List<dynamic> feedbacks) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -415,7 +263,6 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
   /// Map iOS speechRate (0.25-0.6) to user-facing label (0.5x-1.2x).
   String _speedLabel(double rate) {
-    // iOS: 0.25=very slow, 0.5=normal, 0.6=fast
     final display = (rate / 0.5).toStringAsFixed(1);
     return '${display}x';
   }
@@ -423,86 +270,439 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   /// Estimate words-per-minute based on lesson metadata and TTS speed.
   int _estimateWpm(int wordCount, int durationSeconds, double speed) {
     if (durationSeconds <= 0) return 0;
-    // Native WPM from lesson data, scaled relative to normal rate (0.5)
     final nativeWpm = (wordCount / durationSeconds * 60).round();
     return (nativeWpm * (speed / 0.5)).round();
   }
+}
 
-  Future<void> _handleCancelRecording() async {
-    await ref.read(audioRecorderProvider.notifier).cancelRecording();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('録音をキャンセルしました'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+// ── Past score banner ──
+
+class _PastScoreBanner extends StatelessWidget {
+  const _PastScoreBanner({required this.feedbacks, required this.onDetails});
+
+  final List<dynamic> feedbacks;
+  final VoidCallback onDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final best = feedbacks
+        .map((f) => f.overallScore as int)
+        .reduce((a, b) => a > b ? a : b);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      color: theme.colorScheme.primary.withValues(alpha: 0.05),
+      child: Row(
+        children: [
+          Icon(Icons.history,
+              size: 16, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Text(
+            '前回: ${feedbacks.first.overallScore}点',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: ScoreUtils.scoreColor(
+                  feedbacks.first.overallScore as int, theme.colorScheme),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text('最高: $best点',
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(fontWeight: FontWeight.w700)),
+          const SizedBox(width: 16),
+          Text('${feedbacks.length}回練習',
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          const Spacer(),
+          TextButton(
+            onPressed: onDetails,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text('詳細'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Mode toggles (hide-text, auto-advance) ──
+
+class _ModeToggleRow extends ConsumerWidget {
+  const _ModeToggleRow({required this.lessonId});
+
+  final String lessonId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final session = ref.watch(shadowingSessionProvider(lessonId));
+    final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          FilterChip(
+            selected: session.hideText,
+            onSelected: (_) => notifier.toggleHideText(),
+            avatar: Icon(
+              session.hideText ? Icons.visibility_off : Icons.visibility,
+              size: 18,
+            ),
+            label: const Text('テキスト非表示'),
+          ),
+          const SizedBox(width: 8),
+          FilterChip(
+            selected: session.autoAdvance,
+            onSelected: (_) => notifier.toggleAutoAdvance(),
+            avatar: const Icon(Icons.skip_next, size: 18),
+            label: const Text('自動で次へ'),
+          ),
+          const Spacer(),
+          if (session.loopMode)
+            Text('区間リピート中',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.primary)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Chunk list ──
+
+class _ChunkListView extends ConsumerStatefulWidget {
+  const _ChunkListView({required this.lessonId});
+
+  final String lessonId;
+
+  @override
+  ConsumerState<_ChunkListView> createState() => _ChunkListViewState();
+}
+
+class _ChunkListViewState extends ConsumerState<_ChunkListView> {
+  final _controller = ScrollController();
+  int _lastIndex = -1;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
-  Future<void> _handleRecordTap(String lessonId, String transcript) async {
-    // Stop TTS if playing
-    ref.read(ttsServiceProvider.notifier).stop();
-
-    final recorder = ref.read(audioRecorderProvider.notifier);
-    final recorderState = ref.read(audioRecorderProvider);
-
-    if (recorderState.isRecording) {
-      // Stop recording and analyze
-      final path = await recorder.stopRecording();
-      await _analyzeAndNavigate(lessonId, transcript, path);
-    } else {
-      // Try to start recording; if it fails (e.g. simulator), skip to analysis
-      final started = await recorder.tryStartRecording();
-      if (!started) {
-        await _analyzeAndNavigate(lessonId, transcript, null);
-      }
-    }
+  void _scrollToCurrent(int index, int count) {
+    if (!_controller.hasClients || count == 0) return;
+    final max = _controller.position.maxScrollExtent;
+    final target = (index / count) * max;
+    _controller.animateTo(
+      target.clamp(0.0, max),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
-  Future<void> _analyzeAndNavigate(
-    String lessonId,
-    String transcript,
-    String? audioPath,
-  ) async {
-    setState(() => _isAnalyzing = true);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final session = ref.watch(shadowingSessionProvider(widget.lessonId));
+    final notifier =
+        ref.read(shadowingSessionProvider(widget.lessonId).notifier);
 
-    try {
-      final analysis = ref.read(speechAnalysisServiceProvider);
-      final feedback = await analysis.analyze(
-        lessonId: lessonId,
-        modelTranscript: transcript,
-        userAudioPath: audioPath,
-      );
+    if (session.currentIndex != _lastIndex) {
+      _lastIndex = session.currentIndex;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToCurrent(session.currentIndex, session.chunks.length);
+      });
+    }
 
-      // Save feedback
-      final feedbackRepo = ref.read(feedbackRepositoryProvider);
-      await feedbackRepo.save(feedback);
+    return ListView.builder(
+      controller: _controller,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      itemCount: session.chunks.length,
+      itemBuilder: (context, i) {
+        final isCurrent = i == session.currentIndex;
+        final status = session.statusOf(i);
+        final recorded = status == ChunkStatus.recorded;
+        final masked = session.hideText && !recorded;
 
-      // Record practice in progress
-      final progressRepo = ref.read(progressRepositoryProvider);
-      await progressRepo.recordPractice(durationMinutes: 3);
+        final Color bg;
+        if (isCurrent) {
+          bg = theme.colorScheme.primary.withValues(alpha: 0.12);
+        } else {
+          bg = Colors.transparent;
+        }
 
-      if (mounted) {
-        setState(() => _isAnalyzing = false);
-        context.go('/feedback/${feedback.id}');
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isAnalyzing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('分析中にエラーが発生しました。もう一度お試しください。'),
-            action: SnackBarAction(
-              label: '閉じる',
-              onPressed: () {},
+        return Card(
+          elevation: isCurrent ? 1 : 0,
+          color: bg,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: isCurrent
+                ? BorderSide(color: theme.colorScheme.primary, width: 1.5)
+                : BorderSide.none,
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () async {
+              await notifier.goTo(i);
+              await notifier.listenCurrent();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2, right: 10),
+                    child: recorded
+                        ? Icon(Icons.check_circle,
+                            size: 20, color: theme.colorScheme.tertiary)
+                        : Icon(
+                            isCurrent
+                                ? Icons.play_circle_fill
+                                : Icons.circle_outlined,
+                            size: 20,
+                            color: isCurrent
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outlineVariant,
+                          ),
+                  ),
+                  Expanded(
+                    child: masked
+                        ? Row(
+                            children: [
+                              Icon(Icons.visibility_off,
+                                  size: 16,
+                                  color: theme.colorScheme.onSurfaceVariant),
+                              const SizedBox(width: 8),
+                              Text('テキスト非表示',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                      color:
+                                          theme.colorScheme.onSurfaceVariant)),
+                            ],
+                          )
+                        : Text(
+                            session.chunks[i],
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              height: 1.6,
+                              fontWeight: isCurrent
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              color: isCurrent
+                                  ? theme.colorScheme.onSurface
+                                  : theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
-      }
-    }
+      },
+    );
   }
 }
+
+// ── Chunk control bar ──
+
+class _ChunkControlBar extends ConsumerWidget {
+  const _ChunkControlBar({
+    required this.lessonId,
+    required this.wpm,
+    required this.speedLabel,
+  });
+
+  final String lessonId;
+  final int wpm;
+  final String speedLabel;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final session = ref.watch(shadowingSessionProvider(lessonId));
+    final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
+    final ttsState = ref.watch(ttsServiceProvider);
+    final hasOwnRecording =
+        session.recordingPaths[session.currentIndex] != null;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chevron_left),
+                tooltip: '前の文',
+                onPressed: session.isFirst ? null : () => notifier.prev(),
+              ),
+              // Listen model (play / stop)
+              IconButton.filled(
+                icon: Icon(ttsState.isSpeaking ? Icons.stop : Icons.volume_up),
+                tooltip: ttsState.isSpeaking ? '停止' : 'お手本を聴く',
+                onPressed: () => notifier.listenCurrent(),
+              ),
+              // A-B loop toggle
+              IconButton(
+                icon: Icon(
+                  Icons.repeat,
+                  color: session.loopMode ? theme.colorScheme.primary : null,
+                ),
+                tooltip: session.loopMode ? '区間リピート ON' : '区間リピート OFF',
+                isSelected: session.loopMode,
+                onPressed: () {
+                  notifier.toggleLoop();
+                  if (!session.loopMode && !ttsState.isSpeaking) {
+                    // Was off, now turning on → start looping.
+                    notifier.listenCurrent();
+                  }
+                },
+              ),
+              // Replay own recording
+              IconButton(
+                icon: const Icon(Icons.record_voice_over),
+                tooltip: '自分の録音を再生',
+                onPressed: hasOwnRecording
+                    ? () => notifier.replayCurrentRecording()
+                    : null,
+              ),
+              IconButton(
+                icon: const Icon(Icons.chevron_right),
+                tooltip: '次の文',
+                onPressed: session.isLast ? null : () => notifier.next(),
+              ),
+            ],
+          ),
+          // Speed slider (reused mapping)
+          Row(
+            children: [
+              const Icon(Icons.speed, size: 18),
+              Expanded(
+                child: Slider(
+                  value: ttsState.speed,
+                  min: 0.25,
+                  max: 0.6,
+                  divisions: 7,
+                  label: speedLabel,
+                  onChanged: (v) =>
+                      ref.read(ttsServiceProvider.notifier).setSpeed(v),
+                ),
+              ),
+              SizedBox(width: 42, child: Text(speedLabel, style: theme.textTheme.labelLarge)),
+              const SizedBox(width: 8),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.tertiary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text('$wpm WPM',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.tertiary,
+                        fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Record bar ──
+
+class _RecordBar extends ConsumerWidget {
+  const _RecordBar({required this.lessonId, required this.onScore});
+
+  final String lessonId;
+  final VoidCallback onScore;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final session = ref.watch(shadowingSessionProvider(lessonId));
+    final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
+    final recorderState = ref.watch(audioRecorderProvider);
+    final isRecording = recorderState.isRecording;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Cancel (while recording)
+          AnimatedOpacity(
+            opacity: isRecording ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 200),
+            child: IgnorePointer(
+              ignoring: !isRecording,
+              child: GestureDetector(
+                onTap: () => notifier.cancelRecordCurrent(),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: theme.colorScheme.surfaceContainerHighest,
+                  ),
+                  child: Icon(Icons.close,
+                      size: 24, color: theme.colorScheme.onSurfaceVariant),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: isRecording ? 20 : 0),
+          // Record / Stop
+          GestureDetector(
+            onTap: () => isRecording
+                ? notifier.stopRecordCurrent()
+                : notifier.startRecordCurrent(),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              width: isRecording ? 84 : 72,
+              height: isRecording ? 84 : 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isRecording
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.primary,
+                boxShadow: [
+                  BoxShadow(
+                    color: (isRecording
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.primary)
+                        .withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(isRecording ? Icons.stop : Icons.mic,
+                  size: 28, color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 20),
+          // Score button
+          FilledButton.icon(
+            onPressed: session.canScore && !isRecording ? onScore : null,
+            icon: const Icon(Icons.grading, size: 18),
+            label: const Text('採点'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Waveform placeholder (reused) ──
 
 class _WaveformPlaceholder extends StatefulWidget {
   const _WaveformPlaceholder({required this.color});
@@ -542,10 +742,10 @@ class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
           children: List.generate(24, (i) {
             final phase = (i / 24) * 2 * pi;
             final sinValue = sin(_controller.value * 2 * pi + phase);
-            final height = 8.0 + sinValue * 20.0;
+            final height = 8.0 + sinValue * 18.0;
             return Container(
               width: 3,
-              height: height.clamp(4.0, 36.0),
+              height: height.clamp(4.0, 32.0),
               margin: const EdgeInsets.symmetric(horizontal: 1),
               decoration: BoxDecoration(
                 color: widget.color,
