@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# 同一ブランチで新しいpushがあれば実行中のCIをキャンセル
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          # ローカルの .fvmrc は "stable" 指定。再現性のため実バージョンをピン。
+          flutter-version: 3.41.2
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # *.freezed.dart / *.g.dart は .gitignore 済み（リポジトリ未追跡）のため
+      # クリーンチェックアウトでは生成が必須。
+      - name: Generate code (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # 既存の info レベル lint が5件あるため info は非致命に。
+      # 警告・エラー（実際の回帰）は引き続きCIを失敗させる。
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
