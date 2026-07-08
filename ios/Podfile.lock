@@ -2,6 +2,8 @@ PODS:
   - audio_session (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_local_notifications (0.0.1):
+    - Flutter
   - flutter_tts (0.0.1):
     - Flutter
   - just_audio (0.0.1):
@@ -18,6 +20,7 @@ PODS:
 DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - Flutter (from `Flutter`)
+  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_tts (from `.symlinks/plugins/flutter_tts/ios`)
   - just_audio (from `.symlinks/plugins/just_audio/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -29,6 +32,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/audio_session/ios"
   Flutter:
     :path: Flutter
+  flutter_local_notifications:
+    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_tts:
     :path: ".symlinks/plugins/flutter_tts/ios"
   just_audio:
@@ -43,6 +48,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   audio_session: 9bb7f6c970f21241b19f5a3658097ae459681ba0
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_local_notifications: 395056b3175ba4f08480a7c5de30cd36d69827e4
   flutter_tts: 35ac3c7d42412733e795ea96ad2d7e05d0a75113
   just_audio: 4e391f57b79cad2b0674030a00453ca5ce817eed
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d

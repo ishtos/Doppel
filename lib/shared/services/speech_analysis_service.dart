@@ -33,6 +33,23 @@ class SpeechAnalysisService {
       userTranscript = await _transcribe(userAudioPath);
     }
 
+    return _buildFeedback(
+      lessonId: lessonId,
+      modelTranscript: modelTranscript,
+      userTranscript: userTranscript,
+      userAudioPath: userAudioPath,
+    );
+  }
+
+  /// Build a [FeedbackModel] from a (possibly null) user transcript, applying
+  /// real transcript-comparison scoring when available and falling back to
+  /// simulated scores otherwise. Shared by [analyze] and [analyzeChunks].
+  Future<FeedbackModel> _buildFeedback({
+    required String lessonId,
+    required String modelTranscript,
+    required String? userTranscript,
+    required String? userAudioPath,
+  }) async {
     // Score by comparing transcripts
     final int pronunciationScore;
     final int rhythmScore;
@@ -80,6 +97,59 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       modelTranscript: modelTranscript,
       userAudioPath: userAudioPath,
+    );
+  }
+
+  /// Analyze a chunk-by-chunk shadowing session.
+  ///
+  /// Each recorded chunk is transcribed independently (in parallel) via
+  /// Whisper, then the transcripts are concatenated and scored against the
+  /// joined model chunks using the exact same logic as [analyze], producing a
+  /// single whole-passage [FeedbackModel]. When no API key / no audio is
+  /// available it falls through to the same simulated-score path as [analyze],
+  /// so the effortless offline loop is preserved.
+  ///
+  /// [chunkAudioPaths] is index-aligned with [modelChunks]; a null entry means
+  /// that chunk was not recorded (e.g. skipped or simulator with no mic).
+  Future<FeedbackModel> analyzeChunks({
+    required String lessonId,
+    required List<String> modelChunks,
+    required List<String?> chunkAudioPaths,
+  }) async {
+    final modelTranscript = modelChunks.join(' ');
+
+    // Transcribe each present chunk in parallel, preserving order.
+    String? userTranscript;
+    if (_apiKey.isNotEmpty) {
+      final futures = chunkAudioPaths.map((path) async {
+        if (path == null) return null;
+        return _transcribe(path);
+      }).toList();
+      final results = await Future.wait(futures);
+      final joined = results
+          .whereType<String>()
+          .map((t) => t.trim())
+          .where((t) => t.isNotEmpty)
+          .join(' ')
+          .trim();
+      if (joined.isNotEmpty) userTranscript = joined;
+    }
+
+    // Use the first available recording as the representative audio path
+    // (feedback screen replays a single file).
+    String? firstAudioPath;
+    for (final path in chunkAudioPaths) {
+      if (path != null) {
+        firstAudioPath = path;
+        break;
+      }
+    }
+
+    return _buildFeedback(
+      lessonId: lessonId,
+      modelTranscript: modelTranscript,
+      userTranscript: userTranscript,
+      userAudioPath: firstAudioPath,
     );
   }
 
