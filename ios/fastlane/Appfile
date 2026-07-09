@@ -1,0 +1,7 @@
+# fastlane Appfile
+# 機密値はコミットしない。CI では環境変数（GitHub Secrets 由来）を参照する。
+
+app_identifier(ENV.fetch("APP_IDENTIFIER", "com.ishtos.doppel"))
+team_id(ENV.fetch("APPLE_TEAM_ID", "V2B43LMURK"))
+
+# App Store Connect API キーを使うため apple_id / itc の対話ログインは不要。

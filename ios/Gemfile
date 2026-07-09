@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+
+# iOS デプロイ用の fastlane。CI(macOSランナー)で `bundle install` して使う。
+gem "fastlane"
