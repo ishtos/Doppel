@@ -1,0 +1,48 @@
+default_platform(:ios)
+
+# ワークフロー側で先に `flutter build ios --release --no-codesign` を実行し、
+# Dart のコンパイルと CocoaPods 準備を済ませておく前提。
+# このレーンは gym で手動署名アーカイブ→エクスポートし、TestFlight にアップロードする。
+platform :ios do
+  desc "Build (manual signing) and upload to TestFlight (internal testers)"
+  lane :beta do
+    app_identifier = ENV.fetch("APP_IDENTIFIER", "com.ishtos.doppel")
+    team_id        = ENV.fetch("APPLE_TEAM_ID", "V2B43LMURK")
+    profile_name   = ENV.fetch("IOS_PROVISION_PROFILE_NAME")
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_content: ENV.fetch("ASC_KEY_P8_BASE64"),
+      is_key_content_base64: true,
+    )
+
+    # CI では automatic signing が使えない（Apple ID 未ログイン）ため、
+    # xcargs で明示的に manual 署名を強制する。
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: File.expand_path("../../build/ios/ipa", __dir__),
+      xcargs: [
+        "CODE_SIGN_STYLE=Manual",
+        "DEVELOPMENT_TEAM=#{team_id}",
+        "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
+      ].join(" "),
+      export_options: {
+        signingStyle: "manual",
+        teamID: team_id,
+        provisioningProfiles: {
+          app_identifier => profile_name,
+        },
+      },
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      skip_waiting_for_build_processing: true, # 処理完了を待たずに終了（CI時間節約）
+      skip_submission: true,                   # 内部テスターのみ。外部審査には出さない
+    )
+  end
+end
