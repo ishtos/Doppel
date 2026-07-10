@@ -10,6 +10,11 @@ import 'lesson_provider.dart';
 /// Per-chunk practice status.
 enum ChunkStatus { notStarted, recording, recorded }
 
+/// How the user records audio for scoring.
+/// [whole] records the whole passage in a single take; [perChunk] records each
+/// sentence separately (the original shadowing-loop behaviour).
+enum RecordMode { whole, perChunk }
+
 /// Sentence/breath-group chunks for a lesson, computed once at runtime.
 /// Keyed by lessonId. Returns an empty list if the lesson is missing.
 final lessonChunksProvider = Provider.family<List<String>, String>((ref, id) {
@@ -36,6 +41,9 @@ class ShadowingSessionState {
     this.loopMode = false,
     this.hideText = false,
     this.autoAdvance = true,
+    this.recordMode = RecordMode.whole,
+    this.wholeRecordingPath,
+    this.wholeRecorded = false,
   });
 
   final List<String> chunks;
@@ -45,6 +53,16 @@ class ShadowingSessionState {
   final bool loopMode;
   final bool hideText;
   final bool autoAdvance;
+
+  /// Whole-passage vs per-chunk recording. Defaults to [RecordMode.whole].
+  final RecordMode recordMode;
+
+  /// Single continuous recording of the whole passage (whole mode).
+  final String? wholeRecordingPath;
+
+  /// True once a whole-passage recording has been attempted (true even when the
+  /// path is null, e.g. simulator without a mic → simulated-score fallback).
+  final bool wholeRecorded;
 
   ChunkStatus statusOf(int index) => statuses[index] ?? ChunkStatus.notStarted;
 
@@ -57,8 +75,10 @@ class ShadowingSessionState {
   double get progressFraction =>
       chunks.isEmpty ? 0.0 : recordedCount / chunks.length;
 
-  /// True once at least one chunk has been recorded (enables "採点").
-  bool get canScore => recordedCount > 0;
+  /// True once enough has been recorded to score, per the active mode.
+  bool get canScore => recordMode == RecordMode.whole
+      ? wholeRecorded
+      : recordedCount > 0;
 
   bool get isLast => currentIndex >= chunks.length - 1;
   bool get isFirst => currentIndex <= 0;
@@ -75,6 +95,10 @@ class ShadowingSessionState {
     bool? loopMode,
     bool? hideText,
     bool? autoAdvance,
+    RecordMode? recordMode,
+    String? wholeRecordingPath,
+    bool? wholeRecorded,
+    bool clearWholeRecording = false,
   }) {
     return ShadowingSessionState(
       chunks: chunks ?? this.chunks,
@@ -84,6 +108,11 @@ class ShadowingSessionState {
       loopMode: loopMode ?? this.loopMode,
       hideText: hideText ?? this.hideText,
       autoAdvance: autoAdvance ?? this.autoAdvance,
+      recordMode: recordMode ?? this.recordMode,
+      wholeRecordingPath: clearWholeRecording
+          ? null
+          : (wholeRecordingPath ?? this.wholeRecordingPath),
+      wholeRecorded: wholeRecorded ?? this.wholeRecorded,
     );
   }
 }
@@ -193,7 +222,58 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
     await _player.playFile(path);
   }
 
+  // ── Record (whole passage) ──
+
+  /// Start a single continuous recording of the whole passage.
+  Future<void> startWholeRecording() async {
+    await _tts.stop();
+    await _deleteWholeRecording();
+    // Reset any prior take so re-recording starts clean.
+    state = state.copyWith(wholeRecorded: false, clearWholeRecording: true);
+
+    final started = await _recorder.tryStartRecording();
+    if (!started) {
+      // No microphone (e.g. simulator): mark as recorded so scoring can still
+      // run via the simulated-score fallback, mirroring per-chunk behaviour.
+      state = state.copyWith(wholeRecorded: true);
+    }
+  }
+
+  Future<void> stopWholeRecording() async {
+    final path = await _recorder.stopRecording();
+    if (path != null) {
+      state = state.copyWith(wholeRecordingPath: path, wholeRecorded: true);
+    } else {
+      state = state.copyWith(wholeRecorded: true);
+    }
+  }
+
+  Future<void> cancelWholeRecording() async {
+    await _recorder.cancelRecording();
+    await _deleteWholeRecording();
+    state = state.copyWith(wholeRecorded: false, clearWholeRecording: true);
+  }
+
+  /// Replay the whole-passage recording, if any.
+  Future<void> replayWholeRecording() async {
+    final path = state.wholeRecordingPath;
+    if (path == null) return;
+    await _tts.stop();
+    await _player.playFile(path);
+  }
+
   // ── Modes ──
+
+  void setRecordMode(RecordMode mode) {
+    if (mode == state.recordMode) return;
+    state = state.copyWith(recordMode: mode);
+  }
+
+  void toggleRecordMode() => setRecordMode(
+        state.recordMode == RecordMode.whole
+            ? RecordMode.perChunk
+            : RecordMode.whole,
+      );
 
   void toggleLoop() => state = state.copyWith(loopMode: !state.loopMode);
   void toggleHideText() => state = state.copyWith(hideText: !state.hideText);
@@ -210,9 +290,23 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
 
   Future<void> _stopEverything() async {
     await _tts.stop();
+    // In whole-passage mode keep an in-progress recording running so the user
+    // can navigate chunks (to read along) while recording straight through.
+    if (state.recordMode == RecordMode.whole) return;
     if (_ref.read(audioRecorderProvider).isRecording) {
       await _recorder.cancelRecording();
       _setStatus(state.currentIndex, ChunkStatus.notStarted);
+    }
+  }
+
+  Future<void> _deleteWholeRecording() async {
+    final path = state.wholeRecordingPath;
+    if (path == null) return;
+    try {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    } catch (_) {
+      // Best-effort cleanup.
     }
   }
 
