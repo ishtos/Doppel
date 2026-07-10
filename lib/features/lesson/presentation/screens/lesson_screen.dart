@@ -516,21 +516,24 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2, right: 10),
-                    child: recorded
-                        ? Icon(Icons.check_circle,
-                            size: 20, color: theme.colorScheme.tertiary)
-                        : Icon(
-                            isCurrent
-                                ? Icons.play_circle_fill
-                                : Icons.circle_outlined,
-                            size: 20,
-                            color: isCurrent
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outlineVariant,
-                          ),
-                  ),
+                  // Per-chunk status icon is only meaningful in per-chunk mode
+                  // (whole-passage mode has no per-chunk recording state).
+                  if (session.recordMode != RecordMode.whole)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2, right: 10),
+                      child: recorded
+                          ? Icon(Icons.check_circle,
+                              size: 20, color: theme.colorScheme.tertiary)
+                          : Icon(
+                              isCurrent
+                                  ? Icons.play_circle_fill
+                                  : Icons.circle_outlined,
+                              size: 20,
+                              color: isCurrent
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.outlineVariant,
+                            ),
+                    ),
                   Expanded(
                     child: masked
                         ? Row(

@@ -68,8 +68,14 @@ jobs:
       # Dart のコンパイルと CocoaPods 準備（署名は次段の fastlane で行う）
       # ビルド番号を run_number で自動採番（単調増加）。同番号は TestFlight が拒否する。
       # バージョン名は pubspec.yaml の version を使用。
+      # OPENAI_API_KEY を dart-define で注入（Whisper文字起こし＋GPTコーチを本番で有効化）。
+      # Secret 未設定なら空文字となり、アプリは自動的に非AI（シミュレート採点＋定型文）に
+      # フォールバックする。※クライアント埋め込みのため抽出リスクあり（下記PR説明参照）。
       - name: Pre-build (compile Dart, prepare Pods)
-        run: flutter build ios --release --no-codesign --build-number=${{ github.run_number }}
+        run: >-
+          flutter build ios --release --no-codesign
+          --build-number=${{ github.run_number }}
+          --dart-define=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 
       - name: Build & upload to TestFlight
         working-directory: ios
