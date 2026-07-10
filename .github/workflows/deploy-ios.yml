@@ -1,8 +1,11 @@
 name: Deploy iOS (TestFlight)
 
-# `vX.Y.Z` タグの push、または手動実行でリリースビルドを TestFlight へ配信する。
+# main への push(=PRマージ) / `vX.Y.Z` タグ / 手動実行で TestFlight へ配信する。
+# ビルド番号は github.run_number で自動採番するので、マージのたびに新ビルドになる。
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -63,8 +66,10 @@ jobs:
           echo "$IOS_PROVISION_PROFILE_BASE64" | base64 --decode > "$PROFILE_DIR/dist.mobileprovision"
 
       # Dart のコンパイルと CocoaPods 準備（署名は次段の fastlane で行う）
+      # ビルド番号を run_number で自動採番（単調増加）。同番号は TestFlight が拒否する。
+      # バージョン名は pubspec.yaml の version を使用。
       - name: Pre-build (compile Dart, prepare Pods)
-        run: flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign --build-number=${{ github.run_number }}
 
       - name: Build & upload to TestFlight
         working-directory: ios
