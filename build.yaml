@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # ネストしたモデル(例: FeedbackModel の List<ProblemWord>)の toJson を
+          # 再帰的に Map へ変換する。未設定だと problemWords がオブジェクトのまま残り、
+          # Hive の Box<Map> へ保存する際に直列化できず採点が失敗する。
+          explicit_to_json: true
