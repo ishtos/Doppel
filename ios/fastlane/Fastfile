@@ -19,18 +19,25 @@ platform :ios do
 
     # CI では automatic signing が使えない（Apple ID 未ログイン）ため、
     # xcargs で明示的に manual 署名を強制する。
+    # Runner ターゲットの Release 構成のみ manual 署名に設定する。
+    # 署名を xcargs で全ターゲットに適用すると Pods(record_ios 等)が
+    # "does not support provisioning profiles" で失敗するため、対象を限定する。
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      profile_name: profile_name,
+      targets: ["Runner"],
+      build_configurations: ["Release"],
+    )
+
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       configuration: "Release",
       export_method: "app-store",
       output_directory: File.expand_path("../../build/ios/ipa", __dir__),
-      xcargs: [
-        "CODE_SIGN_STYLE=Manual",
-        "DEVELOPMENT_TEAM=#{team_id}",
-        "CODE_SIGN_IDENTITY='Apple Distribution'",
-        "PROVISIONING_PROFILE_SPECIFIER='#{profile_name}'",
-      ].join(" "),
       export_options: {
         signingStyle: "manual",
         teamID: team_id,
