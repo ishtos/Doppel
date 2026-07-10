@@ -18,7 +18,8 @@ permissions:
 jobs:
   testflight:
     name: Build & upload to TestFlight
-    runs-on: macos-15
+    # Xcode 26 / iOS 26 SDK が必要（App Store Connect が iOS 18.5 SDK ビルドを拒否するため）
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,6 +30,9 @@ jobs:
           flutter-version: 3.41.2
           channel: stable
           cache: true
+
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Set up Ruby (fastlane)
         uses: ruby/setup-ruby@v1
