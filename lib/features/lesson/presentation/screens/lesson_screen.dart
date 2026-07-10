@@ -148,6 +148,9 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                       speedLabel: _speedLabel(ttsState.speed),
                     ),
 
+                    // Record mode toggle (通し / 一文ずつ)
+                    _RecordModeToggle(lessonId: widget.lessonId),
+
                     // Record bar
                     _RecordBar(
                       lessonId: widget.lessonId,
@@ -163,9 +166,12 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
     // Stop any playback / flush an in-progress recording first, then read the
     // (now up-to-date) session state for scoring.
+    final mode = ref.read(shadowingSessionProvider(lessonId)).recordMode;
     ref.read(ttsServiceProvider.notifier).stop();
     if (ref.read(audioRecorderProvider).isRecording) {
-      await notifier.stopRecordCurrent();
+      await (mode == RecordMode.whole
+          ? notifier.stopWholeRecording()
+          : notifier.stopRecordCurrent());
     }
     final session = ref.read(shadowingSessionProvider(lessonId));
 
@@ -173,11 +179,17 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
     try {
       final analysis = ref.read(speechAnalysisServiceProvider);
-      final feedback = await analysis.analyzeChunks(
-        lessonId: lessonId,
-        modelChunks: session.chunks,
-        chunkAudioPaths: session.orderedAudioPaths,
-      );
+      final feedback = session.recordMode == RecordMode.whole
+          ? await analysis.analyze(
+              lessonId: lessonId,
+              modelTranscript: session.chunks.join(' '),
+              userAudioPath: session.wholeRecordingPath,
+            )
+          : await analysis.analyzeChunks(
+              lessonId: lessonId,
+              modelChunks: session.chunks,
+              chunkAudioPaths: session.orderedAudioPaths,
+            );
 
       await ref.read(feedbackRepositoryProvider).save(feedback);
       await ref
@@ -368,6 +380,53 @@ class _ModeToggleRow extends ConsumerWidget {
             Text('区間リピート中',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.primary)),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Record mode toggle ──
+
+class _RecordModeToggle extends ConsumerWidget {
+  const _RecordModeToggle({required this.lessonId});
+
+  final String lessonId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(
+        shadowingSessionProvider(lessonId).select((s) => s.recordMode));
+    final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
+    final isRecording =
+        ref.watch(audioRecorderProvider.select((s) => s.isRecording));
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: SegmentedButton<RecordMode>(
+              segments: const [
+                ButtonSegment(
+                  value: RecordMode.whole,
+                  label: Text('通し'),
+                  icon: Icon(Icons.notes, size: 18),
+                ),
+                ButtonSegment(
+                  value: RecordMode.perChunk,
+                  label: Text('一文ずつ'),
+                  icon: Icon(Icons.format_list_numbered, size: 18),
+                ),
+              ],
+              selected: {mode},
+              // Disable switching mid-recording to avoid dropping a take.
+              onSelectionChanged: isRecording
+                  ? null
+                  : (sel) => notifier.setRecordMode(sel.first),
+              showSelectedIcon: false,
+            ),
+          ),
         ],
       ),
     );
@@ -632,6 +691,7 @@ class _RecordBar extends ConsumerWidget {
     final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
     final recorderState = ref.watch(audioRecorderProvider);
     final isRecording = recorderState.isRecording;
+    final isWhole = session.recordMode == RecordMode.whole;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
@@ -645,7 +705,9 @@ class _RecordBar extends ConsumerWidget {
             child: IgnorePointer(
               ignoring: !isRecording,
               child: GestureDetector(
-                onTap: () => notifier.cancelRecordCurrent(),
+                onTap: () => isWhole
+                    ? notifier.cancelWholeRecording()
+                    : notifier.cancelRecordCurrent(),
                 child: Container(
                   width: 48,
                   height: 48,
@@ -662,9 +724,17 @@ class _RecordBar extends ConsumerWidget {
           SizedBox(width: isRecording ? 20 : 0),
           // Record / Stop
           GestureDetector(
-            onTap: () => isRecording
-                ? notifier.stopRecordCurrent()
-                : notifier.startRecordCurrent(),
+            onTap: () {
+              if (isRecording) {
+                isWhole
+                    ? notifier.stopWholeRecording()
+                    : notifier.stopRecordCurrent();
+              } else {
+                isWhole
+                    ? notifier.startWholeRecording()
+                    : notifier.startRecordCurrent();
+              }
+            },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: isRecording ? 84 : 72,
