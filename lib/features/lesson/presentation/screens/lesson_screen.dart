@@ -263,16 +263,20 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 
     try {
       final analysis = ref.read(speechAnalysisServiceProvider);
+      // Only send audio/data to the cloud when the user has opted in.
+      final cloudConsent = ref.read(settingsProvider).cloudAnalysisConsent;
       final feedback = session.recordMode == RecordMode.whole
           ? await analysis.analyze(
               lessonId: lessonId,
               modelTranscript: session.chunks.join(' '),
               userAudioPath: session.wholeRecordingPath,
+              cloudEnabled: cloudConsent,
             )
           : await analysis.analyzeChunks(
               lessonId: lessonId,
               modelChunks: session.chunks,
               chunkAudioPaths: session.orderedAudioPaths,
+              cloudEnabled: cloudConsent,
             );
 
       await ref.read(feedbackRepositoryProvider).save(feedback);

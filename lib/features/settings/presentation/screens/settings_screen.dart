@@ -139,6 +139,24 @@ class SettingsScreen extends ConsumerWidget {
             ),
           const Divider(height: 1, indent: 72),
 
+          // Privacy / cloud-analysis consent (opt-in, default off)
+          _SectionHeader(title: 'プライバシー', theme: theme),
+          SwitchListTile(
+            secondary: Icon(
+              settings.cloudAnalysisConsent
+                  ? Icons.cloud_done_outlined
+                  : Icons.cloud_off_outlined,
+            ),
+            title: const Text('クラウド音声解析'),
+            subtitle: const Text(
+              'オンにすると録音音声をOpenAIに送信し、音声認識とAIコーチを利用します。'
+              'オフの場合はデバイス内で簡易採点し、音声やデータを外部に送信しません。',
+            ),
+            value: settings.cloudAnalysisConsent,
+            onChanged: (v) => notifier.setCloudAnalysisConsent(v),
+          ),
+          const Divider(height: 1, indent: 72),
+
           // Data section
           _SectionHeader(title: 'データ', theme: theme),
           ListTile(

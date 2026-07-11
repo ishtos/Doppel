@@ -8,8 +8,14 @@ final aiCoachServiceProvider = Provider<AiCoachService>((ref) {
 });
 
 class AiCoachService {
+  AiCoachService({String? apiKey, http.Client? httpClient})
+      : _apiKey = apiKey ?? const String.fromEnvironment('OPENAI_API_KEY'),
+        _client = httpClient ?? http.Client();
+
   static const _baseUrl = 'https://api.openai.com/v1/chat/completions';
-  static const _apiKey = String.fromEnvironment('OPENAI_API_KEY');
+
+  final String _apiKey;
+  final http.Client _client;
 
   bool get hasApiKey => _apiKey.isNotEmpty;
 
@@ -20,8 +26,9 @@ class AiCoachService {
     required int rhythmScore,
     required int intonationScore,
     required List<String> problemWords,
+    bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey) {
+    if (!hasApiKey || !cloudEnabled) {
       return _localFeedback(
         pronunciationScore: pronunciationScore,
         rhythmScore: rhythmScore,
@@ -54,9 +61,10 @@ class AiCoachService {
     required int rhythmScore,
     required int intonationScore,
     required List<String> problemWords,
+    bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey) {
-      // FIXED: No API key → still return local feedback instead of throwing
+    if (!hasApiKey || !cloudEnabled) {
+      // No API key or no cloud consent → return local feedback, don't throw.
       return _localFeedback(
         pronunciationScore: pronunciationScore,
         rhythmScore: rhythmScore,
@@ -78,8 +86,9 @@ class AiCoachService {
     required int averageScore,
     required int practiceCount,
     required List<String> weakPatterns,
+    bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey) {
+    if (!hasApiKey || !cloudEnabled) {
       return _localWeeklyReview(
         averageScore: averageScore,
         practiceCount: practiceCount,
@@ -101,7 +110,7 @@ class AiCoachService {
   }
 
   Future<String> _callOpenAI(String prompt) async {
-    final response = await http.post(
+    final response = await _client.post(
       Uri.parse(_baseUrl),
       headers: {
         'Content-Type': 'application/json',
