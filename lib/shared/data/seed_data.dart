@@ -253,30 +253,10 @@ const seedLessons = [
     category: 'プレゼン',
     difficulty: 3,
     transcriptText:
-        'Every habit has three components: a cue, a routine, and a reward. '
-        'Understanding this loop is the key to changing your behavior. '
-        'When you identify the cue that triggers a habit, '
-        'you can consciously choose a different routine while still getting the reward your brain craves. '
-        'This is really the fundamental principle behind habit formation. '
-        'But let me go deeper into why this matters so much for your daily life. '
-        'Think about your morning routine for a moment. You probably do the same things in roughly the same order every single day. '
-        'You wake up, check your phone, brush your teeth, make coffee, and head out the door. '
-        'Most of these actions happen on autopilot. Your brain has learned these patterns so well '
-        'that it barely uses any energy to execute them. This is incredibly efficient, '
-        'but it also means that bad habits can run on autopilot too. '
-        'Here is the good news. Once you understand the habit loop, you can begin to take control of it. '
-        'Let me give you a real example. Suppose you have a habit of snacking on junk food every afternoon at three o\'clock. '
-        'The cue is the time of day. The routine is walking to the vending machine. '
-        'But the reward is not actually the food itself. Research shows that what most people are really seeking is a break from work '
-        'and a moment of social interaction. So what if you replaced the routine? '
-        'Instead of going to the vending machine, you could take a short walk outside or chat with a colleague. '
-        'You still get the reward, a pleasant break, but without the unhealthy snack. '
-        'The key insight is this: you cannot simply eliminate a habit. You have to replace it with something better. '
-        'And the more you practice the new routine, the stronger it becomes. '
-        'Over time, the new habit will feel just as automatic as the old one.',
+        'Building better habits takes patience and a bit of clever planning. Many people believe that change depends on having strong willpower, but willpower comes and goes throughout the day. A more reliable approach is to make good choices easier and bad choices harder. If you want to drink more water, keep a full bottle on your desk where you can see it. If you want to spend less time on your phone, leave it in another room while you work. Small changes to your surroundings can quietly guide your behavior without any struggle. It also helps to begin with something almost too easy. Reading a single page, stretching for two minutes, or writing one sentence may seem pointless, but these small starts remove the pressure and help you get going. Once you begin, continuing feels natural. Above all, aim for consistency rather than perfection. Practicing a little every day is far more powerful than doing a lot once in a while. Give yourself time, repeat the routine, and gradually it will start to feel like a normal part of who you are.',
     audioAssetPath: 'assets/audio/lesson_004.mp3',
-    durationSeconds: 127,
-    wordCount: 317,
+    durationSeconds: 73,
+    wordCount: 182,
   ),
   LessonModel(
     id: 'lesson-008',
