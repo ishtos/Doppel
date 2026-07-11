@@ -17,9 +17,12 @@ Future<void> main() async {
   await Hive.openBox<Map>('feedbacks');
   await Hive.openBox<Map>('progress');
 
-  // Seed lessons if empty
-  if (lessonsBox.isEmpty) {
-    for (final lesson in seedLessons) {
+  // Seed / migrate lessons: add any seed lesson not already present. This
+  // covers first launch (empty box → all added) and app updates that ship new
+  // lessons (existing users get the new ones), while preserving user state
+  // (bookmarks / completion) on lessons they already have.
+  for (final lesson in seedLessons) {
+    if (!lessonsBox.containsKey(lesson.id)) {
       await lessonsBox.put(lesson.id, lesson.toJson());
     }
   }
