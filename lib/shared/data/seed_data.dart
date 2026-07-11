@@ -245,12 +245,12 @@ const seedLessons = [
     wordCount: 260,
   ),
 
-  // ── TEDスタイル ──
+  // ── プレゼン ──
 
   LessonModel(
     id: 'lesson-004',
-    title: 'TED: The Power of Habit',
-    category: 'TEDスタイル',
+    title: 'How Habits Work',
+    category: 'プレゼン',
     difficulty: 3,
     transcriptText:
         'Every habit has three components: a cue, a routine, and a reward. '
@@ -280,8 +280,8 @@ const seedLessons = [
   ),
   LessonModel(
     id: 'lesson-008',
-    title: 'TED: Creative Thinking',
-    category: 'TEDスタイル',
+    title: 'Creative Thinking',
+    category: 'プレゼン',
     difficulty: 3,
     transcriptText:
         'Creativity is not a talent that some people have and others don\'t. '
@@ -1152,7 +1152,7 @@ const seedLessons = [
   LessonModel(
     id: 'lesson-083',
     title: 'Why Sleep Matters',
-    category: 'TEDスタイル',
+    category: 'プレゼン',
     difficulty: 3,
     transcriptText: 'We live in a culture that treats sleep as a luxury, or worse, as a sign of laziness. We brag about how little we slept, as if exhaustion were a badge of honor. But science tells a very different story. While you sleep, your brain is anything but idle. It is busy consolidating memories, clearing away toxic waste products, and rebalancing the chemistry that regulates your mood. A single night of poor sleep measurably impairs your attention, your judgment, and even your ability to read other people\'s emotions. Chronic sleep deprivation has been linked to heart disease, weakened immunity, and a significantly higher risk of dementia later in life. Yet we continue to sacrifice sleep for one more episode, one more email, one more scroll through our phones. I want to challenge you to reconsider that trade. Imagine treating your eight hours not as wasted time, but as the foundation on which everything else depends: your creativity, your relationships, your health. Protecting your sleep is not self-indulgence. It may be one of the most rational, most productive decisions you can make. So tonight, when the screen glows and one more click beckons, choose rest instead.',
     audioAssetPath: 'assets/audio/lesson_083.mp3',
@@ -1162,7 +1162,7 @@ const seedLessons = [
   LessonModel(
     id: 'lesson-084',
     title: 'Rethinking Failure',
-    category: 'TEDスタイル',
+    category: 'プレゼン',
     difficulty: 2,
     transcriptText: 'Most of us are taught to fear failure, to see it as the opposite of success. But what if failure is actually a necessary part of the path? Think about how a child learns to walk. They fall, again and again, dozens of times a day. Nobody calls that failing. We simply call it learning. Somewhere along the way, though, we begin to treat every mistake as evidence that we are not good enough. That fear makes us cautious, and caution quietly stops us from trying new things. I am not asking you to enjoy failure. Nobody enjoys it. But I am asking you to change your relationship with it. The next time something goes wrong, resist the urge to feel ashamed. Instead, ask one simple question: what is this trying to teach me? The people we admire most are rarely those who never failed. They are the ones who kept going anyway.',
     audioAssetPath: 'assets/audio/lesson_084.mp3',
@@ -1172,7 +1172,7 @@ const seedLessons = [
   LessonModel(
     id: 'lesson-085',
     title: 'The Value Of Boredom',
-    category: 'TEDスタイル',
+    category: 'プレゼン',
     difficulty: 3,
     transcriptText: 'I want to make an unusual argument today: that boredom might be one of the most undervalued experiences in modern life. A generation ago, boredom was simply part of being human. We waited in lines, stared out of train windows, and let our minds wander with nowhere in particular to go. Today, that empty space has all but vanished. The moment a flicker of boredom appears, we reach instinctively for our phones, filling every gap with notifications, videos, and endless streams of content. But here is what we are quietly losing. Boredom is not merely the absence of stimulation. It is the fertile ground from which reflection, creativity, and self-understanding grow. Some of our best ideas arrive precisely when the mind is left unoccupied, free to make unexpected connections. When we eliminate every dull moment, we also eliminate the space where imagination breathes. I am not suggesting we abandon technology. I am suggesting we reclaim a little discomfort. Try sitting quietly, without a screen, and simply letting your thoughts drift. It may feel strange at first, even unbearable. But within that emptiness, you may rediscover a part of your mind you had almost forgotten existed.',
     audioAssetPath: 'assets/audio/lesson_085.mp3',
@@ -1182,7 +1182,7 @@ const seedLessons = [
   LessonModel(
     id: 'lesson-086',
     title: 'Small Acts Of Kindness',
-    category: 'TEDスタイル',
+    category: 'プレゼン',
     difficulty: 1,
     transcriptText: 'Today I want to talk about small acts of kindness. We often think we need to do something big to change the world. But that is not true. A simple smile can brighten someone\'s whole day. Saying thank you can make a tired worker feel seen. Holding a door, sharing a kind word, or just listening can mean more than we know. These little actions cost us nothing, yet they spread from person to person. When someone is kind to you, you often want to be kind to others. So today, try one small act of kindness. You may never see the result, but it matters more than you think.',
     audioAssetPath: 'assets/audio/lesson_086.mp3',

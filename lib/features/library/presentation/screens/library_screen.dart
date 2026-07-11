@@ -9,15 +9,8 @@ import '../../../lesson/presentation/providers/lesson_provider.dart';
 class LibraryScreen extends ConsumerWidget {
   const LibraryScreen({super.key});
 
-  static const _categories = [
-    'すべて',
-    'ニュース',
-    'ビジネス',
-    '日常会話',
-    'TEDスタイル',
-    'スポーツ',
-    '時事ネタ',
-  ];
+  // Category filter is data-driven via lessonCategoriesProvider (no hardcoded
+  // list), so new categories appear automatically.
 
   // FIXED: ソート種別のラベルマップを定義
   static const _sortLabels = {
@@ -31,6 +24,7 @@ class LibraryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final selectedCategory = ref.watch(selectedCategoryProvider);
+    final categories = ref.watch(lessonCategoriesProvider);
     final selectedDifficulty = ref.watch(selectedDifficultyProvider);
     final filteredLessons = ref.watch(filteredLessonsProvider);
     final bookmarkOnly = ref.watch(bookmarkFilterProvider);
@@ -57,7 +51,7 @@ class LibraryScreen extends ConsumerWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
-              children: _categories.map((cat) {
+              children: categories.map((cat) {
                 final selected = cat == selectedCategory;
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
