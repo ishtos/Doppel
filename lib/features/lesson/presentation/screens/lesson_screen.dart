@@ -617,7 +617,8 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
               await notifier.listenCurrent();
             },
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -656,7 +657,7 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
                         : Text(
                             session.chunks[i],
                             style: theme.textTheme.bodyLarge?.copyWith(
-                              height: 1.6,
+                              height: 1.3,
                               fontWeight: isCurrent
                                   ? FontWeight.w600
                                   : FontWeight.w400,
