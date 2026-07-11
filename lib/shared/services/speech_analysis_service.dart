@@ -242,14 +242,14 @@ class SpeechAnalysisService {
     final countRatio = modelWords.isEmpty
         ? 0.0
         : (userWords.length / modelWords.length).clamp(0.0, 1.0);
-    // Penalize both too few and too many words
+    // Penalize both too few and too many words. Scale straight to 0–100 with
+    // no random noise so the same recording always yields the same score.
     final rhythmRaw = 1.0 - (1.0 - countRatio).abs();
-    final rhythmScore = _clamp((rhythmRaw * 90 + _random.nextInt(11)).round());
+    final rhythmScore = _clamp((rhythmRaw * 100).round());
 
     // Sequence similarity (intonation proxy)
     final seqSimilarity = _sequenceSimilarity(modelWords, userWords);
-    final intonationScore =
-        _clamp((seqSimilarity * 85 + _random.nextInt(16)).round());
+    final intonationScore = _clamp((seqSimilarity * 100).round());
 
     // Identify problem words (in model but not in user transcript)
     final userWordSet = userWords.toSet();
@@ -258,10 +258,13 @@ class SpeechAnalysisService {
     for (final word in modelWords) {
       if (!userWordSet.contains(word) && !seen.contains(word) && word.length > 2) {
         seen.add(word);
+        final phoneme = _guessPhoneme(word);
         missed.add(ProblemWord(
           word: word,
-          phoneme: _guessPhoneme(word),
-          errorRate: 0.5 + _random.nextDouble() * 0.4,
+          phoneme: phoneme,
+          // Deterministic estimate from the phoneme's known difficulty for
+          // Japanese learners (was a random 0.5–0.9).
+          errorRate: _errorRateFor(phoneme),
         ));
         if (missed.length >= 4) break;
       }
@@ -333,6 +336,23 @@ class SpeechAnalysisService {
     if (w.contains('sh') || w.contains('ch')) return '/ʃ/';
     return '/ə/';
   }
+
+  /// Deterministic per-phoneme error-rate estimate (0–1), ordered by how hard
+  /// each sound is for Japanese learners of English. Replaces the former random
+  /// errorRate so results are reproducible and the weak-pattern breakdown
+  /// reflects real difficulty rather than noise.
+  static const _phonemeDifficulty = <String, double>{
+    '/θ/': 0.9, // "th" — think, through
+    '/ð/': 0.85, // voiced "th" — the
+    '/r/': 0.8,
+    '/l/': 0.8,
+    '/v/': 0.7,
+    '/f/': 0.6,
+    '/ʃ/': 0.6,
+    '/ə/': 0.5, // schwa / default
+  };
+
+  double _errorRateFor(String phoneme) => _phonemeDifficulty[phoneme] ?? 0.6;
 
   // ── Fallback (no audio / no API key) ──
 

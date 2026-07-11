@@ -89,11 +89,18 @@ final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
             ..sort((a, b) => a.difficulty.compareTo(b.difficulty));
         case LessonSortType.bestScore:
           final feedbackRepo = ref.read(feedbackRepositoryProvider);
+          // Precompute each lesson's latest score in a single pass. findAll()
+          // is already sorted newest-first, so the first entry seen per lesson
+          // is its latest — matching findLatestByLessonId semantics without
+          // re-scanning (and re-deserializing) the whole feedback box inside
+          // the O(N log N) comparator.
+          final latestScoreByLesson = <String, int>{};
+          for (final f in feedbackRepo.findAll()) {
+            latestScoreByLesson.putIfAbsent(f.lessonId, () => f.overallScore);
+          }
           filtered = [...filtered]..sort((a, b) {
-              final aFb = feedbackRepo.findLatestByLessonId(a.id);
-              final bFb = feedbackRepo.findLatestByLessonId(b.id);
-              final aScore = aFb?.overallScore ?? -1;
-              final bScore = bFb?.overallScore ?? -1;
+              final aScore = latestScoreByLesson[a.id] ?? -1;
+              final bScore = latestScoreByLesson[b.id] ?? -1;
               return bScore.compareTo(aScore);
             });
         case LessonSortType.recentPractice:

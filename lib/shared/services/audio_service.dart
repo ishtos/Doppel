@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:record/record.dart';
@@ -48,6 +50,9 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   final _player = AudioPlayer();
 
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<PlayerState>? _playerStateSub;
+
   Future<void> loadAsset(String assetPath) async {
     try {
       final duration = await _player.setAsset(assetPath);
@@ -93,12 +98,19 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
   }
 
   void _listenToPosition() {
-    _player.positionStream.listen((pos) {
+    // Cancel any prior subscriptions first: loadAsset/playFile/loadUrl can be
+    // called repeatedly on the same player (e.g. replaying recordings), and
+    // re-subscribing without cancelling leaks listeners — each surviving
+    // listener fires a redundant state update per position tick.
+    _positionSub?.cancel();
+    _playerStateSub?.cancel();
+
+    _positionSub = _player.positionStream.listen((pos) {
       if (mounted) {
         state = state.copyWith(position: pos);
       }
     });
-    _player.playerStateStream.listen((playerState) {
+    _playerStateSub = _player.playerStateStream.listen((playerState) {
       if (mounted) {
         state = state.copyWith(
           isPlaying: playerState.playing,
@@ -144,6 +156,8 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
   @override
   void dispose() {
+    _positionSub?.cancel();
+    _playerStateSub?.cancel();
     _player.dispose();
     super.dispose();
   }
