@@ -111,6 +111,14 @@ final filteredLessonsProvider = Provider<List<LessonModel>>((ref) {
 });
 
 // Filter state providers
+/// Distinct lesson categories (data-driven), prefixed with 'すべて' so the
+/// library filter always reflects the actual content (no hardcoded list).
+final lessonCategoriesProvider = Provider<List<String>>((ref) {
+  final lessons = ref.watch(lessonsProvider).value ?? const <LessonModel>[];
+  final cats = lessons.map((l) => l.category).toSet().toList()..sort();
+  return ['すべて', ...cats];
+});
+
 final selectedCategoryProvider = StateProvider<String>((ref) => 'すべて');
 final selectedDifficultyProvider = StateProvider<int>((ref) => 0);
 final searchQueryProvider = StateProvider<String>((ref) => '');
