@@ -213,17 +213,24 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: const Text('テーマを選択'),
-        children: ThemeMode.values.map((mode) {
-          return RadioListTile<ThemeMode>(
-            title: Text(_themeModeLabel(mode)),
-            value: mode,
+        children: [
+          RadioGroup<ThemeMode>(
             groupValue: current,
             onChanged: (v) {
               if (v != null) notifier.setThemeMode(v);
               Navigator.of(ctx).pop();
             },
-          );
-        }).toList(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: ThemeMode.values.map((mode) {
+                return RadioListTile<ThemeMode>(
+                  title: Text(_themeModeLabel(mode)),
+                  value: mode,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

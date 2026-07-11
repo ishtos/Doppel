@@ -27,6 +27,10 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   bool _isAnalyzing = false;
   bool _locked = false;
 
+  /// When the user opened this lesson, used to record real practice time
+  /// (listening + recording) instead of a fixed estimate.
+  final _enteredAt = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -271,9 +275,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             );
 
       await ref.read(feedbackRepositoryProvider).save(feedback);
+      // Record the actual time spent on the lesson (entry → scoring), clamped
+      // to a sane range so idle time on the screen can't inflate the total.
+      final elapsedMinutes =
+          (DateTime.now().difference(_enteredAt).inSeconds / 60).round();
+      final durationMinutes = elapsedMinutes.clamp(1, 30).toInt();
       await ref
           .read(progressRepositoryProvider)
-          .recordPractice(durationMinutes: 3);
+          .recordPractice(durationMinutes: durationMinutes);
 
       if (mounted) {
         setState(() => _isAnalyzing = false);
