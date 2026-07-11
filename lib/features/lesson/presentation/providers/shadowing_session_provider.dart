@@ -51,6 +51,7 @@ class ShadowingSessionState {
     this.recordMode = RecordMode.whole,
     this.wholeRecordingPath,
     this.wholeRecorded = false,
+    this.readingAll = false,
   });
 
   final List<String> chunks;
@@ -70,6 +71,9 @@ class ShadowingSessionState {
   /// True once a whole-passage recording has been attempted (true even when the
   /// path is null, e.g. simulator without a mic → simulated-score fallback).
   final bool wholeRecorded;
+
+  /// True while the whole passage is being read aloud continuously.
+  final bool readingAll;
 
   ChunkStatus statusOf(int index) => statuses[index] ?? ChunkStatus.notStarted;
 
@@ -106,6 +110,7 @@ class ShadowingSessionState {
     String? wholeRecordingPath,
     bool? wholeRecorded,
     bool clearWholeRecording = false,
+    bool? readingAll,
   }) {
     return ShadowingSessionState(
       chunks: chunks ?? this.chunks,
@@ -120,6 +125,7 @@ class ShadowingSessionState {
           ? null
           : (wholeRecordingPath ?? this.wholeRecordingPath),
       wholeRecorded: wholeRecorded ?? this.wholeRecorded,
+      readingAll: readingAll ?? this.readingAll,
     );
   }
 }
@@ -153,6 +159,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
   /// user turns it off, navigates away, or the session is disposed.
   Future<void> listenCurrent() async {
     if (!state.hasChunks) return;
+    _cancelReadAll();
     final index = state.currentIndex;
 
     // If already speaking, treat this as a stop toggle. Also disable loop mode
@@ -173,10 +180,38 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
     } while (!_disposed && state.loopMode && state.currentIndex == index);
   }
 
+  /// Read the whole passage aloud, chunk by chunk in order, advancing the
+  /// current chunk so the list follows along. Tapping again stops.
+  Future<void> listenAll() async {
+    if (!state.hasChunks) return;
+    // Toggle: if already reading (or speaking), stop.
+    if (state.readingAll || _ref.read(ttsServiceProvider).isSpeaking) {
+      state = state.copyWith(readingAll: false);
+      await _tts.stop();
+      return;
+    }
+    state = state.copyWith(readingAll: true, loopMode: false);
+    for (var i = 0; i < state.chunks.length; i++) {
+      if (_disposed || !state.readingAll) break;
+      state = state.copyWith(currentIndex: i);
+      await _tts.speakOnce(state.chunks[i]);
+      if (_disposed || !state.readingAll) break;
+      // Small natural gap between sentences.
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+    }
+    if (!_disposed) state = state.copyWith(readingAll: false);
+  }
+
+  /// Stop a whole-passage read-through if one is in progress.
+  void _cancelReadAll() {
+    if (state.readingAll) state = state.copyWith(readingAll: false);
+  }
+
   // ── Record (user) ──
 
   Future<void> startRecordCurrent() async {
     if (!state.hasChunks) return;
+    _cancelReadAll();
     await _tts.stop();
 
     final index = state.currentIndex;
@@ -233,6 +268,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
 
   /// Start a single continuous recording of the whole passage.
   Future<void> startWholeRecording() async {
+    _cancelReadAll();
     await _tts.stop();
     await _deleteWholeRecording();
     // Reset any prior take so re-recording starts clean.
@@ -296,6 +332,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
   }
 
   Future<void> _stopEverything() async {
+    _cancelReadAll();
     await _tts.stop();
     // In whole-passage mode keep an in-progress recording running so the user
     // can navigate chunks (to read along) while recording straight through.

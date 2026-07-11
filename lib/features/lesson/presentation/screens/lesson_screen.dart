@@ -710,11 +710,16 @@ class _ChunkControlBar extends ConsumerWidget {
                 tooltip: '前の文',
                 onPressed: session.isFirst ? null : () => notifier.prev(),
               ),
-              // Listen model (play / stop)
+              // Listen to the whole passage (reads chunk by chunk while the
+              // list scrolls along). Tap an individual chunk to hear just it.
               IconButton.filled(
-                icon: Icon(ttsState.isSpeaking ? Icons.stop : Icons.volume_up),
-                tooltip: ttsState.isSpeaking ? '停止' : 'お手本を聴く',
-                onPressed: () => notifier.listenCurrent(),
+                icon: Icon((session.readingAll || ttsState.isSpeaking)
+                    ? Icons.stop
+                    : Icons.volume_up),
+                tooltip: (session.readingAll || ttsState.isSpeaking)
+                    ? '停止'
+                    : '全文を聴く',
+                onPressed: () => notifier.listenAll(),
               ),
               // A-B loop toggle
               IconButton(
