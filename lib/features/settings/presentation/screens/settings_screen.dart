@@ -22,6 +22,26 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           const SizedBox(height: 8),
 
+          // Plan / premium section (freemium: 1 lesson/day for free)
+          _SectionHeader(title: 'プラン', theme: theme),
+          SwitchListTile(
+            secondary: Icon(
+              settings.isPremium
+                  ? Icons.workspace_premium
+                  : Icons.lock_clock_outlined,
+              color: settings.isPremium ? theme.colorScheme.tertiary : null,
+            ),
+            title: const Text('プレミアム'),
+            subtitle: Text(
+              settings.isPremium
+                  ? 'レッスン練習は無制限です'
+                  : '無料プラン: 1日1レッスンまで練習できます',
+            ),
+            value: settings.isPremium,
+            onChanged: (v) => notifier.setPremium(v),
+          ),
+          const Divider(height: 1, indent: 72),
+
           // Theme section
           _SectionHeader(title: '外観', theme: theme),
           ListTile(

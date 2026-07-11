@@ -18,6 +18,9 @@ class SettingsState {
     this.isReminderEnabled = false,
     this.reminderHour = 20,
     this.reminderMinute = 0,
+    this.isPremium = false,
+    this.quotaDate = '',
+    this.quotaLessonId,
   });
 
   final ThemeMode themeMode;
@@ -27,6 +30,15 @@ class SettingsState {
   final bool isReminderEnabled;
   final int reminderHour;
   final int reminderMinute;
+
+  /// Freemium: premium users have no daily lesson limit.
+  final bool isPremium;
+
+  /// yyyy-MM-dd of the day the free lesson quota was last consumed.
+  final String quotaDate;
+
+  /// The single free lesson practiced on [quotaDate] (re-entry allowed).
+  final String? quotaLessonId;
 
   String get reminderTimeLabel =>
       '${reminderHour.toString().padLeft(2, '0')}:${reminderMinute.toString().padLeft(2, '0')}';
@@ -39,6 +51,9 @@ class SettingsState {
     bool? isReminderEnabled,
     int? reminderHour,
     int? reminderMinute,
+    bool? isPremium,
+    String? quotaDate,
+    String? quotaLessonId,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -49,6 +64,9 @@ class SettingsState {
       isReminderEnabled: isReminderEnabled ?? this.isReminderEnabled,
       reminderHour: reminderHour ?? this.reminderHour,
       reminderMinute: reminderMinute ?? this.reminderMinute,
+      isPremium: isPremium ?? this.isPremium,
+      quotaDate: quotaDate ?? this.quotaDate,
+      quotaLessonId: quotaLessonId ?? this.quotaLessonId,
     );
   }
 }
@@ -65,6 +83,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _reminderEnabledKey = 'reminder_enabled';
   static const _reminderHourKey = 'reminder_hour';
   static const _reminderMinuteKey = 'reminder_minute';
+  static const _isPremiumKey = 'is_premium';
+  static const _quotaDateKey = 'quota_date';
+  static const _quotaLessonIdKey = 'quota_lesson_id';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -76,6 +97,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final reminderEnabled = prefs.getBool(_reminderEnabledKey) ?? false;
     final reminderHour = prefs.getInt(_reminderHourKey) ?? 20;
     final reminderMinute = prefs.getInt(_reminderMinuteKey) ?? 0;
+    final isPremium = prefs.getBool(_isPremiumKey) ?? false;
+    final quotaDate = prefs.getString(_quotaDateKey) ?? '';
+    final quotaLessonId = prefs.getString(_quotaLessonIdKey);
 
     state = SettingsState(
       themeMode: themeModeIndex != null
@@ -87,7 +111,75 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       isReminderEnabled: reminderEnabled,
       reminderHour: reminderHour,
       reminderMinute: reminderMinute,
+      isPremium: isPremium,
+      quotaDate: quotaDate,
+      quotaLessonId: quotaLessonId,
     );
+  }
+
+  // ── Daily lesson quota (freemium: 1 lesson/day for free) ──
+
+  static const int freeLessonsPerDay = 1;
+
+  static String todayString([DateTime? now]) {
+    final d = now ?? DateTime.now();
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '${d.year}-$m-$day';
+  }
+
+  /// Pure quota decision (unit-testable, no clock/storage dependency).
+  static bool computeCanAccess({
+    required bool isPremium,
+    required String quotaDate,
+    required String? quotaLessonId,
+    required String today,
+    required String lessonId,
+  }) {
+    if (isPremium) return true;
+    if (quotaDate != today) return true; // new day → free quota available
+    return quotaLessonId == lessonId; // same lesson may be re-entered
+  }
+
+  /// Whether [lessonId] can be practiced now under the current quota.
+  bool canAccessLesson(String lessonId, {DateTime? now}) {
+    return computeCanAccess(
+      isPremium: state.isPremium,
+      quotaDate: state.quotaDate,
+      quotaLessonId: state.quotaLessonId,
+      today: todayString(now),
+      lessonId: lessonId,
+    );
+  }
+
+  /// Whether the free daily lesson has already been used (for UI display).
+  bool hasUsedFreeLessonToday({DateTime? now}) {
+    if (state.isPremium) return false;
+    return state.quotaDate == todayString(now) && state.quotaLessonId != null;
+  }
+
+  /// Record that [lessonId] is the free lesson used today. Idempotent for the
+  /// same lesson; a no-op for premium users.
+  Future<void> registerLessonAccess(String lessonId, {DateTime? now}) async {
+    if (state.isPremium) return;
+    final today = todayString(now);
+    if (state.quotaDate != today) {
+      state = state.copyWith(quotaDate: today, quotaLessonId: lessonId);
+    } else if (state.quotaLessonId == null) {
+      state = state.copyWith(quotaLessonId: lessonId);
+    } else {
+      return; // already set for today
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_quotaDateKey, state.quotaDate);
+    await prefs.setString(_quotaLessonIdKey, state.quotaLessonId!);
+  }
+
+  /// Placeholder for real IAP (StoreKit / RevenueCat). Toggles premium locally.
+  Future<void> setPremium(bool value) async {
+    state = state.copyWith(isPremium: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_isPremiumKey, value);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
