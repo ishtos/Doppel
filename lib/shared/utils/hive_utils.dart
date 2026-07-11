@@ -1,4 +1,4 @@
-/// Recursively cast Hive's Map<dynamic, dynamic> to Map<String, dynamic>.
+/// Recursively cast Hive's `Map<dynamic, dynamic>` to `Map<String, dynamic>`.
 // FIXED: FeedbackRepository から共通ユーティリティへ移動
 Map<String, dynamic> deepCast(Map raw) {
   return raw.map((key, value) {

@@ -91,6 +91,15 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             ),
             const SizedBox(height: 20),
 
+            // Simulated-score notice: when there is no recognized transcript,
+            // the scores are a rough simulation (no audio analysis) rather than
+            // a real measurement — say so plainly so the numbers aren't
+            // over-trusted.
+            if (feedback.userTranscript == null) ...[
+              _SimulatedScoreNotice(theme: theme),
+              const SizedBox(height: 20),
+            ],
+
             // Transcript comparison with diff highlighting
             if (feedback.userTranscript != null ||
                 feedback.modelTranscript != null)
@@ -309,6 +318,40 @@ class _SubScoreTile extends StatelessWidget {
   }
 }
 
+class _SimulatedScoreNotice extends StatelessWidget {
+  const _SimulatedScoreNotice({required this.theme});
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline,
+              size: 16, color: theme.colorScheme.onSurfaceVariant),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              '簡易採点です（音声解析を利用できませんでした）。'
+              'スコアはおおよその目安としてご覧ください。',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TranscriptComparisonCard extends StatelessWidget {
   const _TranscriptComparisonCard({
     required this.modelTranscript,
@@ -421,7 +464,7 @@ class _TranscriptComparisonCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '音声認識テキストなし（シミュレーターモード）',
+                  '音声認識テキストなし（簡易採点）',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),

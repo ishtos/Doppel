@@ -7,6 +7,7 @@ import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/seed_data.dart';
 import 'shared/services/notification_service.dart';
+import 'shared/utils/recording_cleanup.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,8 +15,12 @@ Future<void> main() async {
   // Initialize Hive
   await Hive.initFlutter();
   final lessonsBox = await Hive.openBox<Map>('lessons');
-  await Hive.openBox<Map>('feedbacks');
+  final feedbacksBox = await Hive.openBox<Map>('feedbacks');
   await Hive.openBox<Map>('progress');
+
+  // Remove orphaned recording files (abandoned sessions / non-representative
+  // chunks) so they don't accumulate. Best-effort; never blocks startup.
+  await cleanupOrphanRecordings(feedbacksBox);
 
   // Seed / migrate lessons: add any seed lesson not already present. This
   // covers first launch (empty box → all added) and app updates that ship new

@@ -289,7 +289,7 @@ class _BookmarkedLessonsSection extends ConsumerWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: bookmarked.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final lesson = bookmarked[index];
               return SizedBox(
