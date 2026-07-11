@@ -1,3 +1,4 @@
+import 'package:doppel/shared/services/ai_backend.dart';
 import 'package:doppel/shared/services/ai_coach_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +13,8 @@ void main() {
         called = true;
         return http.Response('{}', 200);
       });
-      final svc = AiCoachService(apiKey: 'sk-test', httpClient: client);
+      final svc = AiCoachService(
+          backend: AiBackendConfig(apiKey: 'sk-test'), httpClient: client);
 
       final msg = await svc.generateFeedback(
         pronunciationScore: 70,
@@ -33,7 +35,8 @@ void main() {
         called = true;
         return http.Response('{}', 200);
       });
-      final svc = AiCoachService(apiKey: '', httpClient: client);
+      final svc = AiCoachService(
+          backend: AiBackendConfig(apiKey: ''), httpClient: client);
 
       final msg = await svc.generateFeedback(
         pronunciationScore: 70,
@@ -58,7 +61,8 @@ void main() {
           headers: {'content-type': 'application/json; charset=utf-8'},
         );
       });
-      final svc = AiCoachService(apiKey: 'sk-test', httpClient: client);
+      final svc = AiCoachService(
+          backend: AiBackendConfig(apiKey: 'sk-test'), httpClient: client);
 
       final msg = await svc.generateFeedback(
         pronunciationScore: 90,
