@@ -7,6 +7,7 @@ import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/seed_data.dart';
 import 'shared/services/notification_service.dart';
+import 'shared/services/purchase_service.dart';
 import 'shared/utils/recording_cleanup.dart';
 
 Future<void> main() async {
@@ -45,6 +46,10 @@ class DoppelApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(settingsProvider.select((s) => s.themeMode));
+    // Keep the purchase controller alive for the whole app so store
+    // transactions (e.g. an interrupted or restored purchase) are handled at
+    // launch, not only when the paywall is open.
+    ref.watch(purchaseControllerProvider);
 
     return MaterialApp.router(
       title: 'Doppel',

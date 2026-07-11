@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
+import '../../../../shared/services/purchase_service.dart';
 import '../../../../shared/services/speech_analysis_service.dart';
 import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/score_utils.dart';
@@ -190,6 +191,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   Widget _buildPaywall(BuildContext context, ThemeData theme) {
+    final purchase = ref.watch(purchaseControllerProvider);
+    // Unlock automatically once a purchase makes the user premium.
+    final isPremium = ref.watch(settingsProvider.select((s) => s.isPremium));
+    if (isPremium && _locked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _locked) setState(() => _locked = false);
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -220,23 +229,49 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 28),
+              // Premium subscription (real in-app purchase).
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: () => context.go('/library'),
-                  icon: const Icon(Icons.menu_book_outlined),
-                  label: const Text('ライブラリに戻る'),
+                  onPressed:
+                      (purchase.product == null || purchase.purchasePending)
+                          ? null
+                          : () => ref
+                              .read(purchaseControllerProvider.notifier)
+                              .buy(),
+                  icon: purchase.purchasePending
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.workspace_premium),
+                  label: Text(
+                    purchase.priceLabel != null
+                        ? 'プレミアム登録（${purchase.priceLabel}）'
+                        : 'プレミアム登録',
+                  ),
                 ),
               ),
+              if (purchase.errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    purchase.errorMessage!,
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: theme.colorScheme.error),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               const SizedBox(height: 8),
               TextButton(
-                // TODO(iap): replace with a real in-app purchase flow
-                // (StoreKit / RevenueCat). For now this just unlocks locally.
-                onPressed: () async {
-                  await ref.read(settingsProvider.notifier).setPremium(true);
-                  if (mounted) setState(() => _locked = false);
-                },
-                child: const Text('プレミアムにする（準備中）'),
+                onPressed: () =>
+                    ref.read(purchaseControllerProvider.notifier).restore(),
+                child: const Text('購入を復元'),
+              ),
+              TextButton(
+                onPressed: () => context.go('/library'),
+                child: const Text('ライブラリに戻る'),
               ),
             ],
           ),

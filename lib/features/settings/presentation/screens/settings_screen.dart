@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
+import '../../../../shared/services/purchase_service.dart';
 import '../providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -13,6 +14,7 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final settings = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    final purchase = ref.watch(purchaseControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -24,21 +26,38 @@ class SettingsScreen extends ConsumerWidget {
 
           // Plan / premium section (freemium: 1 lesson/day for free)
           _SectionHeader(title: 'プラン', theme: theme),
-          SwitchListTile(
-            secondary: Icon(
-              settings.isPremium
-                  ? Icons.workspace_premium
-                  : Icons.lock_clock_outlined,
-              color: settings.isPremium ? theme.colorScheme.tertiary : null,
+          if (settings.isPremium)
+            ListTile(
+              leading: Icon(Icons.workspace_premium,
+                  color: theme.colorScheme.tertiary),
+              title: const Text('プレミアム会員'),
+              subtitle: const Text('レッスン練習は無制限です'),
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.workspace_premium_outlined),
+              title: const Text('プレミアムにアップグレード'),
+              subtitle: Text(
+                purchase.priceLabel != null
+                    ? '${purchase.priceLabel} ・ レッスン練習が無制限に'
+                    : '無料プラン: 1日1レッスンまで練習できます',
+              ),
+              trailing: purchase.purchasePending
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.chevron_right),
+              onTap: purchase.product == null
+                  ? null
+                  : () => ref.read(purchaseControllerProvider.notifier).buy(),
             ),
-            title: const Text('プレミアム'),
-            subtitle: Text(
-              settings.isPremium
-                  ? 'レッスン練習は無制限です'
-                  : '無料プラン: 1日1レッスンまで練習できます',
-            ),
-            value: settings.isPremium,
-            onChanged: (v) => notifier.setPremium(v),
+          ListTile(
+            leading: const Icon(Icons.restore),
+            title: const Text('購入を復元'),
+            onTap: () =>
+                ref.read(purchaseControllerProvider.notifier).restore(),
           ),
           const Divider(height: 1, indent: 72),
 
