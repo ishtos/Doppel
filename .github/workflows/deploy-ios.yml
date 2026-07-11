@@ -6,6 +6,10 @@ on:
   push:
     branches:
       - main
+    # ドキュメント/README のみの変更ではデプロイしない（コスト削減）
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
     tags:
       - 'v*'
   workflow_dispatch:
@@ -51,6 +55,13 @@ jobs:
       # *.g.dart / *.freezed.dart は .gitignore 済みのため生成が必須
       - name: Generate code (build_runner)
         run: dart run build_runner build --delete-conflicting-outputs
+
+      # CIゲート: analyze/test が失敗したら配信せずここで停止する
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
 
       - name: Import signing certificate
         uses: apple-actions/import-codesign-certs@v3
