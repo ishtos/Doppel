@@ -9,6 +9,7 @@ import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/services/speech_analysis_service.dart';
 import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/score_utils.dart';
+import '../../../feedback/data/models/feedback_model.dart';
 import '../../../feedback/presentation/providers/feedback_provider.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 import '../providers/lesson_provider.dart';
@@ -293,7 +294,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
   }
 
   void _showPastResults(
-      BuildContext context, ThemeData theme, List<dynamic> feedbacks) {
+      BuildContext context, ThemeData theme, List<FeedbackModel> feedbacks) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -304,22 +305,21 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
           children: [
             Text('過去の成績', style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),
-            ...feedbacks.take(10).map((f) {
-              final fb = f as dynamic;
+            ...feedbacks.take(10).map((fb) {
               return ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: CircleAvatar(
                   radius: 16,
                   backgroundColor: ScoreUtils.scoreColor(
-                    fb.overallScore as int,
+                    fb.overallScore,
                     theme.colorScheme,
                   ).withValues(alpha: 0.15),
                   child: Text(
                     '${fb.overallScore}',
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: ScoreUtils.scoreColor(
-                        fb.overallScore as int,
+                        fb.overallScore,
                         theme.colorScheme,
                       ),
                       fontWeight: FontWeight.w700,
@@ -331,7 +331,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                   style: theme.textTheme.bodySmall,
                 ),
                 subtitle: Text(
-                  _formatDate(fb.createdAt as DateTime),
+                  _formatDate(fb.createdAt),
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
@@ -371,14 +371,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
 class _PastScoreBanner extends StatelessWidget {
   const _PastScoreBanner({required this.feedbacks, required this.onDetails});
 
-  final List<dynamic> feedbacks;
+  final List<FeedbackModel> feedbacks;
   final VoidCallback onDetails;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final best = feedbacks
-        .map((f) => f.overallScore as int)
+        .map((f) => f.overallScore)
         .reduce((a, b) => a > b ? a : b);
     return Container(
       width: double.infinity,
@@ -393,7 +393,7 @@ class _PastScoreBanner extends StatelessWidget {
             '前回: ${feedbacks.first.overallScore}点',
             style: theme.textTheme.bodySmall?.copyWith(
               color: ScoreUtils.scoreColor(
-                  feedbacks.first.overallScore as int, theme.colorScheme),
+                  feedbacks.first.overallScore, theme.colorScheme),
               fontWeight: FontWeight.w700,
             ),
           ),
