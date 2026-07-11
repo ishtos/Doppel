@@ -16,40 +16,27 @@ const _abbreviations = <String>[
   'a.m', 'p.m', 'U.S', 'U.K', 'e.g', 'i.e',
 ];
 
-/// Split [text] into shadowing chunks.
+/// Split [text] into shadowing chunks, one chunk per sentence (period-based).
 ///
-/// - Splits on sentence terminators (`. ! ?`) followed by whitespace and a
-///   capital / quote, while protecting abbreviations, initials and decimals.
-/// - Any sentence longer than [maxWordsPerChunk] words is further split into
-///   natural breath groups at commas, semicolons, colons and coordinating
-///   conjunctions.
-/// - Always returns at least one chunk for non-empty input.
-List<String> splitIntoChunks(String text, {int maxWordsPerChunk = 10}) {
+/// Splits on sentence terminators (`. ! ?`) followed by whitespace and a
+/// capital / opening quote, while protecting abbreviations, initials and
+/// decimals so their periods are not treated as sentence boundaries. Each
+/// sentence becomes a single chunk (long sentences are kept whole for clear,
+/// predictable boundaries). Always returns at least one chunk for non-empty
+/// input.
+List<String> splitIntoChunks(String text) {
   final trimmed = text.trim();
   if (trimmed.isEmpty) return const [];
 
   final protected = _protectDots(trimmed);
 
-  // Split into sentences.
-  final rawSentences = protected
+  final sentences = protected
       .split(RegExp(r'''(?<=[.!?])\s+(?=[A-Z"'“‘])'''))
       .map((s) => _restoreDots(s).trim())
       .where((s) => s.isNotEmpty)
       .toList();
 
-  final sentences = rawSentences.isEmpty ? [trimmed] : rawSentences;
-
-  final chunks = <String>[];
-  for (final sentence in sentences) {
-    if (_wordCount(sentence) <= maxWordsPerChunk) {
-      chunks.add(sentence);
-    } else {
-      chunks.addAll(_splitLongSentence(sentence, maxWordsPerChunk));
-    }
-  }
-
-  final result = chunks.map((c) => c.trim()).where((c) => c.isNotEmpty).toList();
-  return result.isEmpty ? [trimmed] : result;
+  return sentences.isEmpty ? [trimmed] : sentences;
 }
 
 /// Replace abbreviation / initial / decimal periods with a sentinel so they
@@ -83,56 +70,3 @@ String _protectDots(String text) {
 }
 
 String _restoreDots(String text) => text.replaceAll(_dot, '.');
-
-/// Break a long sentence into breath groups at natural boundaries.
-List<String> _splitLongSentence(String sentence, int maxWordsPerChunk) {
-  // Split points: punctuation (, ; :) and coordinating conjunctions.
-  // We keep trailing punctuation with the left-hand group.
-  final parts = <String>[];
-  final regex = RegExp(
-    r'''(?<=[,;:])\s+|\s+(?=\b(?:and|but|or|because|so|which|that|while|when|although|however)\b)''',
-    caseSensitive: false,
-  );
-
-  final rawParts =
-      sentence.split(regex).map((p) => p.trim()).where((p) => p.isNotEmpty);
-
-  // Merge tiny fragments (< 4 words) into the previous group so chunks stay
-  // natural to shadow.
-  for (final part in rawParts) {
-    if (parts.isNotEmpty && _wordCount(part) < 4) {
-      parts[parts.length - 1] = '${parts.last} $part';
-    } else {
-      parts.add(part);
-    }
-  }
-
-  if (parts.isEmpty) return [sentence];
-
-  // Any group still longer than the limit is hard-wrapped by word count as a
-  // last resort so no single chunk is overwhelming.
-  final result = <String>[];
-  for (final part in parts) {
-    if (_wordCount(part) <= maxWordsPerChunk) {
-      result.add(part);
-    } else {
-      result.addAll(_hardWrap(part, maxWordsPerChunk));
-    }
-  }
-  return result;
-}
-
-/// Hard-wrap by word count when no natural boundary exists.
-List<String> _hardWrap(String text, int maxWordsPerChunk) {
-  final words = text.split(RegExp(r'\s+'));
-  final out = <String>[];
-  for (var i = 0; i < words.length; i += maxWordsPerChunk) {
-    final end =
-        (i + maxWordsPerChunk < words.length) ? i + maxWordsPerChunk : words.length;
-    out.add(words.sublist(i, end).join(' '));
-  }
-  return out;
-}
-
-int _wordCount(String text) =>
-    text.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
