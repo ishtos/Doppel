@@ -33,12 +33,57 @@ class SpeechAnalysisService {
       userTranscript = await _transcribe(userAudioPath);
     }
 
+    // Score only up to where the user actually read (they read sequentially).
+    // Unread trailing text is trimmed so it does not lower the score.
+    final scoredModel = userTranscript == null
+        ? modelTranscript
+        : coveredModelSpan(modelTranscript, userTranscript);
+
     return _buildFeedback(
       lessonId: lessonId,
-      modelTranscript: modelTranscript,
+      modelTranscript: scoredModel,
       userTranscript: userTranscript,
       userAudioPath: userAudioPath,
     );
+  }
+
+  /// Trim [model] to the portion the user actually read, assuming sequential
+  /// reading from the start. Returns the model up to the furthest model word
+  /// the user reached; if they reached (near) the end, the whole model is kept
+  /// so a complete read is scored in full. Prevents unread trailing text from
+  /// lowering the score.
+  static String coveredModelSpan(String model, String user) {
+    final modelWords = model
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((w) => w.isNotEmpty)
+        .toList();
+    String norm(String w) => w.toLowerCase().replaceAll(RegExp(r'[^\w]'), '');
+    final modelNorm = modelWords.map(norm).toList();
+    final userNorm = user
+        .toLowerCase()
+        .split(RegExp(r'\s+'))
+        .map(norm)
+        .where((w) => w.isNotEmpty)
+        .toList();
+    if (modelWords.isEmpty || userNorm.isEmpty) return model;
+
+    // Greedily walk the user's words forward through the model, tracking the
+    // furthest model index reached.
+    var mi = 0;
+    var lastMatched = -1;
+    for (final uw in userNorm) {
+      for (var j = mi; j < modelNorm.length; j++) {
+        if (modelNorm[j] == uw) {
+          lastMatched = j;
+          mi = j + 1;
+          break;
+        }
+      }
+    }
+    if (lastMatched < 0) return model; // no alignment → score the whole thing
+    if (lastMatched >= modelWords.length - 2) return model; // (near) the end
+    return modelWords.sublist(0, lastMatched + 1).join(' ');
   }
 
   /// Build a [FeedbackModel] from a (possibly null) user transcript, applying
@@ -116,16 +161,29 @@ class SpeechAnalysisService {
     required List<String> modelChunks,
     required List<String?> chunkAudioPaths,
   }) async {
-    final modelTranscript = modelChunks.join(' ');
+    // Score only the chunks that were actually recorded (read). Excluding
+    // unrecorded chunks means the part the user did not read does not lower
+    // their score.
+    final recordedModelChunks = <String>[];
+    final recordedPaths = <String>[];
+    for (var i = 0; i < modelChunks.length; i++) {
+      final path = i < chunkAudioPaths.length ? chunkAudioPaths[i] : null;
+      if (path != null) {
+        recordedModelChunks.add(modelChunks[i]);
+        recordedPaths.add(path);
+      }
+    }
 
-    // Transcribe each present chunk in parallel, preserving order.
+    // Fallback: nothing recorded with audio (e.g. simulator without a mic) →
+    // score against the whole passage via the simulated-score path.
+    final scoredChunks =
+        recordedModelChunks.isEmpty ? modelChunks : recordedModelChunks;
+    final modelTranscript = scoredChunks.join(' ');
+
+    // Transcribe the recorded chunks in parallel, preserving order.
     String? userTranscript;
-    if (_apiKey.isNotEmpty) {
-      final futures = chunkAudioPaths.map((path) async {
-        if (path == null) return null;
-        return _transcribe(path);
-      }).toList();
-      final results = await Future.wait(futures);
+    if (_apiKey.isNotEmpty && recordedPaths.isNotEmpty) {
+      final results = await Future.wait(recordedPaths.map(_transcribe));
       final joined = results
           .whereType<String>()
           .map((t) => t.trim())
@@ -135,15 +193,9 @@ class SpeechAnalysisService {
       if (joined.isNotEmpty) userTranscript = joined;
     }
 
-    // Use the first available recording as the representative audio path
-    // (feedback screen replays a single file).
-    String? firstAudioPath;
-    for (final path in chunkAudioPaths) {
-      if (path != null) {
-        firstAudioPath = path;
-        break;
-      }
-    }
+    // Representative audio path (feedback screen replays a single file).
+    final firstAudioPath =
+        recordedPaths.isNotEmpty ? recordedPaths.first : null;
 
     return _buildFeedback(
       lessonId: lessonId,
