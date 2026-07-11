@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../features/feedback/data/models/feedback_model.dart';
+import 'ai_backend.dart';
 import 'ai_coach_service.dart';
 
 final speechAnalysisServiceProvider = Provider<SpeechAnalysisService>((ref) {
@@ -13,13 +14,11 @@ final speechAnalysisServiceProvider = Provider<SpeechAnalysisService>((ref) {
 });
 
 class SpeechAnalysisService {
-  SpeechAnalysisService(this._aiCoach, {String? apiKey})
-      : _apiKey = apiKey ?? const String.fromEnvironment('OPENAI_API_KEY');
-
-  static const _whisperUrl = 'https://api.openai.com/v1/audio/transcriptions';
+  SpeechAnalysisService(this._aiCoach, {AiBackendConfig? backend})
+      : _backend = backend ?? AiBackendConfig();
 
   final AiCoachService _aiCoach;
-  final String _apiKey;
+  final AiBackendConfig _backend;
   final _random = Random();
 
   /// Analyze a user recording against the model transcript.
@@ -32,7 +31,7 @@ class SpeechAnalysisService {
     // Transcribe user audio via Whisper API only when available AND the user
     // has consented to cloud analysis. Otherwise no audio leaves the device.
     String? userTranscript;
-    if (userAudioPath != null && _apiKey.isNotEmpty && cloudEnabled) {
+    if (userAudioPath != null && _backend.isAvailable && cloudEnabled) {
       userTranscript = await _transcribe(userAudioPath);
     }
 
@@ -189,7 +188,7 @@ class SpeechAnalysisService {
 
     // Transcribe the recorded chunks in parallel, preserving order.
     String? userTranscript;
-    if (_apiKey.isNotEmpty && recordedPaths.isNotEmpty && cloudEnabled) {
+    if (_backend.isAvailable && recordedPaths.isNotEmpty && cloudEnabled) {
       final results = await Future.wait(recordedPaths.map(_transcribe));
       final joined = results
           .whereType<String>()
@@ -216,8 +215,9 @@ class SpeechAnalysisService {
   /// Transcribe audio file using OpenAI Whisper API.
   Future<String?> _transcribe(String audioPath) async {
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(_whisperUrl));
-      request.headers['Authorization'] = 'Bearer $_apiKey';
+      final request =
+          http.MultipartRequest('POST', Uri.parse(_backend.transcriptionUrl));
+      _backend.authHeaders().forEach((k, v) => request.headers[k] = v);
       request.fields['model'] = 'whisper-1';
       request.fields['language'] = 'en';
       request.files

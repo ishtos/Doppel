@@ -3,21 +3,22 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
+import 'ai_backend.dart';
+
 final aiCoachServiceProvider = Provider<AiCoachService>((ref) {
   return AiCoachService();
 });
 
 class AiCoachService {
-  AiCoachService({String? apiKey, http.Client? httpClient})
-      : _apiKey = apiKey ?? const String.fromEnvironment('OPENAI_API_KEY'),
+  AiCoachService({AiBackendConfig? backend, http.Client? httpClient})
+      : _backend = backend ?? AiBackendConfig(),
         _client = httpClient ?? http.Client();
 
-  static const _baseUrl = 'https://api.openai.com/v1/chat/completions';
-
-  final String _apiKey;
+  final AiBackendConfig _backend;
   final http.Client _client;
 
-  bool get hasApiKey => _apiKey.isNotEmpty;
+  /// Whether a cloud backend (proxy or direct key) is configured.
+  bool get isCloudAvailable => _backend.isAvailable;
 
   /// Generate feedback message using OpenAI API.
   /// Falls back to local template if API key is not configured.
@@ -28,7 +29,7 @@ class AiCoachService {
     required List<String> problemWords,
     bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey || !cloudEnabled) {
+    if (!isCloudAvailable || !cloudEnabled) {
       return _localFeedback(
         pronunciationScore: pronunciationScore,
         rhythmScore: rhythmScore,
@@ -63,7 +64,7 @@ class AiCoachService {
     required List<String> problemWords,
     bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey || !cloudEnabled) {
+    if (!isCloudAvailable || !cloudEnabled) {
       // No API key or no cloud consent → return local feedback, don't throw.
       return _localFeedback(
         pronunciationScore: pronunciationScore,
@@ -88,7 +89,7 @@ class AiCoachService {
     required List<String> weakPatterns,
     bool cloudEnabled = false,
   }) async {
-    if (!hasApiKey || !cloudEnabled) {
+    if (!isCloudAvailable || !cloudEnabled) {
       return _localWeeklyReview(
         averageScore: averageScore,
         practiceCount: practiceCount,
@@ -111,10 +112,10 @@ class AiCoachService {
 
   Future<String> _callOpenAI(String prompt) async {
     final response = await _client.post(
-      Uri.parse(_baseUrl),
+      Uri.parse(_backend.chatUrl),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $_apiKey',
+        ..._backend.authHeaders(),
       },
       body: jsonEncode({
         'model': 'gpt-5-mini',
