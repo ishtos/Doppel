@@ -10,6 +10,7 @@ import '../../../../shared/services/speech_analysis_service.dart';
 import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../../../feedback/presentation/providers/feedback_provider.dart';
+import '../../../settings/presentation/providers/settings_provider.dart';
 import '../providers/lesson_provider.dart';
 import '../providers/shadowing_session_provider.dart';
 
@@ -24,6 +25,24 @@ class LessonScreen extends ConsumerStatefulWidget {
 
 class _LessonScreenState extends ConsumerState<LessonScreen> {
   bool _isAnalyzing = false;
+  bool _locked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Freemium gate: free users may practice one lesson per day. Evaluate after
+    // the first frame so settings (loaded async) are available; fail-open if
+    // not yet loaded. Re-entering the same day's lesson stays allowed.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final settings = ref.read(settingsProvider.notifier);
+      if (settings.canAccessLesson(widget.lessonId)) {
+        settings.registerLessonAccess(widget.lessonId);
+      } else {
+        setState(() => _locked = true);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +58,10 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         appBar: AppBar(),
         body: const Center(child: Text('レッスンが見つかりません')),
       );
+    }
+
+    if (_locked) {
+      return _buildPaywall(context, theme);
     }
 
     return Scaffold(
@@ -158,6 +181,62 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                     ),
                   ],
                 ),
+    );
+  }
+
+  Widget _buildPaywall(BuildContext context, ThemeData theme) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/library'),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.lock_clock,
+                  size: 64, color: theme.colorScheme.primary),
+              const SizedBox(height: 24),
+              Text(
+                '本日の無料レッスンは終了しました',
+                style: theme.textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '無料プランでは1日1レッスンまで練習できます。'
+                'また明日挑戦するか、プレミアムで回数無制限にできます。',
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () => context.go('/library'),
+                  icon: const Icon(Icons.menu_book_outlined),
+                  label: const Text('ライブラリに戻る'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                // TODO(iap): replace with a real in-app purchase flow
+                // (StoreKit / RevenueCat). For now this just unlocks locally.
+                onPressed: () async {
+                  await ref.read(settingsProvider.notifier).setPremium(true);
+                  if (mounted) setState(() => _locked = false);
+                },
+                child: const Text('プレミアムにする（準備中）'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
