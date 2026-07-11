@@ -70,6 +70,22 @@ void main() {
       );
     });
 
+    test('respects a small max so utterances stay shadow-sized', () {
+      const sentence =
+          'Packing for a trip does not have to be stressful if you plan a little.';
+      final chunks = splitIntoChunks(sentence, maxWordsPerChunk: 6);
+      expect(chunks.length, greaterThan(1));
+      for (final c in chunks) {
+        final words = c.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+        expect(words, lessThanOrEqualTo(9)); // max + small merge tolerance
+      }
+      // No words are lost.
+      expect(
+        chunks.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
+        sentence,
+      );
+    });
+
     test('always returns at least one chunk for text with no terminator', () {
       final chunks = splitIntoChunks('just a fragment without punctuation');
       expect(chunks, ['just a fragment without punctuation']);

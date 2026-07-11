@@ -24,7 +24,7 @@ const _abbreviations = <String>[
 ///   natural breath groups at commas, semicolons, colons and coordinating
 ///   conjunctions.
 /// - Always returns at least one chunk for non-empty input.
-List<String> splitIntoChunks(String text, {int maxWordsPerChunk = 14}) {
+List<String> splitIntoChunks(String text, {int maxWordsPerChunk = 10}) {
   final trimmed = text.trim();
   if (trimmed.isEmpty) return const [];
 
