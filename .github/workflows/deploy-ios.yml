@@ -10,10 +10,11 @@ on:
       - 'v*'
   workflow_dispatch:
 
-# 同時デプロイを禁止（テスト便の競合を防ぐ）
+# 新しいデプロイが始まったら、進行中/待機中の古いデプロイをキャンセルして最新を優先する。
+# （連続マージ時に古い中間ビルドを配信せず、最新の main だけを配信）
 concurrency:
   group: deploy-ios
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read
