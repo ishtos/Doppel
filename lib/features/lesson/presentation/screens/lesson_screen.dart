@@ -525,7 +525,9 @@ class _ChunkListView extends ConsumerStatefulWidget {
 
 class _ChunkListViewState extends ConsumerState<_ChunkListView> {
   final _controller = ScrollController();
+  final _currentKey = GlobalKey();
   int _lastIndex = -1;
+  bool _wasSpeaking = false;
 
   @override
   void dispose() {
@@ -533,15 +535,33 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
     super.dispose();
   }
 
-  void _scrollToCurrent(int index, int count) {
-    if (!_controller.hasClients || count == 0) return;
-    final max = _controller.position.maxScrollExtent;
-    final target = (index / count) * max;
-    _controller.animateTo(
-      target.clamp(0.0, max),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
+  /// Keep the current chunk visible (upper third) so the list follows along
+  /// while reading. Uses the current item's context — which is always built
+  /// here since navigation is tap / next / prev — and falls back to a
+  /// proportional estimate if it is somehow off-screen.
+  void _scrollToCurrent() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ctx = _currentKey.currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          alignment: 0.35,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      } else if (_controller.hasClients) {
+        final session = ref.read(shadowingSessionProvider(widget.lessonId));
+        final count = session.chunks.length;
+        if (count == 0) return;
+        final max = _controller.position.maxScrollExtent;
+        _controller.animateTo(
+          ((session.currentIndex / count) * max).clamp(0.0, max),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -550,12 +570,17 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
     final session = ref.watch(shadowingSessionProvider(widget.lessonId));
     final notifier =
         ref.read(shadowingSessionProvider(widget.lessonId).notifier);
+    final isSpeaking =
+        ref.watch(ttsServiceProvider.select((s) => s.isSpeaking));
 
-    if (session.currentIndex != _lastIndex) {
-      _lastIndex = session.currentIndex;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToCurrent(session.currentIndex, session.chunks.length);
-      });
+    // Follow the reading position: scroll on chunk change, or when playback
+    // starts (so tapping "聴く" brings the current chunk into view).
+    final indexChanged = session.currentIndex != _lastIndex;
+    final startedSpeaking = isSpeaking && !_wasSpeaking;
+    _lastIndex = session.currentIndex;
+    _wasSpeaking = isSpeaking;
+    if (indexChanged || startedSpeaking) {
+      _scrollToCurrent();
     }
 
     return ListView.builder(
@@ -576,6 +601,7 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
         }
 
         return Card(
+          key: isCurrent ? _currentKey : null,
           elevation: isCurrent ? 1 : 0,
           color: bg,
           shape: RoundedRectangleBorder(
