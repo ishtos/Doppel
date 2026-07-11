@@ -20,7 +20,14 @@ enum RecordMode { whole, perChunk }
 final lessonChunksProvider = Provider.family<List<String>, String>((ref, id) {
   final lesson = ref.watch(lessonByIdProvider(id));
   if (lesson == null) return const [];
-  return splitIntoChunks(lesson.transcriptText);
+  // Shorter breath groups are easier to shadow. Scale the max chunk length
+  // with difficulty (beginner shortest, advanced allows a bit more).
+  final maxWords = switch (lesson.difficulty) {
+    1 => 6,
+    2 => 8,
+    _ => 10,
+  };
+  return splitIntoChunks(lesson.transcriptText, maxWordsPerChunk: maxWords);
 });
 
 /// Shadowing session state for one lesson.
