@@ -21,6 +21,7 @@ class SettingsState {
     this.isPremium = false,
     this.quotaDate = '',
     this.quotaLessonId,
+    this.cloudAnalysisConsent = false,
   });
 
   final ThemeMode themeMode;
@@ -40,6 +41,11 @@ class SettingsState {
   /// The single free lesson practiced on [quotaDate] (re-entry allowed).
   final String? quotaLessonId;
 
+  /// Opt-in consent for cloud analysis. When false (the default) the app never
+  /// sends audio or data to OpenAI (Whisper transcription + AI coach) and uses
+  /// local/simulated results only. Toggled explicitly by the user in settings.
+  final bool cloudAnalysisConsent;
+
   String get reminderTimeLabel =>
       '${reminderHour.toString().padLeft(2, '0')}:${reminderMinute.toString().padLeft(2, '0')}';
 
@@ -54,6 +60,7 @@ class SettingsState {
     bool? isPremium,
     String? quotaDate,
     String? quotaLessonId,
+    bool? cloudAnalysisConsent,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -67,6 +74,7 @@ class SettingsState {
       isPremium: isPremium ?? this.isPremium,
       quotaDate: quotaDate ?? this.quotaDate,
       quotaLessonId: quotaLessonId ?? this.quotaLessonId,
+      cloudAnalysisConsent: cloudAnalysisConsent ?? this.cloudAnalysisConsent,
     );
   }
 }
@@ -86,6 +94,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _isPremiumKey = 'is_premium';
   static const _quotaDateKey = 'quota_date';
   static const _quotaLessonIdKey = 'quota_lesson_id';
+  static const _cloudConsentKey = 'cloud_analysis_consent';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -100,6 +109,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final isPremium = prefs.getBool(_isPremiumKey) ?? false;
     final quotaDate = prefs.getString(_quotaDateKey) ?? '';
     final quotaLessonId = prefs.getString(_quotaLessonIdKey);
+    final cloudConsent = prefs.getBool(_cloudConsentKey) ?? false;
 
     state = SettingsState(
       themeMode: themeModeIndex != null
@@ -114,6 +124,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       isPremium: isPremium,
       quotaDate: quotaDate,
       quotaLessonId: quotaLessonId,
+      cloudAnalysisConsent: cloudConsent,
     );
   }
 
@@ -180,6 +191,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(isPremium: value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_isPremiumKey, value);
+  }
+
+  /// Set the cloud-analysis consent (opt-in for sending audio/data to OpenAI).
+  Future<void> setCloudAnalysisConsent(bool value) async {
+    state = state.copyWith(cloudAnalysisConsent: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_cloudConsentKey, value);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

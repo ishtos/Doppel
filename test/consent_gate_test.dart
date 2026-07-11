@@ -1,0 +1,75 @@
+import 'package:doppel/shared/services/ai_coach_service.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+
+void main() {
+  group('AiCoachService cloud-consent gate', () {
+    test('no network call when cloudEnabled is false (even with a key)',
+        () async {
+      var called = false;
+      final client = MockClient((_) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+      final svc = AiCoachService(apiKey: 'sk-test', httpClient: client);
+
+      final msg = await svc.generateFeedback(
+        pronunciationScore: 70,
+        rhythmScore: 65,
+        intonationScore: 60,
+        problemWords: const ['world'],
+        cloudEnabled: false,
+      );
+
+      expect(called, isFalse); // no audio/data left the device
+      expect(msg, isNotEmpty); // local template returned
+    });
+
+    test('no network call when there is no API key (even if cloudEnabled)',
+        () async {
+      var called = false;
+      final client = MockClient((_) async {
+        called = true;
+        return http.Response('{}', 200);
+      });
+      final svc = AiCoachService(apiKey: '', httpClient: client);
+
+      final msg = await svc.generateFeedback(
+        pronunciationScore: 70,
+        rhythmScore: 65,
+        intonationScore: 60,
+        problemWords: const ['world'],
+        cloudEnabled: true,
+      );
+
+      expect(called, isFalse);
+      expect(msg, isNotEmpty);
+    });
+
+    test('calls the network when cloudEnabled is true and a key is set',
+        () async {
+      var called = false;
+      final client = MockClient((request) async {
+        called = true;
+        return http.Response(
+          '{"choices":[{"message":{"content":"よくできました"}}]}',
+          200,
+          headers: {'content-type': 'application/json; charset=utf-8'},
+        );
+      });
+      final svc = AiCoachService(apiKey: 'sk-test', httpClient: client);
+
+      final msg = await svc.generateFeedback(
+        pronunciationScore: 90,
+        rhythmScore: 88,
+        intonationScore: 85,
+        problemWords: const [],
+        cloudEnabled: true,
+      );
+
+      expect(called, isTrue);
+      expect(msg, 'よくできました');
+    });
+  });
+}

@@ -13,12 +13,13 @@ final speechAnalysisServiceProvider = Provider<SpeechAnalysisService>((ref) {
 });
 
 class SpeechAnalysisService {
-  SpeechAnalysisService(this._aiCoach);
+  SpeechAnalysisService(this._aiCoach, {String? apiKey})
+      : _apiKey = apiKey ?? const String.fromEnvironment('OPENAI_API_KEY');
 
-  static const _apiKey = String.fromEnvironment('OPENAI_API_KEY');
   static const _whisperUrl = 'https://api.openai.com/v1/audio/transcriptions';
 
   final AiCoachService _aiCoach;
+  final String _apiKey;
   final _random = Random();
 
   /// Analyze a user recording against the model transcript.
@@ -26,10 +27,12 @@ class SpeechAnalysisService {
     required String lessonId,
     required String modelTranscript,
     required String? userAudioPath,
+    bool cloudEnabled = false,
   }) async {
-    // Transcribe user audio via Whisper API if available
+    // Transcribe user audio via Whisper API only when available AND the user
+    // has consented to cloud analysis. Otherwise no audio leaves the device.
     String? userTranscript;
-    if (userAudioPath != null && _apiKey.isNotEmpty) {
+    if (userAudioPath != null && _apiKey.isNotEmpty && cloudEnabled) {
       userTranscript = await _transcribe(userAudioPath);
     }
 
@@ -44,6 +47,7 @@ class SpeechAnalysisService {
       modelTranscript: scoredModel,
       userTranscript: userTranscript,
       userAudioPath: userAudioPath,
+      cloudEnabled: cloudEnabled,
     );
   }
 
@@ -94,6 +98,7 @@ class SpeechAnalysisService {
     required String modelTranscript,
     required String? userTranscript,
     required String? userAudioPath,
+    required bool cloudEnabled,
   }) async {
     // Score by comparing transcripts
     final int pronunciationScore;
@@ -124,6 +129,7 @@ class SpeechAnalysisService {
       rhythmScore: rhythmScore,
       intonationScore: intonationScore,
       problemWords: problemWords.map((pw) => pw.word).toList(),
+      cloudEnabled: cloudEnabled,
     );
 
     final overall =
@@ -160,6 +166,7 @@ class SpeechAnalysisService {
     required String lessonId,
     required List<String> modelChunks,
     required List<String?> chunkAudioPaths,
+    bool cloudEnabled = false,
   }) async {
     // Score only the chunks that were actually recorded (read). Excluding
     // unrecorded chunks means the part the user did not read does not lower
@@ -182,7 +189,7 @@ class SpeechAnalysisService {
 
     // Transcribe the recorded chunks in parallel, preserving order.
     String? userTranscript;
-    if (_apiKey.isNotEmpty && recordedPaths.isNotEmpty) {
+    if (_apiKey.isNotEmpty && recordedPaths.isNotEmpty && cloudEnabled) {
       final results = await Future.wait(recordedPaths.map(_transcribe));
       final joined = results
           .whereType<String>()
@@ -202,6 +209,7 @@ class SpeechAnalysisService {
       modelTranscript: modelTranscript,
       userTranscript: userTranscript,
       userAudioPath: firstAudioPath,
+      cloudEnabled: cloudEnabled,
     );
   }
 

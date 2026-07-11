@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/ai_coach_service.dart';
+import '../../../settings/presentation/providers/settings_provider.dart';
 import '../../data/models/feedback_model.dart';
 
 /// Single feedback by ID.
@@ -58,11 +59,14 @@ class CoachMessageRegenerator extends StateNotifier<CoachRegenerateState> {
 
     try {
       final aiCoach = _ref.read(aiCoachServiceProvider);
+      final cloudConsent =
+          _ref.read(settingsProvider).cloudAnalysisConsent;
       final newMessage = await aiCoach.regenerateFeedback(
         pronunciationScore: feedback.pronunciationScore,
         rhythmScore: feedback.rhythmScore,
         intonationScore: feedback.intonationScore,
         problemWords: feedback.problemWords.map((pw) => pw.word).toList(),
+        cloudEnabled: cloudConsent,
       );
 
       // Update feedback in DB
