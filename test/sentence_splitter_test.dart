@@ -51,39 +51,24 @@ void main() {
       expect(chunks.first, 'He said hello.');
     });
 
-    test('breaks a long sentence into breath groups', () {
+    test('keeps a long single sentence as one chunk (period-based)', () {
       const long =
           'The world of artificial intelligence continues to grow at a rapid pace, '
           'and new breakthroughs are being made every single day, '
           'because researchers keep pushing the limits of what is possible.';
-      final chunks = splitIntoChunks(long, maxWordsPerChunk: 12);
-      expect(chunks.length, greaterThan(1));
-      for (final c in chunks) {
-        final words = c.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-        // Breath groups should never be a single stray word.
-        expect(words, greaterThanOrEqualTo(3));
-      }
-      // Reassembled content preserves all original words.
-      expect(
-        chunks.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
-        long.replaceAll(RegExp(r'\s+'), ' ').trim(),
-      );
+      final chunks = splitIntoChunks(long);
+      expect(chunks.length, 1);
+      expect(chunks.first, long.replaceAll(RegExp(r'\s+'), ' ').trim());
     });
 
-    test('respects a small max so utterances stay shadow-sized', () {
-      const sentence =
-          'Packing for a trip does not have to be stressful if you plan a little.';
-      final chunks = splitIntoChunks(sentence, maxWordsPerChunk: 6);
-      expect(chunks.length, greaterThan(1));
-      for (final c in chunks) {
-        final words = c.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
-        expect(words, lessThanOrEqualTo(9)); // max + small merge tolerance
-      }
-      // No words are lost.
-      expect(
-        chunks.join(' ').replaceAll(RegExp(r'\s+'), ' ').trim(),
-        sentence,
+    test('splits only on sentence terminators, not commas / conjunctions', () {
+      final chunks = splitIntoChunks(
+        'Pack light, and travel far. Rest well, but wake early.',
       );
+      expect(chunks, [
+        'Pack light, and travel far.',
+        'Rest well, but wake early.',
+      ]);
     });
 
     test('always returns at least one chunk for text with no terminator', () {
