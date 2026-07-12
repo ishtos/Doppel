@@ -9,6 +9,16 @@ final aiCoachServiceProvider = Provider<AiCoachService>((ref) {
   return AiCoachService();
 });
 
+/// Result of an AI coach generation: the message plus whether it is a local
+/// fallback because a cloud call was attempted and failed (distinct from being
+/// local by design when cloud analysis is off).
+class CoachMessage {
+  const CoachMessage(this.text, {this.isFallback = false});
+
+  final String text;
+  final bool isFallback;
+}
+
 class AiCoachService {
   AiCoachService({AiBackendConfig? backend, http.Client? httpClient})
       : _backend = backend ?? AiBackendConfig(),
@@ -20,38 +30,36 @@ class AiCoachService {
   /// Whether a cloud backend (proxy or direct key) is configured.
   bool get isCloudAvailable => _backend.isAvailable;
 
-  /// Generate feedback message using OpenAI API.
-  /// Falls back to local template if API key is not configured.
-  Future<String> generateFeedback({
+  /// Generate a coach message. [CoachMessage.isFallback] is true only when a
+  /// cloud call was attempted but failed — not when cloud is off by design.
+  Future<CoachMessage> generateFeedback({
     required int pronunciationScore,
     required int rhythmScore,
     required int intonationScore,
     required List<String> problemWords,
     bool cloudEnabled = false,
   }) async {
+    String local() => _localFeedback(
+          pronunciationScore: pronunciationScore,
+          rhythmScore: rhythmScore,
+          intonationScore: intonationScore,
+          problemWords: problemWords,
+        );
+
     if (!isCloudAvailable || !cloudEnabled) {
-      return _localFeedback(
-        pronunciationScore: pronunciationScore,
-        rhythmScore: rhythmScore,
-        intonationScore: intonationScore,
-        problemWords: problemWords,
-      );
+      return CoachMessage(local()); // local by design — not a failure
     }
 
     try {
-      return await _callOpenAI(
+      final message = await _callOpenAI(
         '発音スコア: $pronunciationScore/100\n'
         'リズムスコア: $rhythmScore/100\n'
         'イントネーションスコア: $intonationScore/100\n'
         '問題のある単語: ${problemWords.join(", ")}\n',
       );
+      return CoachMessage(message);
     } catch (_) {
-      return _localFeedback(
-        pronunciationScore: pronunciationScore,
-        rhythmScore: rhythmScore,
-        intonationScore: intonationScore,
-        problemWords: problemWords,
-      );
+      return CoachMessage(local(), isFallback: true); // cloud failed → surface
     }
   }
 

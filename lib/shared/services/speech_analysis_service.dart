@@ -123,7 +123,7 @@ class SpeechAnalysisService {
     }
 
     // Generate AI coach message
-    final coachMessage = await _aiCoach.generateFeedback(
+    final coach = await _aiCoach.generateFeedback(
       pronunciationScore: pronunciationScore,
       rhythmScore: rhythmScore,
       intonationScore: intonationScore,
@@ -142,7 +142,8 @@ class SpeechAnalysisService {
       rhythmScore: rhythmScore,
       intonationScore: intonationScore,
       problemWords: problemWords,
-      coachMessage: coachMessage,
+      coachMessage: coach.text,
+      coachIsFallback: coach.isFallback,
       createdAt: DateTime.now(),
       userTranscript: userTranscript,
       modelTranscript: modelTranscript,

@@ -20,6 +20,9 @@ class FeedbackModel with _$FeedbackModel {
     String? userTranscript,
     String? modelTranscript,
     String? userAudioPath,
+    // True when the coach message is a local fallback because a cloud call was
+    // attempted and failed (not the by-design offline case).
+    @Default(false) bool coachIsFallback,
   }) = _FeedbackModel;
 
   factory FeedbackModel.fromJson(Map<String, dynamic> json) =>

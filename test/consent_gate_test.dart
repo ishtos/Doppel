@@ -25,7 +25,8 @@ void main() {
       );
 
       expect(called, isFalse); // no audio/data left the device
-      expect(msg, isNotEmpty); // local template returned
+      expect(msg.text, isNotEmpty); // local template returned
+      expect(msg.isFallback, isFalse); // local by design, not a failure
     });
 
     test('no network call when there is no API key (even if cloudEnabled)',
@@ -47,7 +48,8 @@ void main() {
       );
 
       expect(called, isFalse);
-      expect(msg, isNotEmpty);
+      expect(msg.text, isNotEmpty);
+      expect(msg.isFallback, isFalse);
     });
 
     test('calls the network when cloudEnabled is true and a key is set',
@@ -75,11 +77,29 @@ void main() {
       );
 
       expect(called, isTrue);
-      expect(msg, 'よくできました');
+      expect(msg.text, 'よくできました');
+      expect(msg.isFallback, isFalse);
       // GPT-5 models require max_completion_tokens (max_tokens → 400). Guard it.
       expect(sentBody, contains('max_completion_tokens'));
       expect(sentBody, contains('reasoning_effort'));
       expect(sentBody, isNot(contains('"max_tokens"')));
+    });
+
+    test('cloud failure marks the message as a fallback', () async {
+      final client = MockClient((_) async => http.Response('err', 500));
+      final svc = AiCoachService(
+          backend: AiBackendConfig(apiKey: 'sk-test'), httpClient: client);
+
+      final msg = await svc.generateFeedback(
+        pronunciationScore: 70,
+        rhythmScore: 65,
+        intonationScore: 60,
+        problemWords: const ['world'],
+        cloudEnabled: true,
+      );
+
+      expect(msg.isFallback, isTrue); // cloud attempted but failed
+      expect(msg.text, isNotEmpty); // local template used
     });
   });
 }
