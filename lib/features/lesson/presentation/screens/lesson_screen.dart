@@ -183,6 +183,11 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                     // Record bar
                     _RecordBar(
                       lessonId: widget.lessonId,
+                      wpm: _estimateWpm(
+                        lesson.wordCount,
+                        lesson.durationSeconds,
+                        ttsState.speed,
+                      ),
                       onScore: () => _scoreAndNavigate(lesson.id),
                     ),
                   ],
@@ -847,9 +852,14 @@ class _ChunkControlBar extends ConsumerWidget {
 // ── Record bar ──
 
 class _RecordBar extends ConsumerWidget {
-  const _RecordBar({required this.lessonId, required this.onScore});
+  const _RecordBar({
+    required this.lessonId,
+    required this.wpm,
+    required this.onScore,
+  });
 
   final String lessonId;
+  final int wpm;
   final VoidCallback onScore;
 
   @override
@@ -897,10 +907,13 @@ class _RecordBar extends ConsumerWidget {
                 isWhole
                     ? notifier.stopWholeRecording()
                     : notifier.stopRecordCurrent();
+              } else if (isWhole) {
+                notifier.startWholeRecording();
+                // Auto-advance the reading position at WPM pace so the passage
+                // scrolls along while recording (respects the 自動で次へ toggle).
+                if (session.autoAdvance) notifier.startReadAlong(wpm);
               } else {
-                isWhole
-                    ? notifier.startWholeRecording()
-                    : notifier.startRecordCurrent();
+                notifier.startRecordCurrent();
               }
             },
             child: AnimatedContainer(

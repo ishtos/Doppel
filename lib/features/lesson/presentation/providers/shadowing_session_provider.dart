@@ -130,6 +130,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
 
   final Ref _ref;
   bool _disposed = false;
+  bool _readAlong = false;
 
   TtsNotifier get _tts => _ref.read(ttsServiceProvider.notifier);
   AudioRecorderNotifier get _recorder =>
@@ -277,6 +278,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
   }
 
   Future<void> stopWholeRecording() async {
+    stopReadAlong();
     final path = await _recorder.stopRecording();
     if (path != null) {
       state = state.copyWith(wholeRecordingPath: path, wholeRecorded: true);
@@ -286,6 +288,7 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
   }
 
   Future<void> cancelWholeRecording() async {
+    stopReadAlong();
     await _recorder.cancelRecording();
     await _deleteWholeRecording();
     state = state.copyWith(wholeRecorded: false, clearWholeRecording: true);
@@ -298,6 +301,28 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
     await _tts.stop();
     await _player.playFile(path);
   }
+
+  // ── Read-along (auto-advance while recording the whole passage) ──
+
+  /// Advance the current chunk automatically, paced by [wpm], so the passage
+  /// scrolls along while the user records it. Starts from the top and stops
+  /// when recording stops, the session is disposed, or the end is reached.
+  /// No-op if already running or [wpm] is not positive.
+  Future<void> startReadAlong(int wpm) async {
+    if (wpm <= 0 || !state.hasChunks || _readAlong) return;
+    _readAlong = true;
+    for (var i = 0; i < state.chunks.length; i++) {
+      if (_disposed || !_readAlong) break;
+      state = state.copyWith(currentIndex: i);
+      await Future<void>.delayed(
+        Duration(milliseconds: readAlongMillis(state.chunks[i], wpm)),
+      );
+    }
+    _readAlong = false;
+  }
+
+  /// Stop the read-along auto-advance.
+  void stopReadAlong() => _readAlong = false;
 
   // ── Modes ──
 
@@ -370,4 +395,14 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
     } catch (_) {}
     super.dispose();
   }
+}
+
+/// Milliseconds to dwell on [chunk] when reading along at [wpm] words/min,
+/// derived from its word count and clamped so tiny/huge chunks stay reasonable.
+int readAlongMillis(String chunk, int wpm) {
+  if (wpm <= 0) return 0;
+  final words =
+      chunk.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+  final ms = (words / wpm * 60000).round();
+  return ms.clamp(700, 20000).toInt();
 }
