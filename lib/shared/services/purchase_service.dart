@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import 'iap_backend.dart';
 
 /// Product id for the premium subscription. Must match the auto-renewable
 /// subscription created in App Store Connect (and Google Play Console).
@@ -26,7 +27,7 @@ final purchaseControllerProvider =
     // Platform/store unavailable (e.g. running under `flutter test`).
     iap = null;
   }
-  return PurchaseController(ref, iap);
+  return PurchaseController(ref, iap, ref.read(iapBackendClientProvider));
 });
 
 class PurchaseState {
@@ -68,7 +69,8 @@ class PurchaseState {
 /// platform) or a channel throws, the controller stays in a safe "store
 /// unavailable" state instead of crashing.
 class PurchaseController extends StateNotifier<PurchaseState> {
-  PurchaseController(this._ref, this._iap) : super(const PurchaseState()) {
+  PurchaseController(this._ref, this._iap, this._backend)
+      : super(const PurchaseState()) {
     final iap = _iap;
     if (iap == null) return;
     // Listen at construction so transactions delivered at launch (an
@@ -83,6 +85,7 @@ class PurchaseController extends StateNotifier<PurchaseState> {
 
   final Ref _ref;
   final InAppPurchase? _iap;
+  final IapBackendClient _backend;
   StreamSubscription<List<PurchaseDetails>>? _sub;
 
   Future<void> _init() async {
@@ -100,8 +103,20 @@ class PurchaseController extends StateNotifier<PurchaseState> {
         product:
             resp.productDetails.isNotEmpty ? resp.productDetails.first : null,
       );
+      await _syncEntitlement();
     } catch (_) {
       state = state.copyWith(isStoreAvailable: false);
+    }
+  }
+
+  /// Sync premium from the server-side entitlement (best-effort). Only updates
+  /// on a definite answer, so a network error never downgrades the user.
+  Future<void> _syncEntitlement() async {
+    final token = _ref.read(settingsProvider).appAccountToken;
+    if (token.isEmpty || !_backend.isAvailable) return;
+    final ent = await _backend.entitlement(appAccountToken: token);
+    if (ent != null) {
+      await _ref.read(settingsProvider.notifier).setPremium(ent.entitled);
     }
   }
 
@@ -111,8 +126,12 @@ class PurchaseController extends StateNotifier<PurchaseState> {
     final product = state.product;
     if (iap == null || product == null) return;
     state = state.copyWith(purchasePending: true, clearError: true);
+    final appAccountToken = _ref.read(settingsProvider).appAccountToken;
     await iap.buyNonConsumable(
-      purchaseParam: PurchaseParam(productDetails: product),
+      purchaseParam: PurchaseParam(
+        productDetails: product,
+        applicationUserName: appAccountToken.isEmpty ? null : appAccountToken,
+      ),
     );
   }
 
@@ -138,7 +157,7 @@ class PurchaseController extends StateNotifier<PurchaseState> {
                 purchase.error?.message ?? '購入処理に失敗しました。もう一度お試しください。',
           );
         } else if (grantsPremium(purchase.status, purchase.productID)) {
-          await _ref.read(settingsProvider.notifier).setPremium(true);
+          await _grantFromPurchase(purchase);
           state = state.copyWith(purchasePending: false, clearError: true);
         } else if (purchase.status == PurchaseStatus.canceled) {
           state = state.copyWith(purchasePending: false);
@@ -149,6 +168,20 @@ class PurchaseController extends StateNotifier<PurchaseState> {
         }
       }
     }
+  }
+
+  /// Grant premium for a purchased/restored transaction. Prefer the server's
+  /// receipt verification; if the backend is unreachable, grant optimistically
+  /// (the user paid) and let the next entitlement sync reconcile.
+  Future<void> _grantFromPurchase(PurchaseDetails purchase) async {
+    final token = _ref.read(settingsProvider).appAccountToken;
+    final receipt = purchase.verificationData.serverVerificationData;
+    IapEntitlement? ent;
+    if (_backend.isAvailable && token.isNotEmpty && receipt.isNotEmpty) {
+      ent = await _backend.verify(appAccountToken: token, receipt: receipt);
+    }
+    final entitled = ent?.entitled ?? true; // optimistic when backend is silent
+    await _ref.read(settingsProvider.notifier).setPremium(entitled);
   }
 
   @override

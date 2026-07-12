@@ -72,6 +72,40 @@ Notes:
   per-install token (see `claudedocs/design_20260712_iap-validation-and-rate-limiting.md`).
 - To test: with a valid `X-App-Token`, send >60 requests in a minute → `429`.
 
+## IAP receipt validation (server-authoritative premium, optional)
+
+Makes premium depend on a **server-verified** App Store receipt instead of the
+client's word. Needs a D1 database and Apple's app-specific shared secret.
+
+```bash
+cd server/cloudflare-worker
+wrangler d1 create doppel-iap                              # prints a database_id
+# paste the id into wrangler.toml (uncomment the [[d1_databases]] block)
+wrangler d1 execute doppel-iap --file=schema.sql --remote  # create the table
+wrangler secret put APPLE_SHARED_SECRET                    # ASC app-specific shared secret
+wrangler deploy
+```
+
+Endpoints (both require `X-App-Token`):
+- `POST /iap/verify` — `{ appAccountToken, receipt }` → validates via Apple
+  `verifyReceipt` (production, falling back to sandbox on 21007), stores the
+  entitlement in D1, returns `{ entitled, expiresDate, ... }`.
+- `GET /iap/entitlement?appAccountToken=…` — returns the stored entitlement
+  (the app syncs this at launch).
+
+The app generates a stable `appAccountToken` per install, passes it as the
+StoreKit `applicationUserName`, verifies each purchase against `/iap/verify`,
+and trusts the server's answer — falling back to an optimistic local grant only
+when the backend is unreachable, so a paying user is never blocked.
+
+Notes / limitations (Phase 1):
+- Uses Apple's **`verifyReceipt`** — deprecated but functional and simple.
+  Phase 2 migrates to the App Store Server API + Server Notifications V2 so
+  renewals / expirations / refunds are pushed to the server automatically.
+- Without the `DB` binding + `APPLE_SHARED_SECRET`, `/iap/*` returns 500 and the
+  app keeps its previous client-side premium behavior.
+- iOS only for now (Android = Phase 3).
+
 ## Behavior / safety
 
 - Only `POST /v1/chat/completions` and `POST /v1/audio/transcriptions` are

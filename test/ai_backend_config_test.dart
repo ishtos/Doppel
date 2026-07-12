@@ -42,6 +42,19 @@ void main() {
       expect(c.authHeaders(), isEmpty);
     });
 
+    test('IAP endpoints are proxy-only', () {
+      final proxy =
+          AiBackendConfig(proxyUrl: 'https://proxy.example.workers.dev');
+      expect(
+          proxy.iapVerifyUrl, 'https://proxy.example.workers.dev/iap/verify');
+      expect(proxy.iapEntitlementUrl,
+          'https://proxy.example.workers.dev/iap/entitlement');
+
+      final direct = AiBackendConfig(apiKey: 'sk-test');
+      expect(direct.iapVerifyUrl, isNull);
+      expect(direct.iapEntitlementUrl, isNull);
+    });
+
     test('neither proxy nor key: not available', () {
       final c = AiBackendConfig(apiKey: '', proxyUrl: '');
       expect(c.isAvailable, isFalse);
