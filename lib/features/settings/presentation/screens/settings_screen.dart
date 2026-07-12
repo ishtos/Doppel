@@ -18,6 +18,14 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'ホームに戻る',
+          // Settings is reached via context.go (a replace), so there is no
+          // route to pop back to — navigate home explicitly, like the other
+          // root-level screens (feedback / lesson).
+          onPressed: () => context.go('/home'),
+        ),
         title: Text('設定', style: theme.textTheme.titleLarge),
       ),
       body: ListView(
