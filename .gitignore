@@ -69,6 +69,9 @@ app.*.map.json
 *.freezed.dart
 *.g.dart
 
+# Node (Cloudflare Worker tooling — server/cloudflare-worker)
+**/node_modules/
+
 # Environment
 .env
 .env.*

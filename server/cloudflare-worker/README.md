@@ -44,6 +44,34 @@ In CI these come from GitHub Secrets — see `.github/workflows/deploy-ios.yml`
 (`AI_PROXY_URL`, `AI_PROXY_TOKEN`). Once the proxy is configured, stop injecting
 `OPENAI_API_KEY` into the build.
 
+## Rate limiting & daily cost cap (optional, recommended)
+
+`APP_TOKEN` is embedded in the app and can be extracted, so add throughput
+limits so a leaked token can't run up your OpenAI bill. Enable by creating a KV
+namespace and uncommenting the `RL` binding in `wrangler.toml`:
+
+```bash
+wrangler kv namespace create RL   # prints an id
+# paste the id into wrangler.toml (uncomment the [[kv_namespaces]] block)
+wrangler deploy
+```
+
+When the `RL` binding is present the Worker enforces:
+- **Per-IP limit**: `PER_IP_PER_MINUTE` (default 60) requests / minute / client IP → `429` + `Retry-After: 60`.
+- **Global daily cap**: `DAILY_MAX` (default 5000) requests / day total → `429` + `Retry-After: 3600`.
+
+Both constants live at the top of `src/index.js`; tune to your budget. Counts
+use KV (eventually consistent), so limits are approximate — fine for coarse
+abuse/cost control. Without the binding the proxy runs unlimited (as before).
+
+Notes:
+- The app treats `429` like any cloud failure and falls back to local/simulated
+  scoring, so users see a graceful degrade (the "簡易採点" notice), not an error.
+- The daily cap is global, so a determined attacker could exhaust it and
+  degrade service for everyone; per-user limits become possible once IAP adds a
+  per-install token (see `claudedocs/design_20260712_iap-validation-and-rate-limiting.md`).
+- To test: with a valid `X-App-Token`, send >60 requests in a minute → `429`.
+
 ## Behavior / safety
 
 - Only `POST /v1/chat/completions` and `POST /v1/audio/transcriptions` are

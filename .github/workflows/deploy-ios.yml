@@ -6,10 +6,12 @@ on:
   push:
     branches:
       - main
-    # ドキュメント/README のみの変更ではデプロイしない（コスト削減）
+    # ドキュメント/README/バックエンド(Worker)のみの変更ではアプリを再ビルドしない
+    # （Worker は wrangler で別途デプロイするため）
     paths-ignore:
       - 'docs/**'
       - '**/*.md'
+      - 'server/**'
     tags:
       - 'v*'
   workflow_dispatch:
