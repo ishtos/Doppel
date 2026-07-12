@@ -9,3 +9,10 @@ compatibility_date = "2024-11-01"
 #   wrangler secret put APP_TOKEN        # optional shared app token (recommended)
 #
 # No account IDs or secrets belong in this file.
+
+# Optional rate limiting + daily cost cap. Create a KV namespace and uncomment
+# the block below (the Worker guards on `env.RL`, so it deploys fine without it):
+#   wrangler kv namespace create RL
+# [[kv_namespaces]]
+# binding = "RL"
+# id = "<paste the id printed by the command above>"
