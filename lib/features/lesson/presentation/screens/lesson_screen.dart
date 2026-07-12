@@ -744,8 +744,12 @@ class _ChunkControlBar extends ConsumerWidget {
     final session = ref.watch(shadowingSessionProvider(lessonId));
     final notifier = ref.read(shadowingSessionProvider(lessonId).notifier);
     final ttsState = ref.watch(ttsServiceProvider);
-    final hasOwnRecording =
-        session.recordingPaths[session.currentIndex] != null;
+    final isWhole = session.recordMode == RecordMode.whole;
+    // Replay the whole-passage take in 通し mode, or the current chunk's take
+    // in 一文ずつ mode (recordingPaths is only populated per-chunk).
+    final hasOwnRecording = isWhole
+        ? session.wholeRecordingPath != null
+        : session.recordingPaths[session.currentIndex] != null;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -786,12 +790,14 @@ class _ChunkControlBar extends ConsumerWidget {
                   }
                 },
               ),
-              // Replay own recording
+              // Replay own recording (whole take or current chunk, per mode).
               IconButton(
                 icon: const Icon(Icons.record_voice_over),
                 tooltip: '自分の録音を再生',
                 onPressed: hasOwnRecording
-                    ? () => notifier.replayCurrentRecording()
+                    ? () => isWhole
+                        ? notifier.replayWholeRecording()
+                        : notifier.replayCurrentRecording()
                     : null,
               ),
               IconButton(
