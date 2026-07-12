@@ -53,8 +53,10 @@ void main() {
     test('calls the network when cloudEnabled is true and a key is set',
         () async {
       var called = false;
+      String? sentBody;
       final client = MockClient((request) async {
         called = true;
+        sentBody = request.body;
         return http.Response(
           '{"choices":[{"message":{"content":"よくできました"}}]}',
           200,
@@ -74,6 +76,10 @@ void main() {
 
       expect(called, isTrue);
       expect(msg, 'よくできました');
+      // GPT-5 models require max_completion_tokens (max_tokens → 400). Guard it.
+      expect(sentBody, contains('max_completion_tokens'));
+      expect(sentBody, contains('reasoning_effort'));
+      expect(sentBody, isNot(contains('"max_tokens"')));
     });
   });
 }
