@@ -16,3 +16,13 @@ compatibility_date = "2024-11-01"
 # [[kv_namespaces]]
 # binding = "RL"
 # id = "<paste the id printed by the command above>"
+
+# IAP receipt validation (server-authoritative premium). Needs a D1 DB + secret.
+# The Worker guards on `env.DB`, so /iap/* stays 500 until this is set up:
+#   wrangler d1 create doppel-iap
+#   wrangler d1 execute doppel-iap --file=schema.sql --remote
+#   wrangler secret put APPLE_SHARED_SECRET   # App Store app-specific shared secret
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "doppel-iap"
+# database_id = "<paste the id printed by `d1 create`>"

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../../shared/services/notification_service.dart';
 
@@ -22,6 +23,7 @@ class SettingsState {
     this.quotaDate = '',
     this.quotaLessonId,
     this.cloudAnalysisConsent = false,
+    this.appAccountToken = '',
   });
 
   final ThemeMode themeMode;
@@ -46,6 +48,10 @@ class SettingsState {
   /// local/simulated results only. Toggled explicitly by the user in settings.
   final bool cloudAnalysisConsent;
 
+  /// Stable per-install id (UUID) linking this device to its server-side IAP
+  /// entitlement. Generated once and persisted.
+  final String appAccountToken;
+
   String get reminderTimeLabel =>
       '${reminderHour.toString().padLeft(2, '0')}:${reminderMinute.toString().padLeft(2, '0')}';
 
@@ -61,6 +67,7 @@ class SettingsState {
     String? quotaDate,
     String? quotaLessonId,
     bool? cloudAnalysisConsent,
+    String? appAccountToken,
   }) {
     return SettingsState(
       themeMode: themeMode ?? this.themeMode,
@@ -75,6 +82,7 @@ class SettingsState {
       quotaDate: quotaDate ?? this.quotaDate,
       quotaLessonId: quotaLessonId ?? this.quotaLessonId,
       cloudAnalysisConsent: cloudAnalysisConsent ?? this.cloudAnalysisConsent,
+      appAccountToken: appAccountToken ?? this.appAccountToken,
     );
   }
 }
@@ -95,6 +103,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _quotaDateKey = 'quota_date';
   static const _quotaLessonIdKey = 'quota_lesson_id';
   static const _cloudConsentKey = 'cloud_analysis_consent';
+  static const _appAccountTokenKey = 'app_account_token';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -110,6 +119,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final quotaDate = prefs.getString(_quotaDateKey) ?? '';
     final quotaLessonId = prefs.getString(_quotaLessonIdKey);
     final cloudConsent = prefs.getBool(_cloudConsentKey) ?? false;
+    // Stable per-install id for server-side IAP entitlement; generate once.
+    var appAccountToken = prefs.getString(_appAccountTokenKey);
+    if (appAccountToken == null || appAccountToken.isEmpty) {
+      appAccountToken = const Uuid().v4();
+      await prefs.setString(_appAccountTokenKey, appAccountToken);
+    }
 
     state = SettingsState(
       themeMode: themeModeIndex != null
@@ -125,6 +140,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       quotaDate: quotaDate,
       quotaLessonId: quotaLessonId,
       cloudAnalysisConsent: cloudConsent,
+      appAccountToken: appAccountToken,
     );
   }
 

@@ -46,6 +46,11 @@ class AiBackendConfig {
       ? '$_base/v1/audio/transcriptions'
       : 'https://api.openai.com/v1/audio/transcriptions';
 
+  /// IAP endpoints live only on the proxy/backend (they hold Apple's shared
+  /// secret + entitlement DB). Null in direct mode / when no proxy is set.
+  String? get iapVerifyUrl => usesProxy ? '$_base/iap/verify' : null;
+  String? get iapEntitlementUrl => usesProxy ? '$_base/iap/entitlement' : null;
+
   /// Auth headers for a request: in direct mode an OpenAI bearer token; in
   /// proxy mode the optional app token (the OpenAI key lives on the server).
   Map<String, String> authHeaders() {
