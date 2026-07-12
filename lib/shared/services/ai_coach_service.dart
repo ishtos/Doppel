@@ -119,7 +119,13 @@ class AiCoachService {
       },
       body: jsonEncode({
         'model': 'gpt-5-mini',
-        'max_tokens': 256,
+        // GPT-5 models reject `max_tokens` (400 unsupported_parameter) and
+        // require `max_completion_tokens`. Keep headroom above the 2-3 sentence
+        // reply, and use minimal reasoning — this is a short templated message,
+        // so deep reasoning would only burn the token budget (risking empty
+        // output) and add latency/cost.
+        'max_completion_tokens': 512,
+        'reasoning_effort': 'minimal',
         'messages': [
           {
             'role': 'system',
