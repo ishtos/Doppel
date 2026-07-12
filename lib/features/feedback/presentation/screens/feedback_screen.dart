@@ -171,6 +171,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             _AiCoachCard(
               feedbackId: feedback.id,
               coachMessage: feedback.coachMessage,
+              isFallback: feedback.coachIsFallback,
               theme: theme,
             ),
             const SizedBox(height: 32),
@@ -518,11 +519,13 @@ class _AiCoachCard extends ConsumerWidget {
   const _AiCoachCard({
     required this.feedbackId,
     required this.coachMessage,
+    required this.isFallback,
     required this.theme,
   });
 
   final String feedbackId;
   final String coachMessage;
+  final bool isFallback;
   final ThemeData theme;
 
   @override
@@ -590,6 +593,31 @@ class _AiCoachCard extends ConsumerWidget {
                 ),
               ],
             ),
+            // Surface a coach fallback: the stored message is a local template
+            // because the cloud call failed (distinct from the by-design
+            // offline case). Hidden once regenerated successfully this session.
+            if (isFallback &&
+                regenerateState.message == null &&
+                regenerateState.status != CoachRegenerateStatus.loading)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline,
+                        size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'AIコーチに接続できず、簡易メッセージを表示しています。'
+                        '「AIで再生成」で再試行できます。',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // FIXED: Error message display
             if (regenerateState.status == CoachRegenerateStatus.error)
               Padding(

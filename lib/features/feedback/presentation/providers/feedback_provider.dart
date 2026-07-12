@@ -69,8 +69,12 @@ class CoachMessageRegenerator extends StateNotifier<CoachRegenerateState> {
         cloudEnabled: cloudConsent,
       );
 
-      // Update feedback in DB
-      final updated = feedback.copyWith(coachMessage: newMessage);
+      // Update feedback in DB (a successful regenerate is real AI, not a
+      // fallback).
+      final updated = feedback.copyWith(
+        coachMessage: newMessage,
+        coachIsFallback: false,
+      );
       await _ref.read(feedbackRepositoryProvider).save(updated);
 
       // Invalidate the feedback provider to refresh UI
