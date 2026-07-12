@@ -43,4 +43,23 @@ void main() {
       expect(cleared.canScore, isFalse);
     });
   });
+
+  group('readAlongMillis', () {
+    test('scales with word count and WPM (10 words @ 100 wpm = 6s)', () {
+      expect(readAlongMillis('a b c d e f g h i j', 100), 6000);
+    });
+
+    test('clamps very short chunks up to the 700ms minimum', () {
+      expect(readAlongMillis('hi', 600), 700); // 1/600*60000 = 100 → 700
+    });
+
+    test('clamps very long chunks down to the 20s maximum', () {
+      final long = List.filled(500, 'word').join(' ');
+      expect(readAlongMillis(long, 10), 20000);
+    });
+
+    test('non-positive wpm yields 0 (no auto-advance)', () {
+      expect(readAlongMillis('a b c', 0), 0);
+    });
+  });
 }
