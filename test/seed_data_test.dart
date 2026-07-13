@@ -32,6 +32,29 @@ void main() {
           reason: 'expected diverse themes');
     });
 
+    test('wordCount matches the transcript token count', () {
+      // Same tokenization the scoring path uses (text_diff.dart): split on
+      // whitespace runs. Keeps the badge/WPM/read-along pacing honest.
+      for (final l in seedLessons) {
+        final actual =
+            l.transcriptText.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+        expect(l.wordCount, actual,
+            reason: '${l.id}: wordCount ${l.wordCount} != actual $actual');
+      }
+    });
+
+    test('lesson length stays within the per-difficulty cap', () {
+      // Shadowing works best on short, repeatable passages. Caps keep each
+      // lesson practicable in one or two takes and bound AI cost per session.
+      const cap = {1: 80, 2: 130, 3: 200};
+      for (final l in seedLessons) {
+        expect(l.wordCount, lessThanOrEqualTo(cap[l.difficulty]!),
+            reason: '${l.id} (diff ${l.difficulty}) is ${l.wordCount} words');
+        expect(l.wordCount, greaterThanOrEqualTo(40),
+            reason: '${l.id} looks truncated (${l.wordCount} words)');
+      }
+    });
+
     test('every lesson JSON round-trips (Hive storage contract)', () {
       for (final l in seedLessons) {
         final restored = LessonModel.fromJson(l.toJson());
