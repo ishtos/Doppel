@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/analytics/analytics_events.dart';
+import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/sentence_splitter.dart';
@@ -241,6 +243,11 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
       _setStatus(index, ChunkStatus.recorded);
     }
 
+    _ref.read(analyticsProvider).capture(
+      AnalyticsEvents.recordingCompleted,
+      properties: {'mode': RecordMode.perChunk.name, 'chunk_index': index},
+    );
+
     if (state.autoAdvance && !state.isLast) {
       await next();
     }
@@ -285,6 +292,10 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
     } else {
       state = state.copyWith(wholeRecorded: true);
     }
+    _ref.read(analyticsProvider).capture(
+      AnalyticsEvents.recordingCompleted,
+      properties: {'mode': RecordMode.whole.name, 'has_audio': path != null},
+    );
   }
 
   Future<void> cancelWholeRecording() async {

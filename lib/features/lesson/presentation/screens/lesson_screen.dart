@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/analytics/analytics_events.dart';
+import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/services/purchase_service.dart';
@@ -44,8 +46,20 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       final settings = ref.read(settingsProvider.notifier);
       if (settings.canAccessLesson(widget.lessonId)) {
         settings.registerLessonAccess(widget.lessonId);
+        ref.read(analyticsProvider).capture(
+          AnalyticsEvents.lessonStarted,
+          properties: {
+            'lesson_id': widget.lessonId,
+            'difficulty':
+                ref.read(lessonByIdProvider(widget.lessonId))?.difficulty,
+          },
+        );
       } else {
         setState(() => _locked = true);
+        ref.read(analyticsProvider).capture(
+          AnalyticsEvents.paywallViewed,
+          properties: {'lesson_id': widget.lessonId},
+        );
       }
     });
   }
@@ -320,6 +334,20 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
             );
 
       await ref.read(feedbackRepositoryProvider).save(feedback);
+
+      final analytics = ref.read(analyticsProvider);
+      // Activation "aha": the very first score this user has ever seen.
+      // recordPractice below increments completedLessons, so read it first.
+      final isFirstScore =
+          ref.read(progressRepositoryProvider).getProgress().completedLessons ==
+              0;
+      if (isFirstScore) {
+        analytics.capture(AnalyticsEvents.firstScoreShown, properties: {
+          'lesson_id': lessonId,
+          'overall_score': feedback.overallScore,
+        });
+      }
+
       // Record the actual time spent on the lesson (entry → scoring), clamped
       // to a sane range so idle time on the screen can't inflate the total.
       final elapsedMinutes =
@@ -328,6 +356,13 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       await ref
           .read(progressRepositoryProvider)
           .recordPractice(durationMinutes: durationMinutes);
+
+      analytics.capture(AnalyticsEvents.lessonCompleted, properties: {
+        'lesson_id': lessonId,
+        'overall_score': feedback.overallScore,
+        'mode': session.recordMode.name,
+        'duration_minutes': durationMinutes,
+      });
 
       if (mounted) {
         setState(() => _isAnalyzing = false);
