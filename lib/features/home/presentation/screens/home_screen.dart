@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../providers/home_provider.dart';
+import '../../../../shared/analytics/day2_tracker.dart';
 import '../../../../shared/utils/score_utils.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -26,6 +27,11 @@ class HomeScreen extends ConsumerWidget {
     final weeklyStats = ref.watch(weeklyStatsProvider);
     final recentActivity = ref.watch(recentActivityProvider);
     final goalProgress = ref.watch(dailyGoalProgressProvider);
+
+    // Retention: fire day2_return once per launch when the user returns on a
+    // new day (home is the landing screen for returning users).
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => maybeCaptureDay2Return(ref));
 
     return Scaffold(
       appBar: AppBar(
