@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/analytics/analytics_events.dart';
+import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/ai_coach_service.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
@@ -54,6 +56,11 @@ class CoachMessageRegenerator extends StateNotifier<CoachRegenerateState> {
   Future<void> regenerate() async {
     final feedback = _ref.read(feedbackRepositoryProvider).findById(_feedbackId);
     if (feedback == null) return;
+
+    _ref.read(analyticsProvider).capture(
+      AnalyticsEvents.coachRetry,
+      properties: {'feedback_id': _feedbackId},
+    );
 
     state = const CoachRegenerateState(status: CoachRegenerateStatus.loading);
 

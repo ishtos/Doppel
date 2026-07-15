@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/analytics/analytics_events.dart';
+import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../settings/presentation/providers/settings_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -51,6 +53,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _completeOnboarding() async {
+    ref.read(analyticsProvider).capture(
+      AnalyticsEvents.onboardingCompleted,
+      properties: {'skipped': _currentPage < _pages.length - 1},
+    );
     await ref.read(settingsProvider.notifier).completeOnboarding();
     if (mounted) {
       context.go('/home');

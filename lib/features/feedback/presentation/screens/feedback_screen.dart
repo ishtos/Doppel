@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/analytics/analytics_events.dart';
+import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/services/audio_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../../../../shared/utils/text_diff.dart';
@@ -17,6 +19,21 @@ class FeedbackScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fire once when the feedback screen opens (build re-runs on playback
+    // state changes, so instrument here instead).
+    final feedback = ref.read(feedbackByIdProvider(widget.feedbackId));
+    ref.read(analyticsProvider).capture(
+      AnalyticsEvents.feedbackViewed,
+      properties: {
+        'feedback_id': widget.feedbackId,
+        'overall_score': feedback?.overallScore,
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

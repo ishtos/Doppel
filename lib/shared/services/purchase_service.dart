@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../analytics/analytics_events.dart';
+import '../analytics/analytics_provider.dart';
 import 'iap_backend.dart';
 
 /// Product id for the premium subscription. Must match the auto-renewable
@@ -182,6 +184,15 @@ class PurchaseController extends StateNotifier<PurchaseState> {
     }
     final entitled = ent?.entitled ?? true; // optimistic when backend is silent
     await _ref.read(settingsProvider.notifier).setPremium(entitled);
+
+    _ref.read(analyticsProvider).capture(
+      AnalyticsEvents.purchaseCompleted,
+      properties: {
+        'product_id': purchase.productID,
+        'status': purchase.status.name,
+        'backend_verified': ent != null,
+      },
+    );
   }
 
   @override
