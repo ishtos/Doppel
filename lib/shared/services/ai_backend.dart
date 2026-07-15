@@ -51,6 +51,11 @@ class AiBackendConfig {
   String? get iapVerifyUrl => usesProxy ? '$_base/iap/verify' : null;
   String? get iapEntitlementUrl => usesProxy ? '$_base/iap/entitlement' : null;
 
+  /// Anonymous progress-backup endpoints (proxy/backend only, they hold the
+  /// D1 store). Null in direct mode / when no proxy is set.
+  String? get progressSyncUrl => usesProxy ? '$_base/progress/sync' : null;
+  String? get progressGetUrl => usesProxy ? '$_base/progress' : null;
+
   /// Auth headers for a request: in direct mode an OpenAI bearer token; in
   /// proxy mode the optional app token (the OpenAI key lives on the server).
   Map<String, String> authHeaders() {
