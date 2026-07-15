@@ -5,7 +5,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
-import 'shared/data/seed_data.dart';
+import 'shared/data/lesson_seeder.dart';
 import 'shared/services/notification_service.dart';
 import 'shared/services/purchase_service.dart';
 import 'shared/utils/recording_cleanup.dart';
@@ -23,15 +23,10 @@ Future<void> main() async {
   // chunks) so they don't accumulate. Best-effort; never blocks startup.
   await cleanupOrphanRecordings(feedbacksBox);
 
-  // Seed / migrate lessons: add any seed lesson not already present. This
-  // covers first launch (empty box → all added) and app updates that ship new
-  // lessons (existing users get the new ones), while preserving user state
-  // (bookmarks / completion) on lessons they already have.
-  for (final lesson in seedLessons) {
-    if (!lessonsBox.containsKey(lesson.id)) {
-      await lessonsBox.put(lesson.id, lesson.toJson());
-    }
-  }
+  // Seed new lessons and refresh changed content from the bundle, preserving
+  // user state (bookmarks / completion). Lets content updates reach existing
+  // installs without a reinstall. See syncSeedLessons for details.
+  await syncSeedLessons(lessonsBox);
 
   // Initialize notification service
   await NotificationService.instance.initialize();
