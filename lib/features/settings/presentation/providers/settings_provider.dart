@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../shared/services/notification_service.dart';
+import '../../../../shared/services/stable_id.dart';
 
 final settingsProvider =
     StateNotifierProvider<SettingsNotifier, SettingsState>(
@@ -103,7 +103,6 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _quotaDateKey = 'quota_date';
   static const _quotaLessonIdKey = 'quota_lesson_id';
   static const _cloudConsentKey = 'cloud_analysis_consent';
-  static const _appAccountTokenKey = 'app_account_token';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -119,13 +118,10 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final quotaDate = prefs.getString(_quotaDateKey) ?? '';
     final quotaLessonId = prefs.getString(_quotaLessonIdKey);
     final cloudConsent = prefs.getBool(_cloudConsentKey) ?? false;
-    // Stable per-install id for server-side IAP entitlement; generate once.
-    var appAccountToken = prefs.getString(_appAccountTokenKey);
-    if (appAccountToken == null || appAccountToken.isEmpty) {
-      appAccountToken = const Uuid().v4();
-      await prefs.setString(_appAccountTokenKey, appAccountToken);
-    }
 
+    // Set state immediately (including the onboarding flag the router depends
+    // on) using whatever token prefs already holds, so a slow Keychain read can
+    // never delay first render.
     state = SettingsState(
       themeMode: themeModeIndex != null
           ? ThemeMode.values[themeModeIndex]
@@ -140,8 +136,15 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       quotaDate: quotaDate,
       quotaLessonId: quotaLessonId,
       cloudAnalysisConsent: cloudConsent,
-      appAccountToken: appAccountToken,
+      appAccountToken: prefs.getString(StableId.key) ?? '',
     );
+
+    // Resolve the stable, Keychain-backed per-install id (survives an iOS
+    // reinstall) without blocking initial load.
+    final appAccountToken = await StableId().resolve(prefs);
+    if (appAccountToken != state.appAccountToken) {
+      state = state.copyWith(appAccountToken: appAccountToken);
+    }
   }
 
   // ── Daily lesson quota (freemium: 1 lesson/day for free) ──
