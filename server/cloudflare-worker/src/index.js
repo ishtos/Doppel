@@ -6,6 +6,8 @@
  *   POST /v1/audio/transcriptions    → OpenAI proxy (Whisper)
  *   POST /iap/verify                 → validate an App Store receipt, store entitlement
  *   GET  /iap/entitlement            → read stored entitlement (?appAccountToken=)
+ *   POST /progress/sync              → back up anonymous progress (body: appAccountToken, data, updatedAt)
+ *   GET  /progress                   → read backed-up progress (?appAccountToken=)
  *
  * Secrets (set with `wrangler secret put`, never committed):
  *   OPENAI_API_KEY       – the real OpenAI key (required for the proxy)
@@ -14,7 +16,8 @@
  *
  * Optional bindings (see wrangler.toml):
  *   RL (KV)  – per-IP requests/minute + global requests/day cap.
- *   DB (D1)  – entitlements store for /iap/*. Without it, /iap/* returns 500.
+ *   DB (D1)  – entitlements store for /iap/* and progress store for /progress*.
+ *              Without it, those routes return 500.
  *
  * NOTE: /iap/verify uses Apple's `verifyReceipt` (deprecated but functional and
  * simple). Phase 2 migrates to the App Store Server API + Server Notifications.
@@ -47,12 +50,14 @@ export default {
     const isProxy = ALLOWED_PATHS.has(path);
     const isVerify = path === '/iap/verify';
     const isEntitlement = path === '/iap/entitlement';
-    if (!isProxy && !isVerify && !isEntitlement) {
+    const isProgressSync = path === '/progress/sync';
+    const isProgressGet = path === '/progress';
+    if (!isProxy && !isVerify && !isEntitlement && !isProgressSync && !isProgressGet) {
       return json({ error: 'not_found' }, 404);
     }
 
     // Method per route.
-    const wantGet = isEntitlement;
+    const wantGet = isEntitlement || isProgressGet;
     if (wantGet ? request.method !== 'GET' : request.method !== 'POST') {
       return json({ error: 'method_not_allowed' }, 405);
     }
@@ -68,7 +73,9 @@ export default {
 
     if (isProxy) return handleProxy(request, env, path);
     if (isVerify) return handleIapVerify(request, env);
-    return handleIapEntitlement(env, url);
+    if (isEntitlement) return handleIapEntitlement(env, url);
+    if (isProgressSync) return handleProgressSync(request, env);
+    return handleProgressGet(env, url);
   },
 };
 
@@ -184,6 +191,62 @@ async function handleIapEntitlement(env, url) {
   const entitled = row.status === 'active' &&
     (row.expires_date == null || row.expires_date > Date.now());
   return json(entitlementResponse(entitled, row.product_id, row.expires_date, row.environment), 200);
+}
+
+// ── Progress backup (anonymous, keyed by per-install token) ──
+//
+// The server is a dumb per-token blob store: it keeps the last synced snapshot
+// and its client timestamp. Conflict resolution (a progress-preferring merge)
+// lives on the client, which merges the stored snapshot into local state on
+// restore before syncing back. No account/login — the token is the only key.
+
+async function handleProgressSync(request, env) {
+  if (!env.DB) return json({ error: 'progress_unconfigured' }, 500);
+
+  let body;
+  try {
+    body = await request.json();
+  } catch (_) {
+    return json({ error: 'bad_request' }, 400);
+  }
+  const appAccountToken = body && body.appAccountToken;
+  const data = body && body.data;
+  if (!appAccountToken || data == null) {
+    return json({ error: 'bad_request' }, 400);
+  }
+  const updatedAt =
+    typeof body.updatedAt === 'number' && Number.isFinite(body.updatedAt)
+      ? body.updatedAt
+      : Date.now();
+
+  await env.DB.prepare(
+    `INSERT INTO progress (app_account_token, data, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(app_account_token) DO UPDATE SET
+       data = excluded.data,
+       updated_at = excluded.updated_at`,
+  ).bind(appAccountToken, JSON.stringify(data), updatedAt).run();
+
+  return json({ ok: true, updatedAt }, 200);
+}
+
+async function handleProgressGet(env, url) {
+  if (!env.DB) return json({ error: 'progress_unconfigured' }, 500);
+  const token = url.searchParams.get('appAccountToken');
+  if (!token) return json({ error: 'bad_request' }, 400);
+
+  const row = await env.DB.prepare(
+    'SELECT data, updated_at FROM progress WHERE app_account_token = ?',
+  ).bind(token).first();
+
+  if (!row) return json({ data: null, updatedAt: null }, 200);
+  let data;
+  try {
+    data = JSON.parse(row.data);
+  } catch (_) {
+    data = null;
+  }
+  return json({ data, updatedAt: row.updated_at }, 200);
 }
 
 /**

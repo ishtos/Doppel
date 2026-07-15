@@ -106,6 +106,28 @@ Notes / limitations (Phase 1):
   app keeps its previous client-side premium behavior.
 - iOS only for now (Android = Phase 3).
 
+## Anonymous progress backup (no login)
+
+Lets a user's practice progress survive reinstall / device change without an
+account. Reuses the same `DB` (D1) binding and the per-install
+`appAccountToken`. Apply the schema (same file as IAP):
+
+```sh
+wrangler d1 execute doppel-iap --file=schema.sql --remote  # adds the progress table
+```
+
+Endpoints (both require `X-App-Token`):
+- `POST /progress/sync` — `{ appAccountToken, data, updatedAt }` → upserts the
+  latest snapshot for that token. `data` is an opaque JSON object (the app's
+  progress); the server does not interpret it.
+- `GET /progress?appAccountToken=…` — returns `{ data, updatedAt }` (or
+  `{ data: null }` if nothing is stored).
+
+The server is a dumb per-token blob store. Conflict resolution (a
+progress-preferring merge across devices) is done on the client, which merges
+the stored snapshot into local state on restore before syncing back. Without
+the `DB` binding, `/progress*` returns 500 and the app stays fully local.
+
 ## Behavior / safety
 
 - Only `POST /v1/chat/completions` and `POST /v1/audio/transcriptions` are
