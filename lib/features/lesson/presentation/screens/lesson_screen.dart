@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import '../../../../shared/analytics/analytics_events.dart';
 import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/providers/db_providers.dart';
 import '../../../../shared/services/audio_service.dart';
+import '../../../../shared/services/progress_backup_service.dart';
 import '../../../../shared/services/purchase_service.dart';
 import '../../../../shared/services/speech_analysis_service.dart';
 import '../../../../shared/services/tts_service.dart';
@@ -363,6 +365,15 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         'mode': session.recordMode.name,
         'duration_minutes': durationMinutes,
       });
+
+      // Back up the updated progress (fire-and-forget; a failure keeps local).
+      final token = ref.read(settingsProvider).appAccountToken;
+      if (token.isNotEmpty) {
+        unawaited(ref.read(progressBackupServiceProvider).sync(
+              appAccountToken: token,
+              progress: ref.read(progressRepositoryProvider).getProgress(),
+            ));
+      }
 
       if (mounted) {
         setState(() => _isAnalyzing = false);

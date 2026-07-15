@@ -7,6 +7,7 @@ import 'app/theme.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/lesson_seeder.dart';
 import 'shared/services/notification_service.dart';
+import 'shared/services/progress_backup_startup.dart';
 import 'shared/services/purchase_service.dart';
 import 'shared/utils/recording_cleanup.dart';
 
@@ -17,7 +18,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   final lessonsBox = await Hive.openBox<Map>('lessons');
   final feedbacksBox = await Hive.openBox<Map>('feedbacks');
-  await Hive.openBox<Map>('progress');
+  final progressBox = await Hive.openBox<Map>('progress');
 
   // Remove orphaned recording files (abandoned sessions / non-representative
   // chunks) so they don't accumulate. Best-effort; never blocks startup.
@@ -27,6 +28,10 @@ Future<void> main() async {
   // user state (bookmarks / completion). Lets content updates reach existing
   // installs without a reinstall. See syncSeedLessons for details.
   await syncSeedLessons(lessonsBox);
+
+  // Restore backed-up progress (best-effort) before the UI reads it, so a
+  // reinstall / new device shows the user's real progress from the start.
+  await restoreProgressBackup(progressBox: progressBox, feedbackBox: feedbacksBox);
 
   // Initialize notification service
   await NotificationService.instance.initialize();
