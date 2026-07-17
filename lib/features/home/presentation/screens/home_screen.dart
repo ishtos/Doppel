@@ -9,8 +9,24 @@ import '../providers/home_provider.dart';
 import '../../../../shared/analytics/day2_tracker.dart';
 import '../../../../shared/utils/score_utils.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Retention: fire day2_return once per launch (home is the landing screen
+    // for returning users). Registered here — not in build — so it isn't
+    // re-scheduled on every rebuild.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) maybeCaptureDay2Return(ref);
+    });
+  }
 
   String _greeting() {
     final hour = DateTime.now().hour;
@@ -20,18 +36,13 @@ class HomeScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final progress = ref.watch(homeProgressProvider);
     final todayLesson = ref.watch(todayLessonProvider);
     final weeklyStats = ref.watch(weeklyStatsProvider);
     final recentActivity = ref.watch(recentActivityProvider);
     final goalProgress = ref.watch(dailyGoalProgressProvider);
-
-    // Retention: fire day2_return once per launch when the user returns on a
-    // new day (home is the landing screen for returning users).
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => maybeCaptureDay2Return(ref));
 
     return Scaffold(
       appBar: AppBar(

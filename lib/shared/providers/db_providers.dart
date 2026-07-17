@@ -18,6 +18,28 @@ final progressBoxProvider = Provider<Box<Map>>((ref) {
   return Hive.box<Map>('progress');
 });
 
+// Box-change "revision" streams. Hive boxes don't notify Riverpod on their
+// own, so derived read-providers watch these to recompute when the box changes
+// (e.g. after recordPractice / feedback save). The incrementing int makes each
+// change a distinct value so dependents actually rebuild.
+final progressRevisionProvider = StreamProvider<int>((ref) {
+  final box = ref.watch(progressBoxProvider);
+  var n = 0;
+  return box.watch().map((_) => ++n);
+});
+
+final feedbacksRevisionProvider = StreamProvider<int>((ref) {
+  final box = ref.watch(feedbacksBoxProvider);
+  var n = 0;
+  return box.watch().map((_) => ++n);
+});
+
+final lessonsRevisionProvider = StreamProvider<int>((ref) {
+  final box = ref.watch(lessonsBoxProvider);
+  var n = 0;
+  return box.watch().map((_) => ++n);
+});
+
 // Repository providers
 final lessonRepositoryProvider = Provider<LessonRepository>((ref) {
   return LessonRepository(ref.watch(lessonsBoxProvider));

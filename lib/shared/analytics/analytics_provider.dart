@@ -11,13 +11,27 @@ final analyticsBackendProvider = Provider<AnalyticsService>((ref) {
   return const NoopAnalytics();
 });
 
-/// App-wide analytics sink. Wrapped in a consent gate so nothing is captured
-/// unless the user has opted into cloud analysis (`cloudAnalysisConsent`),
-/// matching how the app already gates sending data to the cloud.
+/// App-wide analytics sink. Wrapped in a consent gate keyed on
+/// `productAnalyticsConsent` (opt-out) — a separate flag from
+/// `cloudAnalysisConsent` (audio→OpenAI), since anonymous funnel/retention
+/// analytics is a different privacy question and must not be suppressed just
+/// because the user declined cloud audio analysis.
 final analyticsProvider = Provider<AnalyticsService>((ref) {
   final backend = ref.watch(analyticsBackendProvider);
   return ConsentGatedAnalytics(
     backend,
-    () => ref.read(settingsProvider).cloudAnalysisConsent,
+    () => ref.read(settingsProvider).productAnalyticsConsent,
   );
+});
+
+/// Wires the stable install token as the analytics identity, so events (and
+/// especially retention) survive an iOS reinstall instead of fragmenting into a
+/// fresh anonymous id. Read this once at app start (e.g. in the root widget);
+/// it re-runs when the token resolves and is a no-op until consent + token are
+/// available. `identify` is consent-gated by [analyticsProvider].
+final analyticsIdentityProvider = Provider<void>((ref) {
+  final token = ref.watch(settingsProvider.select((s) => s.appAccountToken));
+  if (token.isNotEmpty) {
+    ref.read(analyticsProvider).identify(token);
+  }
 });

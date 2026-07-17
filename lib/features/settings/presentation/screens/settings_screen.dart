@@ -182,6 +182,20 @@ class SettingsScreen extends ConsumerWidget {
             value: settings.cloudAnalysisConsent,
             onChanged: (v) => notifier.setCloudAnalysisConsent(v),
           ),
+          SwitchListTile(
+            secondary: Icon(
+              settings.productAnalyticsConsent
+                  ? Icons.insights_outlined
+                  : Icons.insights,
+            ),
+            title: const Text('利用状況の匿名分析'),
+            subtitle: const Text(
+              'アプリ改善のため、匿名の利用状況（機能の使用回数など）を送信します。'
+              '音声や個人情報は含みません。オフにできます。',
+            ),
+            value: settings.productAnalyticsConsent,
+            onChanged: (v) => notifier.setProductAnalyticsConsent(v),
+          ),
           const Divider(height: 1, indent: 72),
 
           // Data section
