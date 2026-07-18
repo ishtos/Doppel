@@ -7,17 +7,20 @@ import '../../../settings/presentation/providers/settings_provider.dart';
 
 /// Bookmarked lessons for home screen display. // FIXED: お気に入りレッスンプロバイダー追加
 final bookmarkedLessonsProvider = Provider<List<LessonModel>>((ref) {
+  ref.watch(lessonsRevisionProvider);
   final repo = ref.watch(lessonRepositoryProvider);
   return repo.findAll().where((l) => l.isBookmarked).toList();
 });
 
 /// User progress for home screen display.
 final homeProgressProvider = Provider<UserProgressModel>((ref) {
+  ref.watch(progressRevisionProvider);
   return ref.watch(progressRepositoryProvider).getProgress();
 });
 
 /// Today's recommended lesson.
 final todayLessonProvider = Provider<LessonModel?>((ref) {
+  ref.watch(lessonsRevisionProvider);
   final repo = ref.watch(lessonRepositoryProvider);
   final lessons = repo.findAll();
   if (lessons.isEmpty) return null;
@@ -29,6 +32,7 @@ final todayLessonProvider = Provider<LessonModel?>((ref) {
 
 /// Recent activity (latest feedbacks with lesson info).
 final recentActivityProvider = Provider<List<RecentActivity>>((ref) {
+  ref.watch(feedbacksRevisionProvider);
   final feedbackRepo = ref.watch(feedbackRepositoryProvider);
   final lessonRepo = ref.watch(lessonRepositoryProvider);
   final feedbacks = feedbackRepo.findRecent(limit: 5);
@@ -47,6 +51,7 @@ final recentActivityProvider = Provider<List<RecentActivity>>((ref) {
 /// Aggregated improvement points from recent feedbacks.
 final recentImprovementPointsProvider =
     Provider<List<ImprovementPoint>>((ref) {
+  ref.watch(feedbacksRevisionProvider);
   final feedbackRepo = ref.watch(feedbackRepositoryProvider);
   final lessonRepo = ref.watch(lessonRepositoryProvider);
   final feedbacks = feedbackRepo.findRecent(limit: 10);
@@ -86,6 +91,7 @@ final recentImprovementPointsProvider =
 
 /// Weekly stats for home screen.
 final weeklyStatsProvider = Provider<WeeklyStats>((ref) {
+  ref.watch(feedbacksRevisionProvider);
   final progressRepo = ref.watch(progressRepositoryProvider);
 
   final weekFeedbacks = progressRepo.getScoreHistory(days: 7);
@@ -108,6 +114,7 @@ final weeklyStatsProvider = Provider<WeeklyStats>((ref) {
 
 /// Today's practice count from feedback records.
 final todayPracticeCountProvider = Provider<int>((ref) {
+  ref.watch(feedbacksRevisionProvider);
   final feedbackRepo = ref.watch(feedbackRepositoryProvider);
   final all = feedbackRepo.findAll();
   final now = DateTime.now();

@@ -43,6 +43,19 @@ void main() {
     expect(mergeProgress(a, b), mergeProgress(b, a));
   });
 
+  test('currentStreak follows the more recent snapshot, not max (no phantom streak)', () {
+    // A: a big streak that went stale (last practiced weeks ago).
+    final stale = _p(streak: 30, longest: 30, last: DateTime(2026, 7, 1));
+    // B: a fresh, small streak practiced today.
+    final fresh = _p(streak: 3, longest: 5, last: DateTime(2026, 7, 16));
+    final m = mergeProgress(stale, fresh);
+    expect(m.currentStreak, 3, reason: 'must not resurrect the stale 30-day streak');
+    expect(m.longestStreak, 30, reason: 'all-time peak still preserved');
+    expect(m.lastPracticeDate, DateTime(2026, 7, 16));
+    // Commutative.
+    expect(mergeProgress(fresh, stale).currentStreak, 3);
+  });
+
   test('never downgrades local progress against an empty remote', () {
     final local = _p(streak: 8, longest: 8, minutes: 240, completed: 40, last: DateTime(2026, 7, 13));
     final emptyRemote = _p(); // fresh install: all zeros, old date

@@ -4,6 +4,7 @@ import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'shared/analytics/analytics_provider.dart';
 import 'features/settings/presentation/providers/settings_provider.dart';
 import 'shared/data/lesson_seeder.dart';
 import 'shared/services/notification_service.dart';
@@ -44,6 +45,8 @@ class DoppelApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Wire the analytics identity (stable install token) once at startup.
+    ref.watch(analyticsIdentityProvider);
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(settingsProvider.select((s) => s.themeMode));
     // Keep the purchase controller alive for the whole app so store

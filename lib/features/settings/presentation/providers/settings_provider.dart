@@ -23,6 +23,7 @@ class SettingsState {
     this.quotaDate = '',
     this.quotaLessonId,
     this.cloudAnalysisConsent = false,
+    this.productAnalyticsConsent = true,
     this.appAccountToken = '',
   });
 
@@ -48,6 +49,13 @@ class SettingsState {
   /// local/simulated results only. Toggled explicitly by the user in settings.
   final bool cloudAnalysisConsent;
 
+  /// Opt-out consent for anonymous product analytics (funnel/retention events —
+  /// no audio, no PII, keyed only by the anonymous install token). Separate from
+  /// [cloudAnalysisConsent] (which gates sending audio to OpenAI) because
+  /// anonymous analytics is a different privacy question. Defaults to true
+  /// (opt-out); the user can disable it in settings.
+  final bool productAnalyticsConsent;
+
   /// Stable per-install id (UUID) linking this device to its server-side IAP
   /// entitlement. Generated once and persisted.
   final String appAccountToken;
@@ -67,6 +75,7 @@ class SettingsState {
     String? quotaDate,
     String? quotaLessonId,
     bool? cloudAnalysisConsent,
+    bool? productAnalyticsConsent,
     String? appAccountToken,
   }) {
     return SettingsState(
@@ -82,6 +91,8 @@ class SettingsState {
       quotaDate: quotaDate ?? this.quotaDate,
       quotaLessonId: quotaLessonId ?? this.quotaLessonId,
       cloudAnalysisConsent: cloudAnalysisConsent ?? this.cloudAnalysisConsent,
+      productAnalyticsConsent:
+          productAnalyticsConsent ?? this.productAnalyticsConsent,
       appAccountToken: appAccountToken ?? this.appAccountToken,
     );
   }
@@ -103,6 +114,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   static const _quotaDateKey = 'quota_date';
   static const _quotaLessonIdKey = 'quota_lesson_id';
   static const _cloudConsentKey = 'cloud_analysis_consent';
+  static const _productAnalyticsConsentKey = 'product_analytics_consent';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -118,6 +130,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final quotaDate = prefs.getString(_quotaDateKey) ?? '';
     final quotaLessonId = prefs.getString(_quotaLessonIdKey);
     final cloudConsent = prefs.getBool(_cloudConsentKey) ?? false;
+    final productAnalyticsConsent =
+        prefs.getBool(_productAnalyticsConsentKey) ?? true;
 
     // Set state immediately (including the onboarding flag the router depends
     // on) using whatever token prefs already holds, so a slow Keychain read can
@@ -136,6 +150,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       quotaDate: quotaDate,
       quotaLessonId: quotaLessonId,
       cloudAnalysisConsent: cloudConsent,
+      productAnalyticsConsent: productAnalyticsConsent,
       appAccountToken: prefs.getString(StableId.key) ?? '',
     );
 
@@ -217,6 +232,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(cloudAnalysisConsent: value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_cloudConsentKey, value);
+  }
+
+  /// Set the anonymous product-analytics consent (opt-out; funnel/retention).
+  Future<void> setProductAnalyticsConsent(bool value) async {
+    state = state.copyWith(productAnalyticsConsent: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_productAnalyticsConsentKey, value);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
