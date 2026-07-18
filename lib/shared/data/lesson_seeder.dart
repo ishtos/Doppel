@@ -32,4 +32,11 @@ Future<void> syncSeedLessons(Box<Map> lessonsBox) async {
       await lessonsBox.put(lesson.id, merged.toJson());
     }
   }
+
+  // Remove lessons that are no longer in the bundle (retired content), so a
+  // dropped id doesn't linger in the box and get shown to the user.
+  final seedIds = {for (final l in seedLessons) l.id};
+  for (final key in lessonsBox.keys.toList()) {
+    if (!seedIds.contains(key)) await lessonsBox.delete(key);
+  }
 }

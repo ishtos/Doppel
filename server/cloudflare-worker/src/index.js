@@ -184,6 +184,16 @@ async function handleIapVerify(request, env) {
     return json({ error: 'invalid_receipt' }, 400);
   }
 
+  // One subscription (original_transaction_id) entitles one install: expire any
+  // other token that previously claimed this receipt (blocks receipt sharing).
+  // Uses the idx_entitlements_otid index.
+  if (result.originalTransactionId) {
+    await env.DB.prepare(
+      `UPDATE entitlements SET status = 'expired', updated_at = ?
+       WHERE original_transaction_id = ? AND app_account_token != ?`,
+    ).bind(Date.now(), result.originalTransactionId, appAccountToken).run();
+  }
+
   await upsertEntitlement(env.DB, {
     appAccountToken,
     originalTransactionId: result.originalTransactionId || null,

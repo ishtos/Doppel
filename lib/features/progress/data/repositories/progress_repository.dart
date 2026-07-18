@@ -37,9 +37,11 @@ class ProgressRepository {
   Future<void> recordPractice({required int durationMinutes}) async {
     final current = getProgress();
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final lastDate = current.lastPracticeDate;
-    final lastDay = DateTime(lastDate.year, lastDate.month, lastDate.day);
+    // Bucket the streak by the device's local calendar day. Stored dates are
+    // UTC (see lastPracticeDate below) so the instant is preserved across
+    // timezones/devices; convert to local before bucketing.
+    final today = _localDay(now);
+    final lastDay = _localDay(current.lastPracticeDate);
 
     final daysDiff = today.difference(lastDay).inDays;
 
@@ -62,10 +64,18 @@ class ProgressRepository {
       totalPracticeMinutes:
           current.totalPracticeMinutes + durationMinutes,
       completedLessons: current.completedLessons + 1,
-      lastPracticeDate: now,
+      // Store UTC so JSON round-trips carry the real instant (no wall-clock
+      // ambiguity) across devices/timezones.
+      lastPracticeDate: now.toUtc(),
     );
 
     await saveProgress(updated);
+  }
+
+  // Local calendar day (midnight) used for streak day-bucketing.
+  static DateTime _localDay(DateTime d) {
+    final l = d.toLocal();
+    return DateTime(l.year, l.month, l.day);
   }
 
   /// Get score history from feedback data for chart display.

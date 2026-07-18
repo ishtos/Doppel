@@ -66,6 +66,24 @@ void main() {
     expect(stored.lastPracticedAt, lastPracticed);
   });
 
+  test('removes lessons no longer in the bundle (orphan cleanup)', () async {
+    await box.put('retired-lesson', {
+      'id': 'retired-lesson',
+      'title': 'Old',
+      'category': 'x',
+      'difficulty': 1,
+      'transcriptText': 'gone',
+      'audioAssetPath': 'a',
+      'durationSeconds': 1,
+      'wordCount': 1,
+    });
+
+    await syncSeedLessons(box);
+
+    expect(box.containsKey('retired-lesson'), isFalse);
+    expect(box.length, seedLessons.length);
+  });
+
   test('is idempotent and keeps a user bookmark across a second sync', () async {
     await syncSeedLessons(box);
     final id = seedLessons.first.id;
