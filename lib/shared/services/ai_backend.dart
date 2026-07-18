@@ -1,3 +1,10 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/// App-wide backend config — the single place to override the backend endpoint
+/// / token (e.g. in tests or for a staging environment).
+final aiBackendConfigProvider =
+    Provider<AiBackendConfig>((ref) => AiBackendConfig());
+
 /// Resolves how the app reaches OpenAI-compatible endpoints.
 ///
 /// Two modes, chosen at build time via `--dart-define`:

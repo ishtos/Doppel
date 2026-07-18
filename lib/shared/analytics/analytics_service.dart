@@ -1,7 +1,8 @@
 /// Provider-agnostic analytics seam.
 ///
-/// Call sites depend only on this interface, so the backend (Noop today,
-/// PostHog later) can be swapped in one place without touching instrumentation.
+/// Call sites depend only on this interface, so the backend (Noop today, a real
+/// analytics product later) can be swapped in one place without touching
+/// instrumentation.
 /// All product event names live in `analytics_events.dart`.
 abstract class AnalyticsService {
   /// Record a product event with optional properties.
@@ -15,8 +16,8 @@ abstract class AnalyticsService {
   Future<void> flush();
 }
 
-/// Discards everything. The default backend until PostHog is wired, and the
-/// backend used whenever the user has not opted into cloud analysis.
+/// Discards everything. The default backend until a real one is wired, and the
+/// backend used whenever the user has not opted into product analytics.
 class NoopAnalytics implements AnalyticsService {
   const NoopAnalytics();
 

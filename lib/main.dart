@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
@@ -30,9 +32,11 @@ Future<void> main() async {
   // installs without a reinstall. See syncSeedLessons for details.
   await syncSeedLessons(lessonsBox);
 
-  // Restore backed-up progress (best-effort) before the UI reads it, so a
-  // reinstall / new device shows the user's real progress from the start.
-  await restoreProgressBackup(progressBox: progressBox, feedbackBox: feedbacksBox);
+  // Restore backed-up progress in the background — reactive providers surface it
+  // when it lands, so first render never blocks on the network.
+  unawaited(
+    restoreProgressBackup(progressBox: progressBox, feedbackBox: feedbacksBox),
+  );
 
   // Initialize notification service
   await NotificationService.instance.initialize();

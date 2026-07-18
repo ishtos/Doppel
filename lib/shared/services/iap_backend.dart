@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'ai_backend.dart';
 
 final iapBackendClientProvider = Provider<IapBackendClient>((ref) {
-  return IapBackendClient(AiBackendConfig());
+  return IapBackendClient(ref.watch(aiBackendConfigProvider));
 });
 
 /// Server's answer about a device's premium entitlement.
