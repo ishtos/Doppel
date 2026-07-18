@@ -60,10 +60,13 @@ class IapBackendClient {
     final base = _config.iapEntitlementUrl;
     if (base == null) return null;
     try {
-      final uri = Uri.parse(base).replace(
-        queryParameters: {'appAccountToken': appAccountToken},
+      final resp = await _client.get(
+        Uri.parse(base),
+        headers: {
+          ..._config.authHeaders(),
+          'X-App-Account-Token': appAccountToken,
+        },
       );
-      final resp = await _client.get(uri, headers: _config.authHeaders());
       if (resp.statusCode != 200) return null;
       return _parse(resp.body);
     } catch (_) {

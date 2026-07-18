@@ -90,8 +90,9 @@ Endpoints (both require `X-App-Token`):
 - `POST /iap/verify` — `{ appAccountToken, receipt }` → validates via Apple
   `verifyReceipt` (production, falling back to sandbox on 21007), stores the
   entitlement in D1, returns `{ entitled, expiresDate, ... }`.
-- `GET /iap/entitlement?appAccountToken=…` — returns the stored entitlement
-  (the app syncs this at launch).
+- `GET /iap/entitlement` — the app sends the token in an `X-App-Account-Token`
+  header (never a query string), returns the stored entitlement (synced at
+  launch).
 
 The app generates a stable `appAccountToken` per install, passes it as the
 StoreKit `applicationUserName`, verifies each purchase against `/iap/verify`,
@@ -118,15 +119,18 @@ wrangler d1 execute doppel-iap --file=schema.sql --remote  # adds the progress t
 
 Endpoints (both require `X-App-Token`):
 - `POST /progress/sync` — `{ appAccountToken, data, updatedAt }` → upserts the
-  latest snapshot for that token. `data` is an opaque JSON object (the app's
-  progress); the server does not interpret it.
-- `GET /progress?appAccountToken=…` — returns `{ data, updatedAt }` (or
-  `{ data: null }` if nothing is stored).
+  latest snapshot for that token. The body is capped (64 KB) and `data` is
+  shape-validated against the known progress fields. The write only applies
+  when `updatedAt` is newer than the stored row, so an out-of-order / concurrent
+  packet can't roll progress back.
+- `GET /progress` — token sent as an `X-App-Account-Token` header; returns
+  `{ data, updatedAt }` (or `{ data: null }` if nothing is stored).
 
-The server is a dumb per-token blob store. Conflict resolution (a
-progress-preferring merge across devices) is done on the client, which merges
-the stored snapshot into local state on restore before syncing back. Without
-the `DB` binding, `/progress*` returns 500 and the app stays fully local.
+The server keeps only the latest per-token snapshot; the progress-preferring
+merge across devices is done on the client, which merges the stored snapshot
+into local state on restore and syncs the merged result back so the server
+converges to the max. Without the `DB` binding, `/progress*` returns 500 and the
+app stays fully local. Run `node --test` for the worker unit tests.
 
 ## Behavior / safety
 

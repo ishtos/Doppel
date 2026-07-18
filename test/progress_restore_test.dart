@@ -63,6 +63,33 @@ void main() {
     expect(merged.lastPracticeDate, DateTime(2026, 7, 14));
   });
 
+  test('pushes the merged max back to the server when local exceeds remote', () async {
+    final repo =
+        ProgressRepository(progressBox: progressBox, feedbackBox: feedbackBox);
+    await repo.saveProgress(u(9, 40, DateTime(2026, 7, 16))); // local ahead
+
+    final remote = u(2, 3, DateTime(2026, 7, 10)); // server behind
+    Map<String, dynamic>? pushed;
+    final client = MockClient((req) async {
+      if (req.method == 'POST') {
+        pushed = jsonDecode(req.body) as Map<String, dynamic>;
+        return http.Response('{"ok":true}', 200);
+      }
+      return http.Response(
+          jsonEncode({'data': remote.toJson(), 'updatedAt': 1}), 200);
+    });
+    final service = ProgressBackupService(proxy, httpClient: client);
+
+    await restoreProgressBackup(
+        progressBox: progressBox, feedbackBox: feedbackBox, service: service);
+
+    expect(repo.getProgress().completedLessons, 40, reason: 'local kept');
+    // The push-back is fire-and-forget; let it run.
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(pushed, isNotNull, reason: 'server should be converged to the max');
+    expect((pushed!['data'] as Map)['completedLessons'], 40);
+  });
+
   test('keeps local progress when the remote is empty', () async {
     final repo =
         ProgressRepository(progressBox: progressBox, feedbackBox: feedbackBox);

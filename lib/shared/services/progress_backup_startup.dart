@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,6 +35,11 @@ Future<void> restoreProgressBackup({
     final local = repo.getProgress();
     final merged = mergeProgress(local, snapshot.progress);
     if (merged != local) await repo.saveProgress(merged);
+    // Converge the server to the merged max (this device may have had more than
+    // the server) so the next device / restore sees the true maximum.
+    if (merged != snapshot.progress) {
+      unawaited(backup.sync(appAccountToken: token, progress: merged));
+    }
   } catch (_) {
     // A restore failure must never block or crash startup.
   }

@@ -39,9 +39,13 @@ class ProgressBackupService {
     final base = _config.progressGetUrl;
     if (base == null) return null;
     try {
-      final uri = Uri.parse(base)
-          .replace(queryParameters: {'appAccountToken': appAccountToken});
-      final resp = await _client.get(uri, headers: _config.authHeaders());
+      final resp = await _client.get(
+        Uri.parse(base),
+        headers: {
+          ..._config.authHeaders(),
+          'X-App-Account-Token': appAccountToken,
+        },
+      );
       if (resp.statusCode != 200) return null;
       final body = jsonDecode(resp.body) as Map<String, dynamic>;
       final data = body['data'];
@@ -74,8 +78,9 @@ class ProgressBackupService {
         body: jsonEncode({
           'appAccountToken': appAccountToken,
           'data': progress.toJson(),
-          'updatedAt':
-              (updatedAt ?? progress.lastPracticeDate).millisecondsSinceEpoch,
+          // Real write time (monotonic-ish) — the server rejects a stale write
+          // whose updatedAt is older than the stored one.
+          'updatedAt': (updatedAt ?? DateTime.now()).millisecondsSinceEpoch,
         }),
       );
       return resp.statusCode == 200;
