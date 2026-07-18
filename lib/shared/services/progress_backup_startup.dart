@@ -15,6 +15,11 @@ import 'stable_id.dart';
 /// (progress-preferring, so nothing is ever downgraded). Runs before the UI
 /// reads progress so a reinstall shows the restored numbers immediately. Never
 /// blocks startup for long ([timeout]) and never throws.
+///
+/// Scope (v1): only the aggregate `UserProgress` counters (streak, minutes,
+/// completed count) are backed up — per-lesson completion/bookmark and score
+/// history are not, so after a reinstall the header numbers restore but the
+/// lesson list and charts start empty.
 Future<void> restoreProgressBackup({
   required Box<Map> progressBox,
   required Box<Map> feedbackBox,
