@@ -79,6 +79,22 @@ void main() {
     });
   });
 
+  group('delete', () {
+    test('DELETEs with the token header and returns true on 200', () async {
+      String? method;
+      String? token;
+      final client = MockClient((req) async {
+        method = req.method;
+        token = req.headers['X-App-Account-Token'];
+        return http.Response('{"ok":true}', 200);
+      });
+      final svc = ProgressBackupService(proxy, httpClient: client);
+      expect(await svc.delete(appAccountToken: 'tok'), isTrue);
+      expect(method, 'DELETE');
+      expect(token, 'tok');
+    });
+  });
+
   group('direct mode (no proxy configured)', () {
     test('is unavailable and makes no network call', () async {
       var called = false;

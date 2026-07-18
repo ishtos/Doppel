@@ -367,10 +367,11 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
       });
 
       // Back up the updated progress (fire-and-forget; a failure keeps local).
-      final token = ref.read(settingsProvider).appAccountToken;
-      if (token.isNotEmpty) {
+      final settings = ref.read(settingsProvider);
+      if (settings.appAccountToken.isNotEmpty &&
+          settings.progressBackupConsent) {
         unawaited(ref.read(progressBackupServiceProvider).sync(
-              appAccountToken: token,
+              appAccountToken: settings.appAccountToken,
               progress: ref.read(progressRepositoryProvider).getProgress(),
             ));
       }

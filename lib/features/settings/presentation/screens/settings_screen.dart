@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 
+import '../../../../shared/services/progress_backup_service.dart';
 import '../../../../shared/services/purchase_service.dart';
 import '../providers/settings_provider.dart';
 
@@ -196,6 +197,20 @@ class SettingsScreen extends ConsumerWidget {
             value: settings.productAnalyticsConsent,
             onChanged: (v) => notifier.setProductAnalyticsConsent(v),
           ),
+          SwitchListTile(
+            secondary: Icon(
+              settings.progressBackupConsent
+                  ? Icons.cloud_sync_outlined
+                  : Icons.cloud_off_outlined,
+            ),
+            title: const Text('進捗のクラウドバックアップ'),
+            subtitle: const Text(
+              '再インストールや機種変更後も進捗（ストリーク等）を復元できるよう、'
+              '匿名でバックアップします。個人情報は含みません。オフにできます。',
+            ),
+            value: settings.progressBackupConsent,
+            onChanged: (v) => notifier.setProgressBackupConsent(v),
+          ),
           const Divider(height: 1, indent: 72),
 
           // Data section
@@ -208,6 +223,27 @@ class SettingsScreen extends ConsumerWidget {
             ),
             subtitle: const Text('フィードバック・進捗データを全て削除します'),
             onTap: () => _confirmReset(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.cloud_off_outlined),
+            title: const Text('クラウドバックアップを削除'),
+            subtitle: const Text('サーバー上の進捗バックアップを削除します'),
+            onTap: () async {
+              final token = settings.appAccountToken;
+              final ok = token.isEmpty
+                  ? false
+                  : await ref
+                      .read(progressBackupServiceProvider)
+                      .delete(appAccountToken: token);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content:
+                        Text(ok ? 'バックアップを削除しました' : '削除できませんでした'),
+                  ),
+                );
+              }
+            },
           ),
           const Divider(height: 1, indent: 72),
 

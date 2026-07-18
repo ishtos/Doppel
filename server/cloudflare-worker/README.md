@@ -125,12 +125,21 @@ Endpoints (both require `X-App-Token`):
   packet can't roll progress back.
 - `GET /progress` — token sent as an `X-App-Account-Token` header; returns
   `{ data, updatedAt }` (or `{ data: null }` if nothing is stored).
+- `DELETE /progress` — token sent as an `X-App-Account-Token` header; erases the
+  stored snapshot (user reset / GDPR erasure — surfaced in the app's settings).
 
 The server keeps only the latest per-token snapshot; the progress-preferring
 merge across devices is done on the client, which merges the stored snapshot
 into local state on restore and syncs the merged result back so the server
 converges to the max. Without the `DB` binding, `/progress*` returns 500 and the
 app stays fully local. Run `node --test` for the worker unit tests.
+
+Consent & retention: backup is opt-out in the app (a settings toggle, default
+on) and the data is anonymous (no PII, no audio) keyed by the per-install token.
+The app discloses it and offers a "delete backup" action (`DELETE /progress`).
+Rows have no TTL; prune inactive entries periodically (e.g. a scheduled
+`DELETE FROM progress WHERE updated_at < <cutoff>`), and never blind-delete rows
+that are still in active use.
 
 ## Behavior / safety
 
