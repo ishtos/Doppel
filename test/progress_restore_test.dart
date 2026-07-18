@@ -107,6 +107,29 @@ void main() {
     expect(after.currentStreak, 5);
   });
 
+  test('skips restore entirely when the user has opted out of backup', () async {
+    SharedPreferences.setMockInitialValues({
+      'app_account_token': 'tok',
+      'progress_backup_consent': false,
+    });
+    final repo =
+        ProgressRepository(progressBox: progressBox, feedbackBox: feedbackBox);
+    await repo.saveProgress(u(5, 20, DateTime(2026, 7, 12)));
+
+    var called = false;
+    final client = MockClient((_) async {
+      called = true;
+      return http.Response('{}', 200);
+    });
+    final service = ProgressBackupService(proxy, httpClient: client);
+
+    await restoreProgressBackup(
+        progressBox: progressBox, feedbackBox: feedbackBox, service: service);
+
+    expect(called, isFalse, reason: 'no network call when opted out');
+    expect(repo.getProgress().completedLessons, 20);
+  });
+
   test('is a no-op when the backup service is unavailable (direct mode)',
       () async {
     final repo =

@@ -25,6 +25,7 @@ Future<void> restoreProgressBackup({
     final backup = service ?? ProgressBackupService(AiBackendConfig());
     if (!backup.isAvailable) return; // no proxy configured → stay fully local
     final prefs = await SharedPreferences.getInstance();
+    if (!(prefs.getBool(kProgressBackupConsentKey) ?? true)) return; // opted out
     final token = await StableId().resolve(prefs);
     final snapshot =
         await backup.fetch(appAccountToken: token).timeout(timeout);

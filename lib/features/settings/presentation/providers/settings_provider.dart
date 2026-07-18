@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../shared/services/notification_service.dart';
+import '../../../../shared/services/progress_backup_service.dart'
+    show kProgressBackupConsentKey;
 import '../../../../shared/services/stable_id.dart';
 
 final settingsProvider =
@@ -24,6 +26,7 @@ class SettingsState {
     this.quotaLessonId,
     this.cloudAnalysisConsent = false,
     this.productAnalyticsConsent = true,
+    this.progressBackupConsent = true,
     this.appAccountToken = '',
   });
 
@@ -56,6 +59,11 @@ class SettingsState {
   /// (opt-out); the user can disable it in settings.
   final bool productAnalyticsConsent;
 
+  /// Opt-out consent for anonymous cloud backup of practice progress (so it
+  /// survives reinstall / device change). Defaults to true; the user can
+  /// disable it and erase the server copy in settings.
+  final bool progressBackupConsent;
+
   /// Stable per-install id (UUID) linking this device to its server-side IAP
   /// entitlement. Generated once and persisted.
   final String appAccountToken;
@@ -76,6 +84,7 @@ class SettingsState {
     String? quotaLessonId,
     bool? cloudAnalysisConsent,
     bool? productAnalyticsConsent,
+    bool? progressBackupConsent,
     String? appAccountToken,
   }) {
     return SettingsState(
@@ -93,6 +102,8 @@ class SettingsState {
       cloudAnalysisConsent: cloudAnalysisConsent ?? this.cloudAnalysisConsent,
       productAnalyticsConsent:
           productAnalyticsConsent ?? this.productAnalyticsConsent,
+      progressBackupConsent:
+          progressBackupConsent ?? this.progressBackupConsent,
       appAccountToken: appAccountToken ?? this.appAccountToken,
     );
   }
@@ -132,6 +143,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final cloudConsent = prefs.getBool(_cloudConsentKey) ?? false;
     final productAnalyticsConsent =
         prefs.getBool(_productAnalyticsConsentKey) ?? true;
+    final progressBackupConsent =
+        prefs.getBool(kProgressBackupConsentKey) ?? true;
 
     // Set state immediately (including the onboarding flag the router depends
     // on) using whatever token prefs already holds, so a slow Keychain read can
@@ -151,6 +164,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       quotaLessonId: quotaLessonId,
       cloudAnalysisConsent: cloudConsent,
       productAnalyticsConsent: productAnalyticsConsent,
+      progressBackupConsent: progressBackupConsent,
       appAccountToken: prefs.getString(StableId.key) ?? '',
     );
 
@@ -239,6 +253,13 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(productAnalyticsConsent: value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_productAnalyticsConsentKey, value);
+  }
+
+  /// Set the progress-backup consent (opt-out; cloud backup of progress).
+  Future<void> setProgressBackupConsent(bool value) async {
+    state = state.copyWith(progressBackupConsent: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(kProgressBackupConsentKey, value);
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

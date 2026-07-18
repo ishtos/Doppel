@@ -8,6 +8,7 @@
  *   GET  /iap/entitlement            → read stored entitlement (X-App-Account-Token header)
  *   POST /progress/sync              → back up anonymous progress (body: appAccountToken, data, updatedAt)
  *   GET  /progress                   → read backed-up progress (X-App-Account-Token header)
+ *   DELETE /progress                 → erase backed-up progress (X-App-Account-Token header)
  *
  * Secrets (set with `wrangler secret put`, never committed):
  *   OPENAI_API_KEY       – the real OpenAI key (required for the proxy)
@@ -54,16 +55,19 @@ export default {
     const isVerify = path === '/iap/verify';
     const isEntitlement = path === '/iap/entitlement';
     const isProgressSync = path === '/progress/sync';
-    const isProgressGet = path === '/progress';
-    if (!isProxy && !isVerify && !isEntitlement && !isProgressSync && !isProgressGet) {
+    const isProgress = path === '/progress'; // GET (read) or DELETE (erase)
+    if (!isProxy && !isVerify && !isEntitlement && !isProgressSync && !isProgress) {
       return json({ error: 'not_found' }, 404);
     }
 
     // Method per route.
-    const wantGet = isEntitlement || isProgressGet;
-    if (wantGet ? request.method !== 'GET' : request.method !== 'POST') {
-      return json({ error: 'method_not_allowed' }, 405);
-    }
+    const method = request.method;
+    const methodOk = isEntitlement
+        ? method === 'GET'
+        : isProgress
+            ? method === 'GET' || method === 'DELETE'
+            : method === 'POST'; // proxy, verify, progress/sync
+    if (!methodOk) return json({ error: 'method_not_allowed' }, 405);
 
     // Shared token gate so nothing here is an open relay.
     if (env.APP_TOKEN && request.headers.get('X-App-Token') !== env.APP_TOKEN) {
@@ -80,6 +84,7 @@ export default {
       if (isVerify) return await handleIapVerify(request, env);
       if (isEntitlement) return await handleIapEntitlement(request, env);
       if (isProgressSync) return await handleProgressSync(request, env);
+      if (method === 'DELETE') return await handleProgressDelete(request, env);
       return await handleProgressGet(request, env);
     } catch (_) {
       // Unexpected failure (e.g. a D1 write error). Return JSON with a retriable
@@ -269,6 +274,17 @@ async function handleProgressGet(request, env) {
     data = null;
   }
   return json({ data, updatedAt: row.updated_at }, 200);
+}
+
+// Erase a user's backed-up progress (GDPR "right to erasure" / user reset).
+async function handleProgressDelete(request, env) {
+  if (!env.DB) return json({ error: 'progress_unconfigured' }, 500);
+  const token = accountToken(request);
+  if (!token) return json({ error: 'bad_request' }, 400);
+  await env.DB.prepare('DELETE FROM progress WHERE app_account_token = ?')
+      .bind(token)
+      .run();
+  return json({ ok: true }, 200);
 }
 
 /**

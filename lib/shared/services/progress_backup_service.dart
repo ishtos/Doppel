@@ -10,6 +10,10 @@ final progressBackupServiceProvider = Provider<ProgressBackupService>((ref) {
   return ProgressBackupService(AiBackendConfig());
 });
 
+/// SharedPreferences key for the progress-backup opt-out consent (default on).
+/// Backup restore/sync are skipped when this is false.
+const kProgressBackupConsentKey = 'progress_backup_consent';
+
 /// A restored backup snapshot: the stored progress and its server timestamp.
 class ProgressSnapshot {
   const ProgressSnapshot({required this.progress, this.updatedAt});
@@ -82,6 +86,25 @@ class ProgressBackupService {
           // whose updatedAt is older than the stored one.
           'updatedAt': (updatedAt ?? DateTime.now()).millisecondsSinceEpoch,
         }),
+      );
+      return resp.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Erase the backed-up snapshot for [appAccountToken] (user reset / GDPR
+  /// erasure). Returns true on success; best-effort otherwise.
+  Future<bool> delete({required String appAccountToken}) async {
+    final url = _config.progressGetUrl;
+    if (url == null) return false;
+    try {
+      final resp = await _client.delete(
+        Uri.parse(url),
+        headers: {
+          ..._config.authHeaders(),
+          'X-App-Account-Token': appAccountToken,
+        },
       );
       return resp.statusCode == 200;
     } catch (_) {
