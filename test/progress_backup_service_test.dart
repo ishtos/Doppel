@@ -54,7 +54,7 @@ void main() {
   group('fetch', () {
     test('parses a stored snapshot and its timestamp', () async {
       final client = MockClient((req) async {
-        expect(req.url.queryParameters['appAccountToken'], 'tok');
+        expect(req.headers['X-App-Account-Token'], 'tok');
         return http.Response(
           jsonEncode({'data': sample().toJson(), 'updatedAt': 1700000000000}),
           200,

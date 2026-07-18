@@ -37,7 +37,7 @@ void main() {
     test('entitlement GETs with appAccountToken and parses not-entitled',
         () async {
       final client = MockClient((req) async {
-        expect(req.url.queryParameters['appAccountToken'], 'tok');
+        expect(req.headers['X-App-Account-Token'], 'tok');
         return http.Response('{"entitled":false}', 200,
             headers: {'content-type': 'application/json'});
       });

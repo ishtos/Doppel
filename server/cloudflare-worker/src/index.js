@@ -5,9 +5,9 @@
  *   POST /v1/chat/completions        → OpenAI proxy (key injected server-side)
  *   POST /v1/audio/transcriptions    → OpenAI proxy (Whisper)
  *   POST /iap/verify                 → validate an App Store receipt, store entitlement
- *   GET  /iap/entitlement            → read stored entitlement (?appAccountToken=)
+ *   GET  /iap/entitlement            → read stored entitlement (X-App-Account-Token header)
  *   POST /progress/sync              → back up anonymous progress (body: appAccountToken, data, updatedAt)
- *   GET  /progress                   → read backed-up progress (?appAccountToken=)
+ *   GET  /progress                   → read backed-up progress (X-App-Account-Token header)
  *
  * Secrets (set with `wrangler secret put`, never committed):
  *   OPENAI_API_KEY       – the real OpenAI key (required for the proxy)
@@ -42,6 +42,9 @@ const MAX_BODY_BYTES = 25 * 1024 * 1024;
 const PER_IP_PER_MINUTE = 60;
 const DAILY_MAX = 5000;
 
+// Progress snapshots are tiny; cap the body so the blob store can't be abused.
+const MAX_PROGRESS_BYTES = 64 * 1024;
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -67,40 +70,50 @@ export default {
       return json({ error: 'unauthorized' }, 401);
     }
 
-    // Shared rate limiting + daily cost cap.
-    const limited = await enforceLimits(request, env);
+    // Per-IP rate limiting for all routes; the daily *cost* cap only bounds the
+    // OpenAI proxy, so backup/entitlement traffic can't 429 the scoring path.
+    const limited = await enforceLimits(request, env, { countCost: isProxy });
     if (limited) return limited;
 
-    if (isProxy) return handleProxy(request, env, path);
-    if (isVerify) return handleIapVerify(request, env);
-    if (isEntitlement) return handleIapEntitlement(env, url);
-    if (isProgressSync) return handleProgressSync(request, env);
-    return handleProgressGet(env, url);
+    try {
+      if (isProxy) return await handleProxy(request, env, path);
+      if (isVerify) return await handleIapVerify(request, env);
+      if (isEntitlement) return await handleIapEntitlement(request, env);
+      if (isProgressSync) return await handleProgressSync(request, env);
+      return await handleProgressGet(request, env);
+    } catch (_) {
+      // Unexpected failure (e.g. a D1 write error). Return JSON with a retriable
+      // status so the client re-tries safely (all writes here are idempotent).
+      return json({ error: 'internal_error' }, 503);
+    }
   },
 };
 
 // ── Rate limiting (KV, optional) ──
 
-async function enforceLimits(request, env) {
+async function enforceLimits(request, env, { countCost = true } = {}) {
   if (!env.RL) return null;
   const minute = new Date().toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
+  // Per-IP request rate applies to every route.
   const ipKey = `ip:${ip}:${minute}`;
   const ipCount = parseInt((await env.RL.get(ipKey)) || '0', 10);
   if (ipCount >= PER_IP_PER_MINUTE) {
     return json({ error: 'rate_limited' }, 429, { 'Retry-After': '60' });
   }
-
-  const capKey = `cap:${minute.slice(0, 10)}`; // cap:YYYY-MM-DD
-  const dayCount = parseInt((await env.RL.get(capKey)) || '0', 10);
-  if (dayCount >= DAILY_MAX) {
-    return json({ error: 'daily_cap' }, 429, { 'Retry-After': '3600' });
-  }
-
-  // Best-effort increments; short TTLs let the keys self-expire.
   await env.RL.put(ipKey, String(ipCount + 1), { expirationTtl: 120 });
-  await env.RL.put(capKey, String(dayCount + 1), { expirationTtl: 172800 });
+
+  // Global daily cost cap bounds OpenAI spend — enforce it only for the proxy
+  // routes that actually cost money, so backup/entitlement traffic is exempt.
+  if (countCost) {
+    const capKey = `cap:${minute.slice(0, 10)}`; // cap:YYYY-MM-DD
+    const dayCount = parseInt((await env.RL.get(capKey)) || '0', 10);
+    if (dayCount >= DAILY_MAX) {
+      return json({ error: 'daily_cap' }, 429, { 'Retry-After': '3600' });
+    }
+    await env.RL.put(capKey, String(dayCount + 1), { expirationTtl: 172800 });
+  }
   return null;
 }
 
@@ -178,9 +191,9 @@ async function handleIapVerify(request, env) {
   return json(entitlementResponse(result.entitled, result.productId, result.expiresDateMs, result.environment), 200);
 }
 
-async function handleIapEntitlement(env, url) {
+async function handleIapEntitlement(request, env) {
   if (!env.DB) return json({ error: 'iap_unconfigured' }, 500);
-  const token = url.searchParams.get('appAccountToken');
+  const token = accountToken(request);
   if (!token) return json({ error: 'bad_request' }, 400);
 
   const row = await env.DB.prepare(
@@ -203,15 +216,20 @@ async function handleIapEntitlement(env, url) {
 async function handleProgressSync(request, env) {
   if (!env.DB) return json({ error: 'progress_unconfigured' }, 500);
 
+  // Size-check before parsing (read as text so we can bound it).
+  const raw = await request.text();
+  if (raw.length > MAX_PROGRESS_BYTES) {
+    return json({ error: 'payload_too_large' }, 413);
+  }
   let body;
   try {
-    body = await request.json();
+    body = JSON.parse(raw);
   } catch (_) {
     return json({ error: 'bad_request' }, 400);
   }
   const appAccountToken = body && body.appAccountToken;
   const data = body && body.data;
-  if (!appAccountToken || data == null) {
+  if (!appAccountToken || !validateProgress(data)) {
     return json({ error: 'bad_request' }, 400);
   }
   const updatedAt =
@@ -219,20 +237,24 @@ async function handleProgressSync(request, env) {
       ? body.updatedAt
       : Date.now();
 
+  // Reject stale writes: only overwrite when this snapshot is newer than the
+  // stored one, so an out-of-order or concurrent packet can't roll progress
+  // back. First insert (no conflict) always applies.
   await env.DB.prepare(
     `INSERT INTO progress (app_account_token, data, updated_at)
      VALUES (?, ?, ?)
      ON CONFLICT(app_account_token) DO UPDATE SET
        data = excluded.data,
-       updated_at = excluded.updated_at`,
+       updated_at = excluded.updated_at
+     WHERE excluded.updated_at > progress.updated_at`,
   ).bind(appAccountToken, JSON.stringify(data), updatedAt).run();
 
   return json({ ok: true, updatedAt }, 200);
 }
 
-async function handleProgressGet(env, url) {
+async function handleProgressGet(request, env) {
   if (!env.DB) return json({ error: 'progress_unconfigured' }, 500);
-  const token = url.searchParams.get('appAccountToken');
+  const token = accountToken(request);
   if (!token) return json({ error: 'bad_request' }, 400);
 
   const row = await env.DB.prepare(
@@ -330,6 +352,39 @@ async function upsertEntitlement(db, e) {
 }
 
 // ── Helpers ──
+
+// The per-install token is a credential, not a public id — read it from a
+// header, never a URL query string (which lands in access logs).
+function accountToken(request) {
+  return request.headers.get('X-App-Account-Token');
+}
+
+// Whitelist-validate a progress snapshot to the known UserProgress shape, so the
+// blob store can't be used to persist arbitrary or oversized data. Exported for
+// unit testing.
+export function validateProgress(data) {
+  if (data == null || typeof data !== 'object' || Array.isArray(data)) {
+    return false;
+  }
+  const counters = [
+    'currentStreak',
+    'longestStreak',
+    'totalPracticeMinutes',
+    'completedLessons',
+  ];
+  for (const k of counters) {
+    const v = data[k];
+    if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > 1e9) {
+      return false;
+    }
+  }
+  if (typeof data.userId !== 'string' || data.userId.length > 128) return false;
+  if (typeof data.lastPracticeDate !== 'string' ||
+      data.lastPracticeDate.length > 40) {
+    return false;
+  }
+  return true;
+}
 
 function entitlementResponse(entitled, productId, expiresDateMs, environment) {
   return {
