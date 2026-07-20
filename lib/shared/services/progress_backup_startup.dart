@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive_ce_flutter/hive_ce_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,7 +47,9 @@ Future<void> restoreProgressBackup({
     if (merged != snapshot.progress) {
       unawaited(backup.sync(appAccountToken: token, progress: merged));
     }
-  } catch (_) {
-    // A restore failure must never block or crash startup.
+  } catch (e) {
+    // A restore failure must never block or crash startup — but surface it in
+    // debug so a broken backend isn't invisible.
+    if (kDebugMode) debugPrint('progress restore failed: $e');
   }
 }

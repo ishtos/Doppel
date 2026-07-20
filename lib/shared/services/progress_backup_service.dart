@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
@@ -7,7 +8,7 @@ import '../../features/progress/data/models/user_progress_model.dart';
 import 'ai_backend.dart';
 
 final progressBackupServiceProvider = Provider<ProgressBackupService>((ref) {
-  return ProgressBackupService(AiBackendConfig());
+  return ProgressBackupService(ref.watch(aiBackendConfigProvider));
 });
 
 /// SharedPreferences key for the progress-backup opt-out consent (default on).
@@ -61,7 +62,8 @@ class ProgressBackupService {
         progress: progress,
         updatedAt: ms is int ? DateTime.fromMillisecondsSinceEpoch(ms) : null,
       );
-    } catch (_) {
+    } catch (e) {
+      if (kDebugMode) debugPrint('progress fetch failed: $e');
       return null;
     }
   }
@@ -88,7 +90,8 @@ class ProgressBackupService {
         }),
       );
       return resp.statusCode == 200;
-    } catch (_) {
+    } catch (e) {
+      if (kDebugMode) debugPrint('progress sync failed: $e');
       return false;
     }
   }

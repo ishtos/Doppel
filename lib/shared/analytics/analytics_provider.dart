@@ -3,11 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import 'analytics_service.dart';
 
-/// The concrete backend. [NoopAnalytics] today — no data leaves the device.
-/// When a PostHog project key is available this is the single line to change
-/// (return a PostHogAnalytics), and every call site keeps working unchanged.
+/// The concrete analytics backend. [NoopAnalytics] today — no data leaves the
+/// device. Wiring a real product-analytics backend is a single change here
+/// (return its [AnalyticsService] implementation); every call site keeps
+/// working unchanged.
 final analyticsBackendProvider = Provider<AnalyticsService>((ref) {
-  // TODO(analytics): return PostHogAnalytics(apiKey: ...) once configured.
+  // TODO(analytics): return a real AnalyticsService backend once one is chosen.
   return const NoopAnalytics();
 });
 
