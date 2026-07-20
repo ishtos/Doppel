@@ -784,13 +784,13 @@ const seedLessons = [
     transcriptText:
         'The Great Wall of China is one of the most famous structures in the world. '
         'It was built long ago to protect the country from invaders in the north. '
-        'The wall is very long and stretches over mountains and valleys for thousands of miles. '
+        'The wall stretches over mountains and valleys for thousands of miles. '
         'Workers used stone, brick, and earth to build the strong walls and tall towers. '
         'Guards once stood on the towers to watch for enemies. '
         'Today, millions of people visit the wall each year.',
     audioAssetPath: 'assets/audio/lesson_046.mp3',
-    durationSeconds: 46,
-    wordCount: 77,
+    durationSeconds: 44,
+    wordCount: 73,
   ),
   LessonModel(
     id: 'lesson-047',
@@ -1497,10 +1497,10 @@ const seedLessons = [
     title: 'The Team Spirit Of Rugby',
     category: 'スポーツ',
     difficulty: 3,
-    transcriptText: 'Rugby is often described as a game played by rough people but governed by remarkable discipline and respect. What fascinates me most is the balance between raw physical power and intricate teamwork. Fifteen players on each side must coordinate their movements, communicating constantly to break through the opposing defense while protecting their own line. Unlike many sports, rugby demands that every player contribute to both attack and defense, blurring the traditional boundaries between offensive and defensive roles. The scrum, in particular, is a fascinating display of collective strength, where eight forwards bind together and drive forward as a single unit. Beyond the physical intensity, rugby cultivates a culture of humility and camaraderie. Opponents who collide fiercely on the field will often share meals and stories afterward, a tradition that reflects the sport\'s deep-rooted values of sportsmanship and mutual respect that endure long after the final whistle.',
+    transcriptText: 'Rugby is often described as a rough sport played with remarkable discipline and respect. What fascinates me most is the balance between raw physical power and intricate teamwork. Fifteen players on each side must coordinate their movements, communicating constantly to break through the opposing defense while protecting their own line. Unlike many sports, rugby demands that every player contribute to both attack and defense, blurring the traditional boundaries between offensive and defensive roles. The scrum, in particular, is a fascinating display of collective strength, where eight forwards bind together and drive forward as a single unit. Beyond the physical intensity, rugby cultivates a culture of humility and camaraderie. Opponents who collide fiercely on the field will often share meals and stories afterward, a tradition that reflects the sport\'s deep-rooted values of sportsmanship and mutual respect that endure long after the final whistle.',
     audioAssetPath: 'assets/audio/lesson_090.mp3',
     durationSeconds: 58,
-    wordCount: 146,
+    wordCount: 142,
   ),
   LessonModel(
     id: 'lesson-091',
