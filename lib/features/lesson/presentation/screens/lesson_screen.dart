@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -172,10 +173,14 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
                                   .withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Center(
-                          child: _WaveformPlaceholder(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          child: _LiveWaveform(
+                            recording: recorderState.isRecording,
                             color: recorderState.isRecording
-                                ? theme.colorScheme.error.withValues(alpha: 0.7)
+                                ? theme.colorScheme.error
+                                    .withValues(alpha: 0.75)
                                 : theme.colorScheme.primary
                                     .withValues(alpha: 0.6),
                           ),
@@ -930,9 +935,12 @@ class _RecordBar extends ConsumerWidget {
             child: IgnorePointer(
               ignoring: !isRecording,
               child: GestureDetector(
-                onTap: () => isWhole
-                    ? notifier.cancelWholeRecording()
-                    : notifier.cancelRecordCurrent(),
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  isWhole
+                      ? notifier.cancelWholeRecording()
+                      : notifier.cancelRecordCurrent();
+                },
                 child: Container(
                   width: 48,
                   height: 48,
@@ -947,44 +955,60 @@ class _RecordBar extends ConsumerWidget {
             ),
           ),
           SizedBox(width: isRecording ? 20 : 0),
-          // Record / Stop
-          GestureDetector(
-            onTap: () {
-              if (isRecording) {
-                isWhole
-                    ? notifier.stopWholeRecording()
-                    : notifier.stopRecordCurrent();
-              } else if (isWhole) {
-                notifier.startWholeRecording();
-                // Auto-advance the reading position at WPM pace so the passage
-                // scrolls along while recording (respects the 自動で次へ toggle).
-                if (session.autoAdvance) notifier.startReadAlong(wpm);
-              } else {
-                notifier.startRecordCurrent();
-              }
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              width: isRecording ? 84 : 72,
-              height: isRecording ? 84 : 72,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isRecording
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.primary,
-                boxShadow: [
-                  BoxShadow(
-                    color: (isRecording
-                            ? theme.colorScheme.error
-                            : theme.colorScheme.primary)
-                        .withValues(alpha: 0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+          // Record / Stop (with pulsing ring while recording)
+          SizedBox(
+            width: 84,
+            height: 84,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                if (isRecording) _PulseRing(color: theme.colorScheme.error),
+                GestureDetector(
+                  onTap: () {
+                    if (isRecording) {
+                      HapticFeedback.lightImpact();
+                      isWhole
+                          ? notifier.stopWholeRecording()
+                          : notifier.stopRecordCurrent();
+                    } else {
+                      HapticFeedback.mediumImpact();
+                      if (isWhole) {
+                        notifier.startWholeRecording();
+                        // Auto-advance the reading position at WPM pace so the
+                        // passage scrolls along while recording (respects the
+                        // 自動で次へ toggle).
+                        if (session.autoAdvance) notifier.startReadAlong(wpm);
+                      } else {
+                        notifier.startRecordCurrent();
+                      }
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: isRecording ? 84 : 72,
+                    height: isRecording ? 84 : 72,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isRecording
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.primary,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isRecording
+                                  ? theme.colorScheme.error
+                                  : theme.colorScheme.primary)
+                              .withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Icon(isRecording ? Icons.stop : Icons.mic,
+                        size: 28, color: Colors.white),
                   ),
-                ],
-              ),
-              child: Icon(isRecording ? Icons.stop : Icons.mic,
-                  size: 28, color: Colors.white),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 20),
@@ -1000,18 +1024,107 @@ class _RecordBar extends ConsumerWidget {
   }
 }
 
-// ── Waveform placeholder (reused) ──
+// ── Live waveform — real mic amplitude while recording ──
 
-class _WaveformPlaceholder extends StatefulWidget {
-  const _WaveformPlaceholder({required this.color});
+class _LiveWaveform extends ConsumerStatefulWidget {
+  const _LiveWaveform({required this.color, required this.recording});
+
+  final Color color;
+  final bool recording;
+
+  @override
+  ConsumerState<_LiveWaveform> createState() => _LiveWaveformState();
+}
+
+class _LiveWaveformState extends ConsumerState<_LiveWaveform> {
+  static const _barCount = 32;
+  final List<double> _levels = List.filled(_barCount, 0.04);
+  Timer? _timer;
+  double _phase = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // A steady clock scrolls the rolling buffer right→left. ~16fps is smooth
+    // enough for a VU meter and cheap for 32 bars.
+    _timer = Timer.periodic(const Duration(milliseconds: 60), (_) => _tick());
+  }
+
+  void _tick() {
+    if (!mounted) return;
+    final double next;
+    if (widget.recording) {
+      // Real mic level (0..1), lightly boosted so quiet speech stays visible.
+      next = (ref.read(audioRecorderProvider).amplitude * 1.3).clamp(0.04, 1.0);
+    } else {
+      // Decorative motion while TTS speaks — no real amplitude is available.
+      _phase += 0.5;
+      next = 0.28 + 0.18 * sin(_phase);
+    }
+    setState(() {
+      _levels.removeAt(0);
+      _levels.add(next);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: _WaveformPainter(levels: _levels, color: widget.color),
+        child: const SizedBox(height: 40, width: double.infinity),
+      ),
+    );
+  }
+}
+
+class _WaveformPainter extends CustomPainter {
+  _WaveformPainter({required this.levels, required this.color});
+
+  final List<double> levels;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (levels.isEmpty) return;
+    final barCount = levels.length;
+    final slot = size.width / barCount;
+    final paint = Paint()
+      ..color = color
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = (slot * 0.5).clamp(2.0, 6.0)
+      ..style = PaintingStyle.stroke;
+    final midY = size.height / 2;
+    for (var i = 0; i < barCount; i++) {
+      final x = slot * i + slot / 2;
+      final h = size.height * 0.9 * levels[i];
+      final half = (h / 2).clamp(1.5, size.height / 2);
+      canvas.drawLine(Offset(x, midY - half), Offset(x, midY + half), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WaveformPainter oldDelegate) => true;
+}
+
+// ── Pulsing ring behind the mic button while recording ──
+
+class _PulseRing extends StatefulWidget {
+  const _PulseRing({required this.color});
 
   final Color color;
 
   @override
-  State<_WaveformPlaceholder> createState() => _WaveformPlaceholderState();
+  State<_PulseRing> createState() => _PulseRingState();
 }
 
-class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
+class _PulseRingState extends State<_PulseRing>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -1020,7 +1133,7 @@ class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1100),
     )..repeat();
   }
 
@@ -1034,23 +1147,21 @@ class _WaveformPlaceholderState extends State<_WaveformPlaceholder>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(24, (i) {
-            final phase = (i / 24) * 2 * pi;
-            final sinValue = sin(_controller.value * 2 * pi + phase);
-            final height = 8.0 + sinValue * 18.0;
-            return Container(
-              width: 3,
-              height: height.clamp(4.0, 32.0),
-              margin: const EdgeInsets.symmetric(horizontal: 1),
+      builder: (context, _) {
+        final t = _controller.value;
+        return Opacity(
+          opacity: (1 - t) * 0.5,
+          child: Transform.scale(
+            scale: 0.85 + t * 0.4,
+            child: Container(
+              width: 84,
+              height: 84,
               decoration: BoxDecoration(
-                color: widget.color,
-                borderRadius: BorderRadius.circular(2),
+                shape: BoxShape.circle,
+                border: Border.all(color: widget.color, width: 3),
               ),
-            );
-          }),
+            ),
+          ),
         );
       },
     );
