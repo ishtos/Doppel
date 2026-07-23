@@ -165,6 +165,14 @@ class AudioPlayerNotifier extends StateNotifier<AudioPlayerState> {
 
 // ── Recording Provider ──
 
+/// Normalize a dBFS amplitude reading (`Amplitude.current`, roughly -50..0 dB)
+/// to a 0..1 level for the live waveform. -50 dB and below reads as silence.
+double normalizeAmplitude(double db) {
+  if (db.isNaN || db.isInfinite) return 0.0;
+  const floorDb = -50.0;
+  return ((db - floorDb) / -floorDb).clamp(0.0, 1.0);
+}
+
 final audioRecorderProvider =
     StateNotifierProvider.autoDispose<AudioRecorderNotifier, AudioRecorderState>(
   (ref) => AudioRecorderNotifier(),
@@ -198,9 +206,30 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
   AudioRecorderNotifier() : super(const AudioRecorderState());
 
   final _recorder = AudioRecorder();
+  StreamSubscription<Amplitude>? _amplitudeSub;
 
   Future<bool> hasPermission() async {
     return await _recorder.hasPermission();
+  }
+
+  /// Subscribe to the recorder's amplitude stream and feed normalized levels
+  /// into state so the live waveform reflects real mic input. Cancels any
+  /// prior subscription first to avoid leaking listeners across sessions.
+  void _listenToAmplitude() {
+    _amplitudeSub?.cancel();
+    _amplitudeSub = _recorder
+        .onAmplitudeChanged(const Duration(milliseconds: 80))
+        .listen((amp) {
+      if (mounted) {
+        state = state.copyWith(amplitude: normalizeAmplitude(amp.current));
+      }
+    });
+  }
+
+  void _stopAmplitude() {
+    _amplitudeSub?.cancel();
+    _amplitudeSub = null;
+    if (mounted) state = state.copyWith(amplitude: 0.0);
   }
 
   Future<void> startRecording() async {
@@ -215,6 +244,7 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
     );
 
     state = state.copyWith(isRecording: true, recordingPath: path);
+    _listenToAmplitude();
   }
 
   /// Try to start recording. Returns false if recording is unavailable
@@ -233,6 +263,7 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
       );
 
       state = state.copyWith(isRecording: true, recordingPath: path);
+      _listenToAmplitude();
       return true;
     } catch (_) {
       return false;
@@ -241,6 +272,7 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
 
   Future<String?> stopRecording() async {
     final path = await _recorder.stop();
+    _stopAmplitude();
     state = state.copyWith(isRecording: false);
     return path;
   }
@@ -248,6 +280,7 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
   /// Cancel recording — stops without returning a path.
   Future<void> cancelRecording() async {
     await _recorder.stop();
+    _stopAmplitude();
     state = state.copyWith(isRecording: false);
   }
 
@@ -261,6 +294,7 @@ class AudioRecorderNotifier extends StateNotifier<AudioRecorderState> {
 
   @override
   void dispose() {
+    _amplitudeSub?.cancel();
     _recorder.dispose();
     super.dispose();
   }
