@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../providers/home_provider.dart';
 import '../../../../shared/analytics/day2_tracker.dart';
 import '../../../../shared/utils/score_utils.dart';
+import '../../../../shared/widgets/app_stat_tile.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -79,10 +80,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                   ),
-                  _DailyGoalIndicator(
-                    goalProgress: goalProgress,
-                    theme: theme,
-                  ),
+                  _DailyGoalIndicator(goalProgress: goalProgress, theme: theme),
                 ],
               ),
               const SizedBox(height: 24),
@@ -94,8 +92,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Card(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () =>
-                          context.go('/lesson/${todayLesson.id}'),
+                      onTap: () => context.go('/lesson/${todayLesson.id}'),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
                         child: Column(
@@ -121,10 +118,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       Chip(
-                                        label: Text(_difficultyLabel(
-                                            todayLesson.difficulty)),
+                                        label: Text(
+                                          _difficultyLabel(
+                                            todayLesson.difficulty,
+                                          ),
+                                        ),
                                         backgroundColor: theme
-                                            .colorScheme.primary
+                                            .colorScheme
+                                            .primary
                                             .withValues(alpha: 0.1),
                                         labelStyle: TextStyle(
                                           color: theme.colorScheme.primary,
@@ -143,28 +144,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 ),
                               ],
                             ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: LinearProgressIndicator(
-                                  value: goalProgress.progress,
-                                  color: goalProgress.isAchieved
-                                      ? theme.colorScheme.tertiary
-                                      : theme.colorScheme.primary,
-                                  backgroundColor: theme.colorScheme.primary
-                                      .withValues(alpha: 0.1),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: LinearProgressIndicator(
+                                    value: goalProgress.progress,
+                                    color: goalProgress.isAchieved
+                                        ? theme.colorScheme.tertiary
+                                        : theme.colorScheme.primary,
+                                    backgroundColor: theme.colorScheme.primary
+                                        .withValues(alpha: 0.1),
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                '${goalProgress.completed}/${goalProgress.goal}',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${goalProgress.completed}/${goalProgress.goal}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -180,23 +181,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _StatTile(
+                  AppStatTile(
+                    variant: StatTileVariant.compact,
                     label: '今週',
                     value: '${weeklyStats.practiceCount}回',
                     icon: Icons.mic,
-                    theme: theme,
                   ),
-                  _StatTile(
+                  AppStatTile(
+                    variant: StatTileVariant.compact,
                     label: '平均',
                     value: '${weeklyStats.averageScore}点',
                     icon: Icons.trending_up,
-                    theme: theme,
                   ),
-                  _StatTile(
+                  AppStatTile(
+                    variant: StatTileVariant.compact,
                     label: '時間',
                     value: '${weeklyStats.totalMinutes}分',
                     icon: Icons.timer,
-                    theme: theme,
                   ),
                 ],
               ),
@@ -222,41 +223,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 )
               else
-                ...recentActivity.map((activity) => ListTile(
-                      leading: Icon(
-                        Icons.mic,
-                        color: ScoreUtils.scoreColor(
-                          activity.score,
-                          theme.colorScheme,
-                        ),
+                ...recentActivity.map(
+                  (activity) => ListTile(
+                    leading: Icon(
+                      Icons.mic,
+                      color: ScoreUtils.scoreColor(
+                        activity.score,
+                        theme.colorScheme,
                       ),
-                      title: Text(activity.lessonTitle),
-                      subtitle: Text(
-                        DateFormat('M/d HH:mm').format(activity.date),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '${activity.score}点',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: ScoreUtils.scoreColor(
-                                activity.score,
-                                theme.colorScheme,
-                              ),
+                    ),
+                    title: Text(activity.lessonTitle),
+                    subtitle: Text(
+                      DateFormat('M/d HH:mm').format(activity.date),
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${activity.score}点',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: ScoreUtils.scoreColor(
+                              activity.score,
+                              theme.colorScheme,
                             ),
                           ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ],
-                      ),
-                      onTap: () =>
-                          context.go('/feedback/${activity.feedbackId}'),
-                    )),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ],
+                    ),
+                    onTap: () => context.go('/feedback/${activity.feedbackId}'),
+                  ),
+                ),
             ],
           ),
         ),
@@ -362,46 +364,6 @@ class _BookmarkedLessonsSection extends ConsumerWidget {
   }
 }
 
-class _StatTile extends StatelessWidget {
-  const _StatTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.theme,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 100,
-      height: 80,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 20, color: theme.colorScheme.secondary),
-          const SizedBox(height: 4),
-          Text(value, style: theme.textTheme.titleSmall),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ImprovementPointsSection extends ConsumerWidget {
   const _ImprovementPointsSection({required this.theme});
 
@@ -418,8 +380,11 @@ class _ImprovementPointsSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Icon(Icons.lightbulb_outline,
-                size: 18, color: theme.colorScheme.tertiary),
+            Icon(
+              Icons.lightbulb_outline,
+              size: 18,
+              color: theme.colorScheme.tertiary,
+            ),
             const SizedBox(width: 6),
             Text('改善ポイント', style: theme.textTheme.titleSmall),
           ],
@@ -445,14 +410,17 @@ class _ImprovementPointsSection extends ConsumerWidget {
                             ),
                           ),
                         )
-                      : Icon(Icons.volume_up,
-                          size: 16, color: theme.colorScheme.error),
+                      : Icon(
+                          Icons.volume_up,
+                          size: 16,
+                          color: theme.colorScheme.error,
+                        ),
                   label: Text('${point.word} ${point.phoneme}'),
-                  backgroundColor:
-                      theme.colorScheme.error.withValues(alpha: 0.08),
+                  backgroundColor: theme.colorScheme.error.withValues(
+                    alpha: 0.08,
+                  ),
                   side: BorderSide.none,
-                  onPressed: () =>
-                      context.go('/feedback/${point.feedbackId}'),
+                  onPressed: () => context.go('/feedback/${point.feedbackId}'),
                 );
               }).toList(),
             ),
@@ -464,10 +432,7 @@ class _ImprovementPointsSection extends ConsumerWidget {
 }
 
 class _DailyGoalIndicator extends StatelessWidget {
-  const _DailyGoalIndicator({
-    required this.goalProgress,
-    required this.theme,
-  });
+  const _DailyGoalIndicator({required this.goalProgress, required this.theme});
 
   final DailyGoalProgress goalProgress;
   final ThemeData theme;

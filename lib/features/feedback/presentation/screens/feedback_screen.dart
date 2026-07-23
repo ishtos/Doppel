@@ -94,7 +94,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         title: Text('フィードバック', style: theme.textTheme.titleMedium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
         ),
         actions: [
           IconButton(

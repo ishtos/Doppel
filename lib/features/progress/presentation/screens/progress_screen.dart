@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/progress_provider.dart';
+import '../../../../shared/widgets/app_stat_tile.dart';
 
 class ProgressScreen extends ConsumerStatefulWidget {
   const ProgressScreen({super.key});
@@ -37,8 +38,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             isSelected: [_isWeekly, !_isWeekly],
             onPressed: (i) => setState(() => _isWeekly = i == 0),
             borderRadius: BorderRadius.circular(8),
-            constraints:
-                const BoxConstraints(minWidth: 48, minHeight: 32),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 32),
             children: const [Text('週'), Text('月')],
           ),
           const SizedBox(width: 8),
@@ -59,48 +59,73 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                     const SizedBox(height: 16),
                     SizedBox(
                       height: 200,
-                      child: LineChart(
-                        LineChartData(
-                          gridData: const FlGridData(show: false),
-                          titlesData: const FlTitlesData(show: false),
-                          borderData: FlBorderData(show: false),
-                          minX: 0,
-                          maxX: (spots.length - 1).toDouble().clamp(1, double.infinity),
-                          minY: 0,
-                          maxY: 100,
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: spots,
-                              isCurved: true,
-                              color: theme.colorScheme.primary,
-                              barWidth: 3,
-                              dotData: FlDotData(
-                                show: scoreHistory.isNotEmpty,
-                              ),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                color: theme.colorScheme.primary
-                                    .withValues(alpha: 0.1),
-                              ),
-                            ),
-                          ],
-                          lineTouchData: LineTouchData(
-                            touchTooltipData: LineTouchTooltipData(
-                              getTooltipItems: (spots) {
-                                return spots.map((spot) {
-                                  return LineTooltipItem(
-                                    '${spot.y.round()}点',
-                                    TextStyle(
-                                      color: theme.colorScheme.onPrimary,
-                                      fontWeight: FontWeight.bold,
+                      child: scoreHistory.isEmpty
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.show_chart,
+                                    size: 40,
+                                    color: theme.colorScheme.onSurfaceVariant
+                                        .withValues(alpha: 0.4),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '練習を記録するとスコアの推移が表示されます',
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
-                                  );
-                                }).toList();
-                              },
+                                  ),
+                                ],
+                              ),
+                            )
+                          : LineChart(
+                              LineChartData(
+                                gridData: const FlGridData(show: false),
+                                titlesData: const FlTitlesData(show: false),
+                                borderData: FlBorderData(show: false),
+                                minX: 0,
+                                maxX: (spots.length - 1).toDouble().clamp(
+                                  1,
+                                  double.infinity,
+                                ),
+                                minY: 0,
+                                maxY: 100,
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: spots,
+                                    isCurved: true,
+                                    color: theme.colorScheme.primary,
+                                    barWidth: 3,
+                                    dotData: FlDotData(
+                                      show: scoreHistory.isNotEmpty,
+                                    ),
+                                    belowBarData: BarAreaData(
+                                      show: true,
+                                      color: theme.colorScheme.primary
+                                          .withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                ],
+                                lineTouchData: LineTouchData(
+                                  touchTooltipData: LineTouchTooltipData(
+                                    getTooltipItems: (spots) {
+                                      return spots.map((spot) {
+                                        return LineTooltipItem(
+                                          '${spot.y.round()}点',
+                                          TextStyle(
+                                            color: theme.colorScheme.onPrimary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        );
+                                      }).toList();
+                                    },
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -152,8 +177,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                                   child: LinearProgressIndicator(
                                     value: entry.value,
                                     color: theme.colorScheme.error,
-                                    backgroundColor: theme
-                                        .colorScheme.error
+                                    backgroundColor: theme.colorScheme.error
                                         .withValues(alpha: 0.1),
                                     minHeight: 8,
                                   ),
@@ -178,29 +202,27 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _StatCard(
+                  child: AppStatTile(
                     label: '累計練習',
-                    value: '${(progress.totalPracticeMinutes / 60).toStringAsFixed(1)}時間',
+                    value:
+                        '${(progress.totalPracticeMinutes / 60).toStringAsFixed(1)}時間',
                     icon: Icons.timer,
-                    theme: theme,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _StatCard(
+                  child: AppStatTile(
                     label: '完了レッスン',
                     value: '${progress.completedLessons}回',
                     icon: Icons.check_circle,
-                    theme: theme,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _StatCard(
+                  child: AppStatTile(
                     label: '最長連続',
                     value: '${progress.longestStreak}日',
                     icon: Icons.local_fire_department,
-                    theme: theme,
                   ),
                 ),
               ],
@@ -209,8 +231,7 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
 
             // Weekly review
             Card(
-              color:
-                  theme.colorScheme.primary.withValues(alpha: 0.05),
+              color: theme.colorScheme.primary.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -252,46 +273,6 @@ class _ProgressScreenState extends ConsumerState<ProgressScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.theme,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-  final ThemeData theme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, size: 24, color: theme.colorScheme.secondary),
-            const SizedBox(height: 8),
-            Text(value, style: theme.textTheme.titleSmall),
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

@@ -94,7 +94,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             ref.read(ttsServiceProvider.notifier).stop();
-            context.go('/home');
+            context.canPop() ? context.pop() : context.go('/home');
           },
         ),
       ),
