@@ -34,13 +34,15 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     // Fire once when the feedback screen opens (build re-runs on playback
     // state changes, so instrument here instead).
     final feedback = ref.read(feedbackByIdProvider(widget.feedbackId));
-    ref.read(analyticsProvider).capture(
-      AnalyticsEvents.feedbackViewed,
-      properties: {
-        'feedback_id': widget.feedbackId,
-        'overall_score': feedback?.overallScore,
-      },
-    );
+    ref
+        .read(analyticsProvider)
+        .capture(
+          AnalyticsEvents.feedbackViewed,
+          properties: {
+            'feedback_id': widget.feedbackId,
+            'overall_score': feedback?.overallScore,
+          },
+        );
   }
 
   /// Called when the animated score finishes counting up. Rewards a strong
@@ -63,7 +65,8 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
     final d = feedback.createdAt.toLocal();
     final date =
         '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
-    final summary = 'Doppel シャドウイング結果 ($date)\n'
+    final summary =
+        'Doppel シャドウイング結果 ($date)\n'
         '総合 ${feedback.overallScore} / 発音 ${feedback.pronunciationScore} '
         '/ リズム ${feedback.rhythmScore} / 抑揚 ${feedback.intonationScore}';
     Clipboard.setData(ClipboardData(text: summary));
@@ -94,6 +97,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         title: Text('フィードバック', style: theme.textTheme.titleMedium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: '戻る',
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/home'),
         ),
@@ -193,9 +197,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   leading: CircleAvatar(
                     backgroundColor: theme.colorScheme.secondary,
                     child: Icon(
-                      playerState.isPlaying
-                          ? Icons.stop
-                          : Icons.play_arrow,
+                      playerState.isPlaying ? Icons.stop : Icons.play_arrow,
                       color: theme.colorScheme.onSecondary,
                     ),
                   ),
@@ -211,8 +213,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                   },
                 ),
               ),
-            if (feedback.userAudioPath != null)
-              const SizedBox(height: 20),
+            if (feedback.userAudioPath != null) const SizedBox(height: 20),
 
             // Problem words
             if (feedback.problemWords.isNotEmpty)
@@ -231,8 +232,9 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                           return InputChip(
                             avatar: const Icon(Icons.volume_up, size: 16),
                             label: Text('${pw.word} ${pw.phoneme}'),
-                            backgroundColor: theme.colorScheme.error
-                                .withValues(alpha: 0.1),
+                            backgroundColor: theme.colorScheme.error.withValues(
+                              alpha: 0.1,
+                            ),
                             tooltip: '「${pw.word}」を再生',
                             onPressed: () {
                               HapticFeedback.selectionClick();
@@ -271,8 +273,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () =>
-                        context.go('/lesson/${feedback.lessonId}'),
+                    onPressed: () => context.go('/lesson/${feedback.lessonId}'),
                     icon: const Icon(Icons.replay),
                     label: const Text('もう一度'),
                   ),
@@ -319,10 +320,7 @@ class _AnimatedScoreIndicatorState extends State<_AnimatedScoreIndicator>
     _animation = Tween<double>(
       begin: 0,
       end: widget.score / 100,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) widget.onComplete?.call();
     });
@@ -422,8 +420,11 @@ class _SimulatedScoreNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline,
-              size: 16, color: theme.colorScheme.onSurfaceVariant),
+          Icon(
+            Icons.info_outline,
+            size: 16,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
@@ -489,10 +490,12 @@ class _TranscriptComparisonCard extends StatelessWidget {
 
             // Model transcript
             if (modelTranscript != null) ...[
-              Text('お手本',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  )),
+              Text(
+                'お手本',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 4),
               Container(
                 width: double.infinity,
@@ -506,8 +509,9 @@ class _TranscriptComparisonCard extends StatelessWidget {
                         text: buildDiffTextSpan(
                           spans: diff.modelSpans,
                           highlightType: DiffType.missing,
-                          highlightColor:
-                              theme.colorScheme.error.withValues(alpha: 0.25),
+                          highlightColor: theme.colorScheme.error.withValues(
+                            alpha: 0.25,
+                          ),
                           baseStyle: baseStyle,
                         ),
                       )
@@ -518,10 +522,12 @@ class _TranscriptComparisonCard extends StatelessWidget {
 
             // User transcript
             if (userTranscript != null) ...[
-              Text('あなたの発話',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  )),
+              Text(
+                'あなたの発話',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
               const SizedBox(height: 4),
               Container(
                 width: double.infinity,
@@ -535,8 +541,9 @@ class _TranscriptComparisonCard extends StatelessWidget {
                         text: buildDiffTextSpan(
                           spans: diff.userSpans,
                           highlightType: DiffType.extra,
-                          highlightColor:
-                              theme.colorScheme.tertiary.withValues(alpha: 0.25),
+                          highlightColor: theme.colorScheme.tertiary.withValues(
+                            alpha: 0.25,
+                          ),
                           baseStyle: baseStyle,
                         ),
                       )
@@ -547,8 +554,9 @@ class _TranscriptComparisonCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surfaceContainerHighest
-                      .withValues(alpha: 0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  ),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -618,8 +626,7 @@ class _AiCoachCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final regenerateState = ref.watch(coachRegenerateProvider(feedbackId));
-    final displayMessage =
-        regenerateState.message ?? coachMessage;
+    final displayMessage = regenerateState.message ?? coachMessage;
 
     return Card(
       color: theme.colorScheme.primary.withValues(alpha: 0.05),
@@ -671,10 +678,7 @@ class _AiCoachCard extends ConsumerWidget {
                           ),
                         )
                       else
-                        Text(
-                          displayMessage,
-                          style: theme.textTheme.bodyMedium,
-                        ),
+                        Text(displayMessage, style: theme.textTheme.bodyMedium),
                     ],
                   ),
                 ),
@@ -690,8 +694,11 @@ class _AiCoachCard extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 8),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline,
-                        size: 14, color: theme.colorScheme.onSurfaceVariant),
+                    Icon(
+                      Icons.info_outline,
+                      size: 14,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
@@ -710,8 +717,10 @@ class _AiCoachCard extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.error.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(8),
@@ -761,7 +770,9 @@ class _AiCoachCard extends ConsumerWidget {
                     ),
                     style: TextButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
                       textStyle: theme.textTheme.labelMedium,
                     ),
                   ),
@@ -806,12 +817,14 @@ class _CelebrationBurstState extends State<_CelebrationBurst>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final colors = [scheme.primary, scheme.secondary, scheme.tertiary];
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) => CustomPaint(
-          size: const Size(180, 140),
-          painter: _BurstPainter(t: _controller.value, colors: colors),
+    return ExcludeSemantics(
+      child: IgnorePointer(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) => CustomPaint(
+            size: const Size(180, 140),
+            painter: _BurstPainter(t: _controller.value, colors: colors),
+          ),
         ),
       ),
     );

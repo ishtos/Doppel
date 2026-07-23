@@ -51,6 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: '設定',
             onPressed: () => context.go('/settings'),
           ),
         ],
@@ -443,34 +444,41 @@ class _DailyGoalIndicator extends StatelessWidget {
         ? theme.colorScheme.tertiary
         : theme.colorScheme.primary;
 
-    return SizedBox(
-      width: 64,
-      height: 64,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 56,
-            height: 56,
-            child: CustomPaint(
-              painter: _CircularGoalPainter(
-                progress: goalProgress.progress,
-                color: color,
-                backgroundColor: color.withValues(alpha: 0.15),
+    return Semantics(
+      label: goalProgress.isAchieved
+          ? 'デイリー目標達成'
+          : 'デイリー目標 ${goalProgress.completed} / ${goalProgress.goal}',
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: 64,
+          height: 64,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                width: 56,
+                height: 56,
+                child: CustomPaint(
+                  painter: _CircularGoalPainter(
+                    progress: goalProgress.progress,
+                    color: color,
+                    backgroundColor: color.withValues(alpha: 0.15),
+                  ),
+                ),
               ),
-            ),
+              if (goalProgress.isAchieved)
+                Icon(Icons.check, size: 22, color: color)
+              else
+                Text(
+                  '${goalProgress.completed}/${goalProgress.goal}',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+            ],
           ),
-          if (goalProgress.isAchieved)
-            Icon(Icons.check, size: 22, color: color)
-          else
-            Text(
-              '${goalProgress.completed}/${goalProgress.goal}',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
