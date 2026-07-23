@@ -92,6 +92,7 @@ class _LessonScreenState extends ConsumerState<LessonScreen> {
         title: Text(lesson.title, style: theme.textTheme.titleMedium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: '戻る',
           onPressed: () {
             ref.read(ttsServiceProvider.notifier).stop();
             context.canPop() ? context.pop() : context.go('/home');
@@ -934,22 +935,26 @@ class _RecordBar extends ConsumerWidget {
             duration: const Duration(milliseconds: 200),
             child: IgnorePointer(
               ignoring: !isRecording,
-              child: GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  isWhole
-                      ? notifier.cancelWholeRecording()
-                      : notifier.cancelRecordCurrent();
-                },
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: theme.colorScheme.surfaceContainerHighest,
+              child: Semantics(
+                button: true,
+                label: '録音をキャンセル',
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    isWhole
+                        ? notifier.cancelWholeRecording()
+                        : notifier.cancelRecordCurrent();
+                  },
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: theme.colorScheme.surfaceContainerHighest,
+                    ),
+                    child: Icon(Icons.close,
+                        size: 24, color: theme.colorScheme.onSurfaceVariant),
                   ),
-                  child: Icon(Icons.close,
-                      size: 24, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
             ),
@@ -964,48 +969,54 @@ class _RecordBar extends ConsumerWidget {
               alignment: Alignment.center,
               children: [
                 if (isRecording) _PulseRing(color: theme.colorScheme.error),
-                GestureDetector(
-                  onTap: () {
-                    if (isRecording) {
-                      HapticFeedback.lightImpact();
-                      isWhole
-                          ? notifier.stopWholeRecording()
-                          : notifier.stopRecordCurrent();
-                    } else {
-                      HapticFeedback.mediumImpact();
-                      if (isWhole) {
-                        notifier.startWholeRecording();
-                        // Auto-advance the reading position at WPM pace so the
-                        // passage scrolls along while recording (respects the
-                        // 自動で次へ toggle).
-                        if (session.autoAdvance) notifier.startReadAlong(wpm);
+                Semantics(
+                  button: true,
+                  label: isRecording ? '録音を停止' : '録音を開始',
+                  child: GestureDetector(
+                    onTap: () {
+                      if (isRecording) {
+                        HapticFeedback.lightImpact();
+                        isWhole
+                            ? notifier.stopWholeRecording()
+                            : notifier.stopRecordCurrent();
                       } else {
-                        notifier.startRecordCurrent();
+                        HapticFeedback.mediumImpact();
+                        if (isWhole) {
+                          notifier.startWholeRecording();
+                          // Auto-advance the reading position at WPM pace so the
+                          // passage scrolls along while recording (respects the
+                          // 自動で次へ toggle).
+                          if (session.autoAdvance) {
+                            notifier.startReadAlong(wpm);
+                          }
+                        } else {
+                          notifier.startRecordCurrent();
+                        }
                       }
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: isRecording ? 84 : 72,
-                    height: isRecording ? 84 : 72,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isRecording
-                          ? theme.colorScheme.error
-                          : theme.colorScheme.primary,
-                      boxShadow: [
-                        BoxShadow(
-                          color: (isRecording
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.primary)
-                              .withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: isRecording ? 84 : 72,
+                      height: isRecording ? 84 : 72,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isRecording
+                            ? theme.colorScheme.error
+                            : theme.colorScheme.primary,
+                        boxShadow: [
+                          BoxShadow(
+                            color: (isRecording
+                                    ? theme.colorScheme.error
+                                    : theme.colorScheme.primary)
+                                .withValues(alpha: 0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(isRecording ? Icons.stop : Icons.mic,
+                          size: 28, color: Colors.white),
                     ),
-                    child: Icon(isRecording ? Icons.stop : Icons.mic,
-                        size: 28, color: Colors.white),
                   ),
                 ),
               ],
@@ -1075,10 +1086,12 @@ class _LiveWaveformState extends ConsumerState<_LiveWaveform> {
 
   @override
   Widget build(BuildContext context) {
-    return RepaintBoundary(
-      child: CustomPaint(
-        painter: _WaveformPainter(levels: _levels, color: widget.color),
-        child: const SizedBox(height: 40, width: double.infinity),
+    return ExcludeSemantics(
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: _WaveformPainter(levels: _levels, color: widget.color),
+          child: const SizedBox(height: 40, width: double.infinity),
+        ),
       ),
     );
   }
@@ -1145,25 +1158,27 @@ class _PulseRingState extends State<_PulseRing>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final t = _controller.value;
-        return Opacity(
-          opacity: (1 - t) * 0.5,
-          child: Transform.scale(
-            scale: 0.85 + t * 0.4,
-            child: Container(
-              width: 84,
-              height: 84,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: widget.color, width: 3),
+    return ExcludeSemantics(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) {
+          final t = _controller.value;
+          return Opacity(
+            opacity: (1 - t) * 0.5,
+            child: Transform.scale(
+              scale: 0.85 + t * 0.4,
+              child: Container(
+                width: 84,
+                height: 84,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: widget.color, width: 3),
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

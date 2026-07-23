@@ -94,6 +94,7 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         title: Text('フィードバック', style: theme.textTheme.titleMedium),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
+          tooltip: '戻る',
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/home'),
         ),
@@ -806,12 +807,14 @@ class _CelebrationBurstState extends State<_CelebrationBurst>
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final colors = [scheme.primary, scheme.secondary, scheme.tertiary];
-    return IgnorePointer(
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) => CustomPaint(
-          size: const Size(180, 140),
-          painter: _BurstPainter(t: _controller.value, colors: colors),
+    return ExcludeSemantics(
+      child: IgnorePointer(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, _) => CustomPaint(
+            size: const Size(180, 140),
+            painter: _BurstPainter(t: _controller.value, colors: colors),
+          ),
         ),
       ),
     );

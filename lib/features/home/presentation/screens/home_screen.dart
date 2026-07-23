@@ -51,6 +51,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
+            tooltip: '設定',
             onPressed: () => context.go('/settings'),
           ),
         ],
@@ -443,7 +444,12 @@ class _DailyGoalIndicator extends StatelessWidget {
         ? theme.colorScheme.tertiary
         : theme.colorScheme.primary;
 
-    return SizedBox(
+    return Semantics(
+      label: goalProgress.isAchieved
+          ? 'デイリー目標達成'
+          : 'デイリー目標 ${goalProgress.completed} / ${goalProgress.goal}',
+      child: ExcludeSemantics(
+        child: SizedBox(
       width: 64,
       height: 64,
       child: Stack(
@@ -471,6 +477,8 @@ class _DailyGoalIndicator extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    ),
       ),
     );
   }
