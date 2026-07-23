@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../shared/analytics/analytics_events.dart';
 import '../../../../shared/analytics/analytics_provider.dart';
@@ -48,8 +49,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     } else {
-      _completeOnboarding();
+      _finishWithMicPriming();
     }
+  }
+
+  /// On the final step (right after the recording step is explained), prime the
+  /// microphone permission so the first lesson doesn't hit a cold system prompt.
+  Future<void> _finishWithMicPriming() async {
+    try {
+      await Permission.microphone.request();
+    } catch (_) {
+      // Permission plugin unavailable (e.g. in tests) — continue regardless.
+    }
+    await _completeOnboarding();
   }
 
   Future<void> _completeOnboarding() async {
@@ -181,18 +193,27 @@ class _OnboardingPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Icon with animated circle background
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          // Icon with a pop-in entrance animation (plays as each page appears)
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeOutBack,
+            builder: (context, t, child) => Opacity(
+              opacity: t.clamp(0.0, 1.0),
+              child: Transform.scale(scale: 0.8 + 0.2 * t, child: child),
             ),
-            child: Icon(
-              data.icon,
-              size: 56,
-              color: theme.colorScheme.primary,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              ),
+              child: Icon(
+                data.icon,
+                size: 56,
+                color: theme.colorScheme.primary,
+              ),
             ),
           ),
           const SizedBox(height: 40),
