@@ -1,12 +1,17 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/analytics/analytics_events.dart';
 import '../../../../shared/analytics/analytics_provider.dart';
 import '../../../../shared/services/audio_service.dart';
+import '../../../../shared/services/tts_service.dart';
 import '../../../../shared/utils/score_utils.dart';
 import '../../../../shared/utils/text_diff.dart';
+import '../../data/models/feedback_model.dart';
 import '../providers/feedback_provider.dart';
 
 class FeedbackScreen extends ConsumerStatefulWidget {
@@ -19,6 +24,10 @@ class FeedbackScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
+  // Celebration fires once, when the score count-up finishes on a high score.
+  bool _celebrated = false;
+  bool _showBurst = false;
+
   @override
   void initState() {
     super.initState();
@@ -31,6 +40,39 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
         'feedback_id': widget.feedbackId,
         'overall_score': feedback?.overallScore,
       },
+    );
+  }
+
+  /// Called when the animated score finishes counting up. Rewards a strong
+  /// result with haptics + a one-shot celebration burst.
+  void _onScoreRevealed(int score) {
+    if (_celebrated || !mounted) return;
+    _celebrated = true;
+    if (score >= 90) {
+      HapticFeedback.heavyImpact();
+    } else if (score >= 80) {
+      HapticFeedback.mediumImpact();
+    } else {
+      return;
+    }
+    setState(() => _showBurst = true);
+  }
+
+  /// Copy a shareable score summary to the clipboard (dependency-free share).
+  void _copyResult(FeedbackModel feedback) {
+    final d = feedback.createdAt.toLocal();
+    final date =
+        '${d.year}/${d.month.toString().padLeft(2, '0')}/${d.day.toString().padLeft(2, '0')}';
+    final summary = 'Doppel シャドウイング結果 ($date)\n'
+        '総合 ${feedback.overallScore} / 発音 ${feedback.pronunciationScore} '
+        '/ リズム ${feedback.rhythmScore} / 抑揚 ${feedback.intonationScore}';
+    Clipboard.setData(ClipboardData(text: summary));
+    HapticFeedback.selectionClick();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('結果をコピーしました'),
+        duration: Duration(seconds: 2),
+      ),
     );
   }
 
@@ -55,7 +97,11 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
           onPressed: () => context.go('/home'),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.copy_outlined),
+            tooltip: '結果をコピー',
+            onPressed: () => _copyResult(feedback),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -68,13 +114,25 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
-                    _AnimatedScoreIndicator(
-                      score: feedback.overallScore,
-                      color: ScoreUtils.scoreColor(
-                        feedback.overallScore,
-                        theme.colorScheme,
+                    SizedBox(
+                      width: 180,
+                      height: 140,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (_showBurst) const _CelebrationBurst(),
+                          _AnimatedScoreIndicator(
+                            score: feedback.overallScore,
+                            color: ScoreUtils.scoreColor(
+                              feedback.overallScore,
+                              theme.colorScheme,
+                            ),
+                            theme: theme,
+                            onComplete: () =>
+                                _onScoreRevealed(feedback.overallScore),
+                          ),
+                        ],
                       ),
-                      theme: theme,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -174,7 +232,13 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
                             label: Text('${pw.word} ${pw.phoneme}'),
                             backgroundColor: theme.colorScheme.error
                                 .withValues(alpha: 0.1),
-                            onPressed: () {},
+                            tooltip: '「${pw.word}」を再生',
+                            onPressed: () {
+                              HapticFeedback.selectionClick();
+                              ref
+                                  .read(ttsServiceProvider.notifier)
+                                  .speak(pw.word);
+                            },
                           );
                         }).toList(),
                       ),
@@ -226,11 +290,13 @@ class _AnimatedScoreIndicator extends StatefulWidget {
     required this.score,
     required this.color,
     required this.theme,
+    this.onComplete,
   });
 
   final int score;
   final Color color;
   final ThemeData theme;
+  final VoidCallback? onComplete;
 
   @override
   State<_AnimatedScoreIndicator> createState() =>
@@ -256,6 +322,9 @@ class _AnimatedScoreIndicatorState extends State<_AnimatedScoreIndicator>
       parent: _controller,
       curve: Curves.easeOutCubic,
     ));
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) widget.onComplete?.call();
+    });
     _controller.forward();
   }
 
@@ -702,4 +771,76 @@ class _AiCoachCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+// ── One-shot celebration burst behind the score ring (high scores) ──
+
+class _CelebrationBurst extends StatefulWidget {
+  const _CelebrationBurst();
+
+  @override
+  State<_CelebrationBurst> createState() => _CelebrationBurstState();
+}
+
+class _CelebrationBurstState extends State<_CelebrationBurst>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final colors = [scheme.primary, scheme.secondary, scheme.tertiary];
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, _) => CustomPaint(
+          size: const Size(180, 140),
+          painter: _BurstPainter(t: _controller.value, colors: colors),
+        ),
+      ),
+    );
+  }
+}
+
+class _BurstPainter extends CustomPainter {
+  _BurstPainter({required this.t, required this.colors});
+
+  final double t; // 0..1 animation progress
+  final List<Color> colors;
+  static const _count = 18;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final eased = Curves.easeOut.transform(t);
+    final maxR = size.shortestSide * 0.55;
+    final opacity = (1 - t).clamp(0.0, 1.0);
+    for (var i = 0; i < _count; i++) {
+      final angle = (2 * pi * i / _count) + (i.isEven ? 0.0 : 0.18);
+      final dist = eased * maxR * (0.7 + (i % 3) * 0.15);
+      final pos = center + Offset(cos(angle) * dist, sin(angle) * dist);
+      final paint = Paint()
+        ..color = colors[i % colors.length].withValues(alpha: opacity);
+      final r = (3.0 - t * 1.5).clamp(1.0, 3.0);
+      canvas.drawCircle(pos, r, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BurstPainter oldDelegate) => oldDelegate.t != t;
 }
