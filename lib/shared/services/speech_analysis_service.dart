@@ -6,19 +6,34 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../features/feedback/data/models/feedback_model.dart';
+import '../analytics/analytics_events.dart';
+import '../analytics/analytics_provider.dart';
+import '../analytics/analytics_service.dart';
 import 'ai_backend.dart';
 import 'ai_coach_service.dart';
 
 final speechAnalysisServiceProvider = Provider<SpeechAnalysisService>((ref) {
-  return SpeechAnalysisService(ref.watch(aiCoachServiceProvider));
+  return SpeechAnalysisService(
+    ref.watch(aiCoachServiceProvider),
+    analytics: ref.watch(analyticsProvider),
+  );
 });
 
 class SpeechAnalysisService {
-  SpeechAnalysisService(this._aiCoach, {AiBackendConfig? backend})
-      : _backend = backend ?? AiBackendConfig();
+  SpeechAnalysisService(
+    this._aiCoach, {
+    AiBackendConfig? backend,
+    AnalyticsService? analytics,
+  })  : _backend = backend ?? AiBackendConfig(),
+        _analytics = analytics;
 
   final AiCoachService _aiCoach;
   final AiBackendConfig _backend;
+
+  /// Optional — when present, cloud transcription failures are reported so a
+  /// silent fall-back to simulated scoring becomes diagnosable.
+  final AnalyticsService? _analytics;
+
   final _random = Random();
 
   /// Analyze a user recording against the model transcript.
@@ -31,8 +46,11 @@ class SpeechAnalysisService {
     // Transcribe user audio via Whisper API only when available AND the user
     // has consented to cloud analysis. Otherwise no audio leaves the device.
     String? userTranscript;
+    String? transcriptionError;
     if (userAudioPath != null && _backend.isAvailable && cloudEnabled) {
-      userTranscript = await _transcribe(userAudioPath);
+      final (text, error) = await _transcribe(userAudioPath);
+      userTranscript = text;
+      transcriptionError = error;
     }
 
     // Score only up to where the user actually read (they read sequentially).
@@ -47,6 +65,7 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       userAudioPath: userAudioPath,
       cloudEnabled: cloudEnabled,
+      transcriptionError: transcriptionError,
     );
   }
 
@@ -98,7 +117,17 @@ class SpeechAnalysisService {
     required String? userTranscript,
     required String? userAudioPath,
     required bool cloudEnabled,
+    String? transcriptionError,
   }) async {
+    // A cloud transcription was attempted but failed (distinct from the
+    // by-design offline / consent-off case, where no attempt is made). Report
+    // it so a silent degrade to simulated scoring becomes diagnosable.
+    if (transcriptionError != null) {
+      _analytics?.capture(
+        AnalyticsEvents.aiTranscriptionFailed,
+        properties: {'reason': transcriptionError},
+      );
+    }
     // Score by comparing transcripts
     final int pronunciationScore;
     final int rhythmScore;
@@ -148,6 +177,7 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       modelTranscript: modelTranscript,
       userAudioPath: userAudioPath,
+      analysisError: transcriptionError,
     );
   }
 
@@ -189,15 +219,23 @@ class SpeechAnalysisService {
 
     // Transcribe the recorded chunks in parallel, preserving order.
     String? userTranscript;
+    String? transcriptionError;
     if (_backend.isAvailable && recordedPaths.isNotEmpty && cloudEnabled) {
       final results = await Future.wait(recordedPaths.map(_transcribe));
       final joined = results
+          .map((r) => r.$1)
           .whereType<String>()
           .map((t) => t.trim())
           .where((t) => t.isNotEmpty)
           .join(' ')
           .trim();
-      if (joined.isNotEmpty) userTranscript = joined;
+      if (joined.isNotEmpty) {
+        userTranscript = joined;
+      } else {
+        // Every recorded chunk failed to transcribe — surface the first cause.
+        final errors = results.map((r) => r.$2).whereType<String>();
+        transcriptionError = errors.isEmpty ? 'unknown' : errors.first;
+      }
     }
 
     // Representative audio path (feedback screen replays a single file).
@@ -210,11 +248,18 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       userAudioPath: firstAudioPath,
       cloudEnabled: cloudEnabled,
+      transcriptionError: transcriptionError,
     );
   }
 
   /// Transcribe audio file using OpenAI Whisper API.
-  Future<String?> _transcribe(String audioPath) async {
+  ///
+  /// Returns `(text, error)`: on success `text` is the transcript and `error`
+  /// is null; on failure `text` is null and `error` carries a short cause code
+  /// (`http_<status>` for a non-200 response, `network` for an exception) so
+  /// callers can report *why* scoring fell back to simulated. No PII is
+  /// included — only the status/kind.
+  Future<(String?, String?)> _transcribe(String audioPath) async {
     try {
       final request =
           http.MultipartRequest('POST', Uri.parse(_backend.transcriptionUrl));
@@ -229,11 +274,11 @@ class SpeechAnalysisService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return data['text'] as String?;
+        return (data['text'] as String?, null);
       }
-      return null;
+      return (null, 'http_${response.statusCode}');
     } catch (_) {
-      return null;
+      return (null, 'network');
     }
   }
 

@@ -173,7 +173,10 @@ class _FeedbackScreenState extends ConsumerState<FeedbackScreen> {
             // a real measurement — say so plainly so the numbers aren't
             // over-trusted.
             if (feedback.userTranscript == null) ...[
-              _SimulatedScoreNotice(theme: theme),
+              _SimulatedScoreNotice(
+                theme: theme,
+                analysisError: feedback.analysisError,
+              ),
               const SizedBox(height: 20),
             ],
 
@@ -408,12 +411,24 @@ class _SubScoreTile extends StatelessWidget {
 }
 
 class _SimulatedScoreNotice extends StatelessWidget {
-  const _SimulatedScoreNotice({required this.theme});
+  const _SimulatedScoreNotice({required this.theme, this.analysisError});
 
   final ThemeData theme;
 
+  /// Non-null when a cloud transcription was attempted but failed. Its code
+  /// (e.g. `http_401`, `network`) is surfaced so a recurrence is diagnosable
+  /// on-device; null for the by-design offline / consent-off case.
+  final String? analysisError;
+
   @override
   Widget build(BuildContext context) {
+    final failed = analysisError != null;
+    final message = failed
+        ? '音声解析に失敗したため簡易採点です（診断コード: $analysisError）。'
+            'スコアはおおよその目安としてご覧ください。'
+        : '簡易採点です（音声解析を利用できませんでした）。'
+            'スコアはおおよその目安としてご覧ください。';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -423,13 +438,12 @@ class _SimulatedScoreNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline,
+          Icon(failed ? Icons.error_outline : Icons.info_outline,
               size: 16, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '簡易採点です（音声解析を利用できませんでした）。'
-              'スコアはおおよその目安としてご覧ください。',
+              message,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

@@ -21,4 +21,9 @@ class AnalyticsEvents {
 
   static const paywallViewed = 'paywall_viewed';
   static const purchaseCompleted = 'purchase_completed';
+
+  /// Cloud transcription (Whisper) was attempted but failed, so scoring fell
+  /// back to simulated. `reason` carries the cause (e.g. `http_401`, `network`)
+  /// so a recurrence is diagnosable instead of silently degrading.
+  static const aiTranscriptionFailed = 'ai_transcription_failed';
 }
