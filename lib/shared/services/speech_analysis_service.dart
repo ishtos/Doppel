@@ -1,39 +1,25 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 import '../../features/feedback/data/models/feedback_model.dart';
-import '../analytics/analytics_events.dart';
-import '../analytics/analytics_provider.dart';
-import '../analytics/analytics_service.dart';
 import 'ai_backend.dart';
 import 'ai_coach_service.dart';
 
 final speechAnalysisServiceProvider = Provider<SpeechAnalysisService>((ref) {
-  return SpeechAnalysisService(
-    ref.watch(aiCoachServiceProvider),
-    analytics: ref.watch(analyticsProvider),
-  );
+  return SpeechAnalysisService(ref.watch(aiCoachServiceProvider));
 });
 
 class SpeechAnalysisService {
-  SpeechAnalysisService(
-    this._aiCoach, {
-    AiBackendConfig? backend,
-    AnalyticsService? analytics,
-  })  : _backend = backend ?? AiBackendConfig(),
-        _analytics = analytics;
+  SpeechAnalysisService(this._aiCoach, {AiBackendConfig? backend})
+      : _backend = backend ?? AiBackendConfig();
 
   final AiCoachService _aiCoach;
   final AiBackendConfig _backend;
-
-  /// Optional — when present, cloud transcription failures are reported so a
-  /// silent fall-back to simulated scoring becomes diagnosable.
-  final AnalyticsService? _analytics;
-
   final _random = Random();
 
   /// Analyze a user recording against the model transcript.
@@ -120,13 +106,12 @@ class SpeechAnalysisService {
     String? transcriptionError,
   }) async {
     // A cloud transcription was attempted but failed (distinct from the
-    // by-design offline / consent-off case, where no attempt is made). Report
-    // it so a silent degrade to simulated scoring becomes diagnosable.
+    // by-design offline / consent-off case, where no attempt is made). No
+    // analytics backend by design — the cause is persisted on the feedback
+    // (`analysisError`) and shown on screen; also log it so it can be tailed on
+    // a device (Console.app / `flutter logs`). Keeps the fallback diagnosable.
     if (transcriptionError != null) {
-      _analytics?.capture(
-        AnalyticsEvents.aiTranscriptionFailed,
-        properties: {'reason': transcriptionError},
-      );
+      debugPrint('[Doppel] cloud transcription failed: $transcriptionError');
     }
     // Score by comparing transcripts
     final int pronunciationScore;
