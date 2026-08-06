@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -31,8 +32,11 @@ class SpeechAnalysisService {
     // Transcribe user audio via Whisper API only when available AND the user
     // has consented to cloud analysis. Otherwise no audio leaves the device.
     String? userTranscript;
+    String? transcriptionError;
     if (userAudioPath != null && _backend.isAvailable && cloudEnabled) {
-      userTranscript = await _transcribe(userAudioPath);
+      final (text, error) = await _transcribe(userAudioPath);
+      userTranscript = text;
+      transcriptionError = error;
     }
 
     // Score only up to where the user actually read (they read sequentially).
@@ -47,6 +51,7 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       userAudioPath: userAudioPath,
       cloudEnabled: cloudEnabled,
+      transcriptionError: transcriptionError,
     );
   }
 
@@ -98,7 +103,16 @@ class SpeechAnalysisService {
     required String? userTranscript,
     required String? userAudioPath,
     required bool cloudEnabled,
+    String? transcriptionError,
   }) async {
+    // A cloud transcription was attempted but failed (distinct from the
+    // by-design offline / consent-off case, where no attempt is made). No
+    // analytics backend by design — the cause is persisted on the feedback
+    // (`analysisError`) and shown on screen; also log it so it can be tailed on
+    // a device (Console.app / `flutter logs`). Keeps the fallback diagnosable.
+    if (transcriptionError != null) {
+      debugPrint('[Doppel] cloud transcription failed: $transcriptionError');
+    }
     // Score by comparing transcripts
     final int pronunciationScore;
     final int rhythmScore;
@@ -148,6 +162,7 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       modelTranscript: modelTranscript,
       userAudioPath: userAudioPath,
+      analysisError: transcriptionError,
     );
   }
 
@@ -189,15 +204,23 @@ class SpeechAnalysisService {
 
     // Transcribe the recorded chunks in parallel, preserving order.
     String? userTranscript;
+    String? transcriptionError;
     if (_backend.isAvailable && recordedPaths.isNotEmpty && cloudEnabled) {
       final results = await Future.wait(recordedPaths.map(_transcribe));
       final joined = results
+          .map((r) => r.$1)
           .whereType<String>()
           .map((t) => t.trim())
           .where((t) => t.isNotEmpty)
           .join(' ')
           .trim();
-      if (joined.isNotEmpty) userTranscript = joined;
+      if (joined.isNotEmpty) {
+        userTranscript = joined;
+      } else {
+        // Every recorded chunk failed to transcribe — surface the first cause.
+        final errors = results.map((r) => r.$2).whereType<String>();
+        transcriptionError = errors.isEmpty ? 'unknown' : errors.first;
+      }
     }
 
     // Representative audio path (feedback screen replays a single file).
@@ -210,11 +233,18 @@ class SpeechAnalysisService {
       userTranscript: userTranscript,
       userAudioPath: firstAudioPath,
       cloudEnabled: cloudEnabled,
+      transcriptionError: transcriptionError,
     );
   }
 
   /// Transcribe audio file using OpenAI Whisper API.
-  Future<String?> _transcribe(String audioPath) async {
+  ///
+  /// Returns `(text, error)`: on success `text` is the transcript and `error`
+  /// is null; on failure `text` is null and `error` carries a short cause code
+  /// (`http_<status>` for a non-200 response, `network` for an exception) so
+  /// callers can report *why* scoring fell back to simulated. No PII is
+  /// included — only the status/kind.
+  Future<(String?, String?)> _transcribe(String audioPath) async {
     try {
       final request =
           http.MultipartRequest('POST', Uri.parse(_backend.transcriptionUrl));
@@ -229,11 +259,11 @@ class SpeechAnalysisService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        return data['text'] as String?;
+        return (data['text'] as String?, null);
       }
-      return null;
+      return (null, 'http_${response.statusCode}');
     } catch (_) {
-      return null;
+      return (null, 'network');
     }
   }
 
