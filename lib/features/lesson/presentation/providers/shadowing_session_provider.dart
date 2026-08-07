@@ -43,6 +43,7 @@ class ShadowingSessionState {
     this.recordingPaths = const {},
     this.loopMode = false,
     this.hideText = false,
+    this.hiddenOverrides = const <int>{},
     this.autoAdvance = true,
     this.recordMode = RecordMode.whole,
     this.wholeRecordingPath,
@@ -55,7 +56,15 @@ class ShadowingSessionState {
   final Map<int, ChunkStatus> statuses;
   final Map<int, String> recordingPaths;
   final bool loopMode;
+
+  /// Master hide switch (the 「テキスト非表示」 chip): hides every chunk at once.
   final bool hideText;
+
+  /// Chunk indices whose visibility is *flipped* from [hideText]. This lets the
+  /// user reveal/hide individual lines in both directions on top of the master
+  /// switch. Effective visibility is `hideText XOR hiddenOverrides.contains(i)`.
+  final Set<int> hiddenOverrides;
+
   final bool autoAdvance;
 
   /// Whole-passage vs per-chunk recording. Defaults to [RecordMode.whole].
@@ -72,6 +81,11 @@ class ShadowingSessionState {
   final bool readingAll;
 
   ChunkStatus statusOf(int index) => statuses[index] ?? ChunkStatus.notStarted;
+
+  /// Whether the text of chunk [index] is hidden, combining the master switch
+  /// with the per-line override. Does not account for recording state (a
+  /// recorded chunk is always shown by the caller).
+  bool isTextHidden(int index) => hideText ^ hiddenOverrides.contains(index);
 
   bool get hasChunks => chunks.isNotEmpty;
 
@@ -101,6 +115,7 @@ class ShadowingSessionState {
     Map<int, String>? recordingPaths,
     bool? loopMode,
     bool? hideText,
+    Set<int>? hiddenOverrides,
     bool? autoAdvance,
     RecordMode? recordMode,
     String? wholeRecordingPath,
@@ -115,6 +130,7 @@ class ShadowingSessionState {
       recordingPaths: recordingPaths ?? this.recordingPaths,
       loopMode: loopMode ?? this.loopMode,
       hideText: hideText ?? this.hideText,
+      hiddenOverrides: hiddenOverrides ?? this.hiddenOverrides,
       autoAdvance: autoAdvance ?? this.autoAdvance,
       recordMode: recordMode ?? this.recordMode,
       wholeRecordingPath: clearWholeRecording
@@ -349,7 +365,22 @@ class ShadowingSessionNotifier extends StateNotifier<ShadowingSessionState> {
       );
 
   void toggleLoop() => state = state.copyWith(loopMode: !state.loopMode);
-  void toggleHideText() => state = state.copyWith(hideText: !state.hideText);
+
+  /// Master hide switch. Flips [hideText] and clears any per-line overrides so
+  /// every chunk re-syncs to the new master value (a bulk show-all / hide-all).
+  void toggleHideText() => state = state.copyWith(
+        hideText: !state.hideText,
+        hiddenOverrides: const <int>{},
+      );
+
+  /// Flip the visibility of a single chunk relative to the master switch.
+  void toggleLineHidden(int index) {
+    final next = Set<int>.from(state.hiddenOverrides);
+    // Set.remove returns true if the element was present; if it wasn't, add it.
+    if (!next.remove(index)) next.add(index);
+    state = state.copyWith(hiddenOverrides: next);
+  }
+
   void toggleAutoAdvance() =>
       state = state.copyWith(autoAdvance: !state.autoAdvance);
 
