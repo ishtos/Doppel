@@ -44,6 +44,41 @@ void main() {
     });
   });
 
+  group('ShadowingSessionState isTextHidden (per-line visibility)', () {
+    const chunks = ['a', 'b', 'c'];
+
+    test('default: master off, no overrides → every line shown', () {
+      const s = ShadowingSessionState(chunks: chunks);
+      expect(s.isTextHidden(0), isFalse);
+      expect(s.isTextHidden(1), isFalse);
+      expect(s.isTextHidden(2), isFalse);
+    });
+
+    test('master on, no overrides → every line hidden', () {
+      const s = ShadowingSessionState(chunks: chunks, hideText: true);
+      expect(s.isTextHidden(0), isTrue);
+      expect(s.isTextHidden(2), isTrue);
+    });
+
+    test('master off + override reveals-as-hide: only that line hidden', () {
+      const s = ShadowingSessionState(chunks: chunks, hiddenOverrides: {1});
+      expect(s.isTextHidden(0), isFalse);
+      expect(s.isTextHidden(1), isTrue); // flipped from shown → hidden
+      expect(s.isTextHidden(2), isFalse);
+    });
+
+    test('master on + override: that line is revealed, rest stay hidden', () {
+      const s = ShadowingSessionState(
+        chunks: chunks,
+        hideText: true,
+        hiddenOverrides: {1},
+      );
+      expect(s.isTextHidden(0), isTrue);
+      expect(s.isTextHidden(1), isFalse); // flipped from hidden → shown
+      expect(s.isTextHidden(2), isTrue);
+    });
+  });
+
   group('readAlongMillis', () {
     test('scales with word count and WPM (10 words @ 100 wpm = 6s)', () {
       expect(readAlongMillis('a b c d e f g h i j', 100), 6000);

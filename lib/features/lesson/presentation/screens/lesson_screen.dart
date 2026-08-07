@@ -697,7 +697,9 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
         final isCurrent = i == session.currentIndex;
         final status = session.statusOf(i);
         final recorded = status == ChunkStatus.recorded;
-        final masked = session.hideText && !recorded;
+        // Per-line override on top of the master switch; recorded chunks stay
+        // visible (unchanged contract).
+        final masked = session.isTextHidden(i) && !recorded;
 
         final Color bg;
         if (isCurrent) {
@@ -718,9 +720,11 @@ class _ChunkListViewState extends ConsumerState<_ChunkListView> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
-            onTap: () async {
-              await notifier.goTo(i);
-              await notifier.listenCurrent();
+            onTap: () {
+              // Tap toggles this line's text (self-check) and makes it current
+              // so the playback bar (loop / 全文を聴く) acts on it.
+              notifier.toggleLineHidden(i);
+              notifier.goTo(i);
             },
             child: Padding(
               padding:
