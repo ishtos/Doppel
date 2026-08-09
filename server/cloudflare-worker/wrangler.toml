@@ -2,27 +2,17 @@ name = "doppel-ai-proxy"
 main = "src/index.js"
 compatibility_date = "2024-11-01"
 
-# This Worker needs two secrets. Set them with `wrangler secret put` — do NOT
-# put them here (this file is committed):
-#
-#   wrangler secret put OPENAI_API_KEY   # the real OpenAI key (required)
-#   wrangler secret put APP_TOKEN        # optional shared app token (recommended)
-#
-# No account IDs or secrets belong in this file.
+# Secrets (set with `wrangler secret put`, NOT committed):
+#   OPENAI_API_KEY (required) · APP_TOKEN (recommended) · APPLE_SHARED_SECRET (IAP)
+# Setup steps for the bindings below live in README.md.
 
-# Optional rate limiting + daily cost cap. Create a KV namespace and uncomment
-# the block below (the Worker guards on `env.RL`, so it deploys fine without it):
-#   wrangler kv namespace create RL
-# [[kv_namespaces]]
-# binding = "RL"
-# id = "<paste the id printed by the command above>"
+# Rate limiting + daily cost cap (env.RL).
+[[kv_namespaces]]
+binding = "RL"
+id = "570a22f7149946d08f0ae5e9da44815f"
 
-# IAP receipt validation (server-authoritative premium). Needs a D1 DB + secret.
-# The Worker guards on `env.DB`, so /iap/* stays 500 until this is set up:
-#   wrangler d1 create doppel-iap
-#   wrangler d1 execute doppel-iap --file=schema.sql --remote
-#   wrangler secret put APPLE_SHARED_SECRET   # App Store app-specific shared secret
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "doppel-iap"
-# database_id = "<paste the id printed by `d1 create`>"
+# IAP entitlements store (env.DB). Apply schema.sql after `wrangler d1 create`.
+[[d1_databases]]
+binding = "DB"
+database_name = "doppel-iap"
+database_id = "ccd23a12-04a6-4e61-a557-5069dbd0d52f"
